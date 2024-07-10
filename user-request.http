@@ -1,0 +1,17 @@
+### Get All Users
+GET http://localhost:9090/users
+
+### Get User by ID
+GET http://localhost:9090/users/1
+
+### Get User not found
+GET http://localhost:9090/users/250
+
+### Add User
+POST http://localhost:9090/users
+Content-Type: application/json
+
+{
+    "name": "Peter Parker",
+    "email": "peter@gmail.com"
+}
