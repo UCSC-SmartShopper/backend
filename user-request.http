@@ -12,8 +12,18 @@ POST http://localhost:9090/users
 Content-Type: application/json
 
 {
-    "id":1,
+    "id":10,
     "name": "Peter Parker",
     "email": "peter@gmail.com",
     "number": "1234567890"
+}
+
+### Update User
+PATCH http://localhost:9090/users/1
+Content-Type: application/json
+
+{
+    "name": "Chathushka Ayash",
+    "email": "chathushka@gmail.com",
+    "number": "0712216841"
 }
