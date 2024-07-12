@@ -11,7 +11,6 @@ table<User> key(id) users = table [
 
 service / on new http:Listener(9090) {
     public final db:Client dbClient;
-
     function init() returns error? {
         self.dbClient = check new ();
     }

@@ -6,3 +6,4 @@ type User record {|
     string email;
     string number;
 |};
+
