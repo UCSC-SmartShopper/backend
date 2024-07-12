@@ -1,5 +1,8 @@
+import backend.db;
+
 import ballerina/http;
 import ballerina/time;
+import ballerina/persist;
 
 table<User> key(id) users = table [
     {id: 1, name: "John Doe", email: "johndoe@gmail.com"},
@@ -7,6 +10,12 @@ table<User> key(id) users = table [
 ];
 
 service / on new http:Listener(9090) {
+    private final db:Client dbClient;
+
+    function init() returns error? {
+        self.dbClient = check new ();
+    }
+
     resource function get users() returns User[]|UserNotFound|error? {
         return users.toArray();
     }
@@ -26,9 +35,15 @@ service / on new http:Listener(9090) {
         return user;
     }
 
-    resource function post users(NewUser newUser) returns User|error? {
-        User user = {id: users.length() + 1, ...newUser};
-        users.add(user);
-        return users[user.id];
+    resource function post users(db:UserInsert newUser) returns http:Created & readonly|persist:Error|http:Conflict & readonly {
+        int[]|persist:Error result = self.dbClient->/users.post([newUser]);
+
+        if result is persist:Error {
+            if result is persist:AlreadyExistsError {
+                return http:CONFLICT;
+            }
+            return result;
+        }
+        return http:CREATED;
     }
 }
