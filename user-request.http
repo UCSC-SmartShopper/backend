@@ -12,6 +12,7 @@ POST http://localhost:9090/users
 Content-Type: application/json
 
 {
+    "id":1,
     "name": "Peter Parker",
     "email": "peter@gmail.com"
 }
