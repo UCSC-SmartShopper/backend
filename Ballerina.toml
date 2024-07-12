@@ -10,7 +10,7 @@ observabilityIncluded = true
 [[tool.persist]]
 id = "generate-db-client"
 targetModule = "backend.db"
-options.datastore = "mysql"
+options.datastore = "postgresql"
 filePath = "persist/model.bal"
 
 [[platform.java17.dependency]]
