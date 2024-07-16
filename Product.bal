@@ -1,11 +1,4 @@
-import ballerina/persist as _;
-
-type User record {|
-    readonly int id;
-    string name;
-    string email;
-    string number;
-|};
+import ballerina/http;
 
 type Product record {|
     readonly string itemID;
@@ -15,3 +8,7 @@ type Product record {|
     string imageUrl;
 |};
 
+type ProductNotFound record {|
+    *http:NotFound;
+    ErrorDetails body;
+|};

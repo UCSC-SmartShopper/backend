@@ -9,8 +9,24 @@ table<User> key(id) users = table [
     {id: 2, name: "Jane Doe", email: "janedoe@gmail.com"}
 ];
 
+type ProductResponse record {|
+    int count;
+    string next;
+    Product[] results;
+|};
+
+@http:ServiceConfig {
+    cors: {
+        allowOrigins: ["http://localhost:5173", "http://localhost:5174"],
+        allowCredentials: false,
+        allowHeaders: ["CORELATION_ID"],
+        exposeHeaders: ["X-CUSTOM-HEADER"],
+        maxAge: 84900
+    }
+}
 service / on new http:Listener(9090) {
     public final db:Client dbClient;
+
     function init() returns error? {
         self.dbClient = check new ();
     }
@@ -69,5 +85,14 @@ service / on new http:Listener(9090) {
 
         db:User updatedUser = check self.dbClient->/users/[id](db:User);
         return updatedUser;
+    }
+
+    resource function get products() returns ProductResponse|persist:Error? {
+        stream<Product, persist:Error?> products = self.dbClient->/products.get();
+        Product[] productList = check from Product product in products
+            select product;
+
+        return {count: productList.length(), next: "null", results: productList};
+
     }
 }
