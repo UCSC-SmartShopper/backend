@@ -18,7 +18,7 @@ type ErrorDetails record {
 
 };
 
-type UserNotFound record {|
+type DataNotFound record {|
     *http:NotFound;
     ErrorDetails body;
 |};

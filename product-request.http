@@ -1,0 +1,7 @@
+### Get All Products
+GET http://localhost:9090/products
+
+### Get Product by ID
+GET http://localhost:9090/products/1
+
+

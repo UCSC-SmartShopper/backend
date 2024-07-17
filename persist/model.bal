@@ -8,7 +8,7 @@ type User record {|
 |};
 
 type Product record {|
-    readonly string itemID;
+    readonly int itemID;
     string name;
     string description;
     float price;

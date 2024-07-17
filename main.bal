@@ -31,16 +31,16 @@ service / on new http:Listener(9090) {
         self.dbClient = check new ();
     }
 
-    resource function get users() returns User[]|UserNotFound|error? {
+    resource function get users() returns User[]|error? {
         stream<User, persist:Error?> users = self.dbClient->/users.get();
         return from User user in users
             select user;
     }
 
-    resource function get users/[int id]() returns db:User|UserNotFound|error? {
+    resource function get users/[int id]() returns db:User|DataNotFound|error? {
         db:User|persist:Error? user = self.dbClient->/users/[id](db:User);
         if user is () {
-            UserNotFound notFound = {
+            DataNotFound notFound = {
                 body: {
                     message: "User not found",
                     details: string `User not found for the given id: ${id}`,
@@ -66,12 +66,12 @@ service / on new http:Listener(9090) {
         return insertedUser;
     }
 
-    resource function patch users/[int id](@http:Payload db:UserUpdate user) returns db:User|UserNotFound|error? {
+    resource function patch users/[int id](@http:Payload db:UserUpdate user) returns db:User|DataNotFound|error? {
         db:User|persist:Error result = self.dbClient->/users/[id].put(user);
 
         if result is persist:Error {
             if result is persist:NotFoundError {
-                UserNotFound notFound = {
+                DataNotFound notFound = {
                     body: {
                         message: "User not found",
                         details: string `User not found for the given id: ${id}`,
@@ -88,11 +88,10 @@ service / on new http:Listener(9090) {
     }
 
     resource function get products() returns ProductResponse|persist:Error? {
-        stream<Product, persist:Error?> products = self.dbClient->/products.get();
-        Product[] productList = check from Product product in products
-            select product;
+        return getProducts();
+    }
 
-        return {count: productList.length(), next: "null", results: productList};
-
+    resource function get products/[int id]() returns db:Product|DataNotFound|error? {
+        return getProductsById(id);
     }
 }
