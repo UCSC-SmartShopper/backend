@@ -6,10 +6,10 @@ type NewUser record {|
     string email;
 |};
 
-type User record {|
-    *NewUser;
-    readonly int id;
-|};
+// type User record {|
+//     *NewUser;
+//     readonly int id;
+// |};
 
 type ErrorDetails record {
     string message;

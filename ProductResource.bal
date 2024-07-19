@@ -1,9 +1,9 @@
-import backend.db;
+
 
 import ballerina/persist;
 import ballerina/time;
 
-public final db:Client dbClient = check new ();
+public final Client dbClient = check new ();
 
 function getProducts() returns ProductResponse|persist:Error? {
     stream<Product, persist:Error?> products = dbClient->/products.get();
@@ -13,8 +13,8 @@ function getProducts() returns ProductResponse|persist:Error? {
     return {count: productList.length(), next: "null", results: productList};
 }
 
-function getProductsById(int id) returns db:Product|DataNotFound|error? {
-    db:Product|persist:Error? product = dbClient->/products/[id](db:Product);
+function getProductsById(int id) returns Product|DataNotFound|error? {
+    Product|persist:Error? product = dbClient->/products/[id](Product);
     if product is () {
         DataNotFound notFound = {
             body: {

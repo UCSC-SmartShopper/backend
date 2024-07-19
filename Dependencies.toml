@@ -5,7 +5,7 @@
 
 [ballerina]
 dependencies-toml-version = "2"
-distribution-version = "2201.9.1"
+distribution-version = "2201.9.2"
 
 [[package]]
 org = "ballerina"
@@ -365,8 +365,7 @@ dependencies = [
 	{org = "ballerinax", name = "postgresql.driver"}
 ]
 modules = [
-	{org = "djaya", packageName = "backend", moduleName = "backend"},
-	{org = "djaya", packageName = "backend", moduleName = "backend.db"}
+	{org = "djaya", packageName = "backend", moduleName = "backend"}
 ]
 
 [[tool]]

@@ -1,12 +1,12 @@
-import backend.db;
+
 
 import ballerina/http;
 import ballerina/persist;
 import ballerina/time;
 
 table<User> key(id) users = table [
-    {id: 1, name: "John Doe", email: "johndoe@gmail.com"},
-    {id: 2, name: "Jane Doe", email: "janedoe@gmail.com"}
+    {id: 1, name: "John Doe", email: "johndoe@gmail.com" ,number: "112"},
+    {id: 2, name: "John Doe", email: "johndoe@gmail.com" ,number: "112"}
 ];
 
 type ProductResponse record {|
@@ -25,7 +25,7 @@ type ProductResponse record {|
     }
 }
 service / on new http:Listener(9090) {
-    public final db:Client dbClient;
+    public final Client dbClient;
 
     function init() returns error? {
         self.dbClient = check new ();
@@ -37,8 +37,8 @@ service / on new http:Listener(9090) {
             select user;
     }
 
-    resource function get users/[int id]() returns db:User|DataNotFound|error? {
-        db:User|persist:Error? user = self.dbClient->/users/[id](db:User);
+    resource function get users/[int id]() returns User|DataNotFound|error? {
+        User|persist:Error? user = self.dbClient->/users/[id](User);
         if user is () {
             DataNotFound notFound = {
                 body: {
@@ -52,7 +52,7 @@ service / on new http:Listener(9090) {
         return user;
     }
 
-    resource function post users(db:UserInsert newUser) returns db:UserInsert|persist:Error|http:Conflict & readonly {
+    resource function post users(UserInsert newUser) returns UserInsert|persist:Error|http:Conflict & readonly {
         int[]|persist:Error result = self.dbClient->/users.post([newUser]);
 
         if result is persist:Error {
@@ -62,12 +62,12 @@ service / on new http:Listener(9090) {
             return result;
         }
 
-        db:User insertedUser = check self.dbClient->/users/[newUser.id](db:User);
+        User insertedUser = check self.dbClient->/users/[newUser.id](User);
         return insertedUser;
     }
 
-    resource function patch users/[int id](@http:Payload db:UserUpdate user) returns db:User|DataNotFound|error? {
-        db:User|persist:Error result = self.dbClient->/users/[id].put(user);
+    resource function patch users/[int id](@http:Payload UserUpdate user) returns User|DataNotFound|error? {
+        User|persist:Error result = self.dbClient->/users/[id].put(user);
 
         if result is persist:Error {
             if result is persist:NotFoundError {
@@ -83,7 +83,7 @@ service / on new http:Listener(9090) {
             return result;
         }
 
-        db:User updatedUser = check self.dbClient->/users/[id](db:User);
+        User updatedUser = check self.dbClient->/users/[id](User);
         return updatedUser;
     }
 
@@ -91,7 +91,7 @@ service / on new http:Listener(9090) {
         return getProducts();
     }
 
-    resource function get products/[int id]() returns db:Product|DataNotFound|error? {
+    resource function get products/[int id]() returns Product|DataNotFound|error? {
         return getProductsById(id);
     }
 }
