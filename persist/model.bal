@@ -25,7 +25,6 @@ type Consumer record {|
     @sql:Generated
     readonly int id;
     User user;
-    Address[] address;
 |};
 
 type Product record {|
