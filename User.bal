@@ -4,6 +4,9 @@ import ballerina/time;
 type NewUser record {|
     string name;
     string email;
+    string password;
+    string number;
+    string profilePic;
 |};
 
 // type User record {|

@@ -1,13 +1,6 @@
-
-
 import ballerina/http;
 import ballerina/persist;
 import ballerina/time;
-
-table<User> key(id) users = table [
-    {id: 1, name: "John Doe", email: "johndoe@gmail.com" ,number: "112"},
-    {id: 2, name: "John Doe", email: "johndoe@gmail.com" ,number: "112"}
-];
 
 type ProductResponse record {|
     int count;
@@ -52,8 +45,16 @@ service / on new http:Listener(9090) {
         return user;
     }
 
-    resource function post users(UserInsert newUser) returns UserInsert|persist:Error|http:Conflict & readonly {
-        int[]|persist:Error result = self.dbClient->/users.post([newUser]);
+    resource function post consumer(NewUser newUser) returns User|persist:Error|http:Conflict & readonly {
+        UserInsert userInsert = {
+            ...newUser,
+            userRole: "consumer",
+            status: "Active",
+            createdAt: time:utcToCivil(time:utcNow()),
+            updatedAt: time:utcToCivil(time:utcNow()),
+            deletedAt: ()};
+
+        int[]|persist:Error result = self.dbClient->/users.post([userInsert]);
 
         if result is persist:Error {
             if result is persist:AlreadyExistsError {
@@ -62,8 +63,9 @@ service / on new http:Listener(9090) {
             return result;
         }
 
-        User insertedUser = check self.dbClient->/users/[newUser.id](User);
-        return insertedUser;
+        User user = {...userInsert, id: result[0]};
+
+        return user;
     }
 
     resource function patch users/[int id](@http:Payload UserUpdate user) returns User|DataNotFound|error? {
