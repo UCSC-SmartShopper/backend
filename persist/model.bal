@@ -17,14 +17,25 @@ type User record {|
     time:Civil updatedAt;
     time:Civil? deletedAt;
     Consumer? consumer;
+	Supermarket? supermarket;
 |};
 
-
+type Address record {|
+    @sql:Generated
+    readonly int id;
+    string addressName;
+    string address;
+    string city;
+    string location;
+    boolean isDefault;
+	Consumer consumer;
+|};
 
 type Consumer record {|
     @sql:Generated
     readonly int id;
     User user;
+    Address[] addresses;
 |};
 
 type Product record {|
@@ -34,5 +45,27 @@ type Product record {|
     string description;
     float price;
     string imageUrl;
+|};
+
+type Supermarket record {|
+    @sql:Generated
+    readonly int id;
+    string name;
+    string contactNo;
+    string logo;
+    string location;
+    string address;
+    User supermarketManager;
+	PriceList[] pricelist;
+|};
+
+type PriceList record {|
+    @sql:Generated
+    readonly int id;
+    int productId;
+    Supermarket supermarket;
+    float price;
+    int quantity;
+    float discountedTotal;
 |};
 

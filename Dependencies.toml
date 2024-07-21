@@ -365,7 +365,11 @@ dependencies = [
 	{org = "ballerinax", name = "postgresql.driver"}
 ]
 modules = [
-	{org = "djaya", packageName = "backend", moduleName = "backend"}
+	{org = "djaya", packageName = "backend", moduleName = "backend"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.db"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.errors"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.price_list"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.products"}
 ]
 
 [[tool]]

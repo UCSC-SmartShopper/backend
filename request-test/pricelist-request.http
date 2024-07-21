@@ -1,0 +1,7 @@
+### Get All Price Lists
+GET http://localhost:9090/pricelists
+
+### Get Price List by ID
+GET http://localhost:9090/pricelists/2
+
+

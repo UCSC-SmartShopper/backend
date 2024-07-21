@@ -1,18 +1,14 @@
 import backend.db;
+import backend.price_list;
+import backend.products;
 
 import ballerina/http;
 import ballerina/persist;
 import ballerina/time;
 
-type ProductResponse record {|
-    int count;
-    string next;
-    // Product[] results;
-|};
-
 @http:ServiceConfig {
     cors: {
-        allowOrigins: ["http://localhost:5173", "http://localhost:5174"],
+        allowOrigins: ["http://localhost:5173", "http://localhost:5174", "*"],
         allowCredentials: false,
         allowHeaders: ["CORELATION_ID"],
         exposeHeaders: ["X-CUSTOM-HEADER"],
@@ -91,11 +87,20 @@ service / on new http:Listener(9090) {
         return updatedUser;
     }
 
-    // resource function get products() returns ProductResponse|persist:Error? {
-    //     return getProducts();
-    // }
+    resource function get products() returns products:ProductResponse|persist:Error? {
+        return products:getProducts();
+    }
 
-    // resource function get products/[int id]() returns Product|DataNotFound|error? {
-    //     return getProductsById(id);
-    // }
+    resource function get products/[int id]() returns products:Product|DataNotFound|error? {
+        return products:getProductsById(id);
+    }
+
+    // ---------------------------------------------- Price List Resource Functions ----------------------------------------------
+    resource function get pricelists() returns price_list:PriceListResponse|error? {
+        return price_list:getPriceLists();
+    }
+
+    resource function get pricelists/[int productId]() returns price_list:PriceListResponse|error? {
+        return price_list:getPriceListsByProductId(productId);
+    }
 }
