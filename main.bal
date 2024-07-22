@@ -1,3 +1,4 @@
+import backend.cart;
 import backend.db;
 import backend.price_list;
 import backend.products;
@@ -8,10 +9,8 @@ import ballerina/time;
 
 @http:ServiceConfig {
     cors: {
-        allowOrigins: ["http://localhost:5173", "http://localhost:5174", "*"],
+        allowOrigins: ["*"],
         allowCredentials: false,
-        allowHeaders: ["CORELATION_ID"],
-        exposeHeaders: ["X-CUSTOM-HEADER"],
         maxAge: 84900
     }
 }
@@ -103,4 +102,14 @@ service / on new http:Listener(9090) {
     resource function get pricelists/[int productId]() returns price_list:PriceListResponse|error? {
         return price_list:getPriceListsByProductId(productId);
     }
+
+    // ---------------------------------------------- Cart Resource Functions ----------------------------------------------
+    resource function post carts(cart:CartItem[] cartItems) returns cart:CartItemResponse|error? {
+        return cart:getCartItems(cartItems);
+    }
+
+    resource function get carts() returns cart:CartItem[]|error? {
+        return cart:test();
+    }
+
 }

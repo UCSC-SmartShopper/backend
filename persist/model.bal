@@ -45,6 +45,7 @@ type Product record {|
     string description;
     float price;
     string imageUrl;
+	PriceList[] pricelist;
 |};
 
 type Supermarket record {|
@@ -62,7 +63,7 @@ type Supermarket record {|
 type PriceList record {|
     @sql:Generated
     readonly int id;
-    int productId;
+    Product product;
     Supermarket supermarket;
     float price;
     int quantity;

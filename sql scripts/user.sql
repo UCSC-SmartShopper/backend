@@ -32,3 +32,6 @@ VALUES
 ('Bodima', '123 Temple Road, Wijerama', 'Wijerama', '6.857740, 79.908682', TRUE, 1),
 ('Home', '144 High Level Rd, Maharagama', 'Maharagama', '6.841174, 79.965387', TRUE, 2),
 ('Home', '292 High Level Rd, Nugegoda', 'Nugegoda', '6.865683, 79.894157', TRUE, 3);
+
+
+
