@@ -1,16 +1,28 @@
 import backend.db;
 import backend.errors;
+import backend.products;
 
 import ballerina/http;
 import ballerina/persist;
 import ballerina/time;
 
+public type Supermarket record {|
+    readonly int id;
+    string name;
+    string contactNo;
+    string logo;
+    string location;
+    string address;
+    int supermarketmanagerId;
+
+|};
+
 public type PriceList record {|
     readonly int id;
-    int productId;
-    int supermarketId;
-    float price;
+    products:Product product;
+    Supermarket supermarket;
     int quantity;
+    float price;
     float discountedTotal;
 |};
 
@@ -41,6 +53,7 @@ public final db:Client dbClient = check new ();
 
 public function getPriceLists() returns PriceListResponse|persist:Error? {
     stream<db:PriceListWithRelations, persist:Error?> prices = dbClient->/pricelists();
+
     db:PriceListWithRelations[] priceList = check from db:PriceListWithRelations price in prices
         select price;
 
@@ -48,8 +61,8 @@ public function getPriceLists() returns PriceListResponse|persist:Error? {
 }
 
 public function getPriceListsByProductId(int productId) returns PriceListResponse|persist:Error? {
-    stream<db:PriceListWithRelations, persist:Error?> prices = dbClient->/pricelists(whereClause = `"PriceList"."productId"=${productId}`);
-    db:PriceListWithRelations[] priceList = check from db:PriceListWithRelations price in prices
+    stream<PriceList, persist:Error?> prices = dbClient->/pricelists(whereClause = `"PriceList"."productId"=${productId}`);
+    PriceList[] priceList = check from PriceList price in prices
         select price;
 
     return {count: priceList.length(), next: "null", results: priceList};
