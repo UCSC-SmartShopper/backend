@@ -371,10 +371,12 @@ dependencies = [
 modules = [
 	{org = "djaya", packageName = "backend", moduleName = "backend"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.cart"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.connection"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.db"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.errors"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.price_list"},
-	{org = "djaya", packageName = "backend", moduleName = "backend.products"}
+	{org = "djaya", packageName = "backend", moduleName = "backend.products"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.supermarkets"}
 ]
 
 [[tool]]

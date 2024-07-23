@@ -1,12 +1,14 @@
 import backend.db;
 import backend.price_list;
 
-import ballerina/persist;
 import ballerina/io;
+import ballerina/persist;
 
 public type CartItem record {|
+    int id?;
     int quantity;
     price_list:PriceList priceList;
+    int consumerId?;
 |};
 
 public type CartItemRequest record {|
@@ -16,7 +18,7 @@ public type CartItemRequest record {|
 public type CartItemResponse record {|
     int count;
     string next;
-    CartItem[] results;
+    db:CartItemWithRelations[] results;
 |};
 
 // This function is used to get all the carts from local storage
@@ -25,21 +27,57 @@ public type CartItemResponse record {|
 
 public final db:Client dbClient = check new ();
 
-public function getCartItems(CartItem[] cartItems) returns CartItemResponse|persist:Error? {
-    // int userId = 6;
+public function getCartItems(CartItem[] localCartItems, int userId) returns db:CartItemWithRelations[]|error {
+
+    map<db:CartItemWithRelations> finalCartItems = {};
 
     // get price lists from the database
-    // stream<price_list:PriceList, persist:Error?> databasePriceList = dbClient->/pricelists();
+    stream<db:CartItemWithRelations, persist:Error?> dbCartItemsSteam = dbClient->/cartitems(whereClause = ` "CartItem"."consumerId" = ${userId}`);
+    db:CartItemWithRelations[] dbCartItems = check from db:CartItemWithRelations dbCartItem in dbCartItemsSteam
+        select dbCartItem;
 
-    // price_list:PriceList[] priceListsToAdd = check from price_list:PriceList priceList in databasePriceList
-    //     // where (priceList in cartItems)
-    //     select priceList;
+    io:println("dbCartItems 1");
+    io:println(dbCartItems);
 
-    // stream<db:PriceListWithRelations, persist:Error?> prices = dbClient->/pricelists();
-    // db:PriceListWithRelations[] priceList = check from db:PriceListWithRelations price in prices
-    //     select price;
+    // add the price lists to the final cart items
+    foreach db:CartItemWithRelations dbCartItem in dbCartItems {
+        finalCartItems[dbCartItem.id.toBalString()] = {quantity: dbCartItem.quantity, priceList: dbCartItem.priceList};
+    }
 
-    return {count: 1, next: "null", results: []};
+    io:println("finalCartItems 2");
+    io:println(finalCartItems);
+
+    // get the cart items that are not in the database
+    CartItem[] newCartItems = from CartItem cartItem in localCartItems
+        where (finalCartItems[cartItem.id.toBalString()] == null)
+        select cartItem;
+
+    io:println("newCartItems 3");
+    io:println(newCartItems);
+
+    // save the new cart items to the database
+    if (newCartItems.length() > 0) {
+        db:CartItemInsert[] newDbCartItems = from CartItem cartItem in newCartItems
+            select {pricelistId: cartItem.priceList.id, quantity: cartItem.quantity, consumerId: userId};
+
+        int[]|persist:Error result = dbClient->/cartitems.post(newDbCartItems);
+        if result is persist:Error {
+            io:println(result);
+        }
+        io:println("newDbCartItems 4");
+        io:println(newDbCartItems);
+    }
+
+    // get the final cart items from the database
+    stream<db:CartItemWithRelations, persist:Error?> finalDbCartItemsStream = dbClient->/cartitems(whereClause = `"CartItem"."consumerId"=${userId}`);
+    db:CartItemWithRelations[] finalDbCartItems = check from db:CartItemWithRelations dbCartItem in finalDbCartItemsStream
+        select dbCartItem;
+
+    io:println("finalDbCartItems 5");
+    io:println(finalDbCartItems);
+
+    return finalDbCartItems;
+
 }
 
 public function test() returns CartItem[]|persist:Error? {

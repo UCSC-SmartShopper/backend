@@ -68,5 +68,14 @@ type PriceList record {|
     float price;
     int quantity;
     float discountedTotal;
+	CartItem? cartitem;
+|};
+
+type CartItem record {|
+    @sql:Generated
+    readonly int id;
+    PriceList priceList;
+    int quantity;
+    int consumerId;
 |};
 

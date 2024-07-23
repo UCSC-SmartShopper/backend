@@ -1,7 +1,9 @@
 import backend.cart;
+import backend.connection;
 import backend.db;
 import backend.price_list;
 import backend.products;
+import backend.supermarkets;
 
 import ballerina/http;
 import ballerina/persist;
@@ -15,20 +17,17 @@ import ballerina/time;
     }
 }
 service / on new http:Listener(9090) {
-    public final db:Client dbClient;
 
-    function init() returns error? {
-        self.dbClient = check new ();
-    }
+    db:Client connection = connection:getConnection();
 
     resource function get users() returns db:User[]|error? {
-        stream<db:User, persist:Error?> users = self.dbClient->/users.get();
+        stream<db:User, persist:Error?> users = self.connection->/users.get();
         return from db:User user in users
             select user;
     }
 
     resource function get users/[int id]() returns db:UserWithRelations|DataNotFound|error? {
-        db:UserWithRelations|persist:Error? user = self.dbClient->/users/[id](db:UserWithRelations);
+        db:UserWithRelations|persist:Error? user = self.connection->/users/[id](db:UserWithRelations);
         if user is () {
             DataNotFound notFound = {
                 body: {
@@ -51,7 +50,7 @@ service / on new http:Listener(9090) {
             updatedAt: time:utcToCivil(time:utcNow()),
             deletedAt: ()};
 
-        int[]|persist:Error result = self.dbClient->/users.post([userInsert]);
+        int[]|persist:Error result = self.connection->/users.post([userInsert]);
 
         if result is persist:Error {
             if result is persist:AlreadyExistsError {
@@ -66,7 +65,7 @@ service / on new http:Listener(9090) {
     }
 
     resource function patch users/[int id](@http:Payload db:UserUpdate user) returns db:User|DataNotFound|error? {
-        db:User|persist:Error result = self.dbClient->/users/[id].put(user);
+        db:User|persist:Error result = self.connection->/users/[id].put(user);
 
         if result is persist:Error {
             if result is persist:NotFoundError {
@@ -82,7 +81,7 @@ service / on new http:Listener(9090) {
             return result;
         }
 
-        db:User updatedUser = check self.dbClient->/users/[id](db:User);
+        db:User updatedUser = check self.connection->/users/[id](db:User);
         return updatedUser;
     }
 
@@ -104,12 +103,21 @@ service / on new http:Listener(9090) {
     }
 
     // ---------------------------------------------- Cart Resource Functions ----------------------------------------------
-    resource function post carts(cart:CartItem[] cartItems) returns cart:CartItemResponse|error? {
-        return cart:getCartItems(cartItems);
+    resource function post carts/[int userId](@http:Payload cart:CartItem[] cartItems) returns db:CartItemWithRelations[]|error {
+        return cart:getCartItems(cartItems, userId);
     }
 
     resource function get carts() returns cart:CartItem[]|error? {
         return cart:test();
+    }
+
+    // ---------------------------------------------- Supermarket Resource Functions ----------------------------------------------
+    resource function get supermarkets() returns db:Supermarket[]|error? {
+        return supermarkets:getSupermarkets();
+    }
+
+    resource function get supermarkets/[int id]() returns db:Supermarket|supermarkets:SuperMarketNotFound|error? {
+        return supermarkets:getSupermarketById(id);
     }
 
 }
