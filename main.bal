@@ -1,7 +1,7 @@
-import backend.cart;
+
 import backend.connection;
 import backend.db;
-import backend.price_list;
+// import backend.store_prices;
 import backend.products;
 import backend.supermarkets;
 
@@ -93,23 +93,23 @@ service / on new http:Listener(9090) {
         return products:getProductsById(id);
     }
 
-    // ---------------------------------------------- Price List Resource Functions ----------------------------------------------
-    resource function get pricelists() returns price_list:PriceListResponse|error? {
-        return price_list:getPriceLists();
-    }
+    // ---------------------------------------------- Store Price Resource Functions ----------------------------------------------
+    // resource function get storeprices() returns store_prices:PriceListResponse|error? {
+    //     return store_prices:getPriceLists();
+    // }
 
-    resource function get pricelists/[int productId]() returns price_list:PriceListResponse|error? {
-        return price_list:getPriceListsByProductId(productId);
-    }
+    // resource function get pricelists/[int productId]() returns store_prices:PriceListResponse|error? {
+    //     return store_prices:getPriceListsByProductId(productId);
+    // }
 
     // ---------------------------------------------- Cart Resource Functions ----------------------------------------------
-    resource function post carts/[int userId](@http:Payload cart:CartItem[] cartItems) returns db:CartItemWithRelations[]|error {
-        return cart:getCartItems(cartItems, userId);
-    }
+    // resource function post carts/[int userId](@http:Payload db:CartItem[] cartItems) returns db:CartItemWithRelations[]|error {
+    //     return cart:getCartItems(cartItems, userId);
+    // }
 
-    resource function get carts() returns cart:CartItem[]|error? {
-        return cart:test();
-    }
+    // resource function get carts() returns cart:CartItem[]|error? {
+    //     return cart:test();
+    // }
 
     // ---------------------------------------------- Supermarket Resource Functions ----------------------------------------------
     resource function get supermarkets() returns db:Supermarket[]|error? {

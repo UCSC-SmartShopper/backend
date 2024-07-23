@@ -1,0 +1,7 @@
+### Get All Price Lists
+GET http://localhost:9090/supermarkets
+
+### Get Price List by ID
+GET http://localhost:9090/supermarkets/2
+
+

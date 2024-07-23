@@ -19,15 +19,6 @@ function createSuperMarketNotFound(int id) returns SuperMarketNotFound {
     };
 }
 
-// type Supermarket record {|
-//     readonly int id;
-//     string name;
-//     string contactNo;
-//     string logo;
-//     string location;
-//     string address;
-//     db:UserWithRelations supermarketManager;
-// |};
 
 db:Client connection = connection:getConnection();
 
