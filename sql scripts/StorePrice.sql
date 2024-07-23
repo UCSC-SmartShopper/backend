@@ -1,9 +1,9 @@
 INSERT INTO
-    "PriceList" (
+    "StorePrice" (
         "productId",
         "price",
-        "quantity",
-        "discountedTotal",
+        "availableQuantity",
+        "discount",
         "supermarketId"
     )
 VALUES (1, 10.99, 100, 999.00, 1),
