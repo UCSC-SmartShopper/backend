@@ -4,6 +4,7 @@ import ballerina/io;
 import ballerina/persist;
 
 public type CartItem record {|
+    int id?;
     db:SupermarketItem supermarketItem;
     int quantity;
 |};
@@ -20,50 +21,12 @@ public type CartItemResponse record {|
 
 public final db:Client dbClient = check new ();
 
-public function getCartItems(CartItem[] localCartItems, int userId) returns db:CartItemWithRelations[]|error {
+public function getCartItems(int userId) returns CartItemResponse|error {
+    stream<CartItem, persist:Error?> CartItemsStream = dbClient->/cartitems(whereClause = `"CartItem"."consumerId"=${userId}`);
+    CartItem[] CartItems = check from CartItem CartItem in CartItemsStream
+        select CartItem;
 
-    db:CartItem[] toUpdate = [];
-    db:CartItemInsert[] toInsert = [];
-
-    // get price lists from the database
-    stream<db:CartItem, persist:Error?> dbCartItemsSteam = dbClient->/cartitems(whereClause = ` "CartItem"."consumerId" = ${userId}`);
-    map<db:CartItem> dbCartItemsMap = check map from db:CartItem dbCartItem in dbCartItemsSteam
-        select [dbCartItem.supermarketitemId.toBalString(), dbCartItem];
-
-    foreach CartItem i in localCartItems {
-        string key = i.supermarketItem.id.toBalString();
-        if (dbCartItemsMap[key] == null) {
-            toInsert.push({supermarketitemId: i.supermarketItem.id, quantity: i.quantity, consumerId: userId});
-        } else {
-            toUpdate.push({id: i.supermarketItem.id, supermarketitemId: i.supermarketItem.id, quantity: i.quantity, consumerId: userId});
-        }
-    }
-
-    // insert the new cart items to the database
-    if (toInsert.length() > 0) {
-        int[]|persist:Error result = dbClient->/cartitems.post(toInsert);
-        if result is persist:Error {
-            io:println(result);
-        }
-    }
-
-    // update the existing cart items in the database
-    if (toUpdate.length() > 0) {
-        foreach db:CartItem item in toUpdate {
-            db:CartItem|persist:Error result = dbClient->/cartitems/[item.id].put({});
-            if result is persist:Error {
-                io:println(result);
-            }
-        }
-    }
-
-    // get the final cart items from the database
-    stream<CartItem, persist:Error?> finalDbCartItemsStream = dbClient->/cartitems(whereClause = `"CartItem"."consumerId"=${userId}`);
-    CartItem[] finalDbCartItems = check from CartItem dbCartItem in finalDbCartItemsStream
-        select dbCartItem;
-
-    return finalDbCartItems;
-
+    return {count: CartItems.length(), next: "null", results: CartItems};
 }
 
 public function test() returns CartItem[]|persist:Error? {

@@ -1,3 +1,4 @@
+import backend.cart;
 import backend.connection;
 import backend.db;
 import backend.products;
@@ -7,7 +8,6 @@ import backend.supermarkets;
 import ballerina/http;
 import ballerina/persist;
 import ballerina/time;
-import backend.cart;
 
 @http:ServiceConfig {
     cors: {
@@ -103,8 +103,8 @@ service / on new http:Listener(9090) {
     }
 
     // ---------------------------------------------- Cart Resource Functions ----------------------------------------------
-    resource function post carts/[int userId](@http:Payload cart:CartItem[] cartItems) returns db:CartItemWithRelations[]|error {
-        return cart:getCartItems(cartItems, userId);
+    resource function get carts(int userId) returns cart:CartItemResponse|error {
+        return cart:getCartItems(userId);
     }
 
     // resource function get carts() returns cart:CartItem[]|error? {
