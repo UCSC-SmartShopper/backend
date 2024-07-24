@@ -1,13 +1,13 @@
-
 import backend.connection;
 import backend.db;
-// import backend.store_prices;
 import backend.products;
+import backend.store_prices;
 import backend.supermarkets;
 
 import ballerina/http;
 import ballerina/persist;
 import ballerina/time;
+import backend.cart;
 
 @http:ServiceConfig {
     cors: {
@@ -94,18 +94,18 @@ service / on new http:Listener(9090) {
     }
 
     // ---------------------------------------------- Store Price Resource Functions ----------------------------------------------
-    // resource function get storeprices() returns store_prices:PriceListResponse|error? {
-    //     return store_prices:getPriceLists();
-    // }
+    resource function get storeprices(@http:Query int productId) returns store_prices:SupermarketItemResponse|store_prices:SupermarketItemNotFound|error {
+        return store_prices:getSupermarketItemByProductId(productId);
+    }
 
-    // resource function get pricelists/[int productId]() returns store_prices:PriceListResponse|error? {
-    //     return store_prices:getPriceListsByProductId(productId);
-    // }
+    resource function get pricelists/[int id]() returns db:SupermarketItem|store_prices:SupermarketItemNotFound {
+        return store_prices:getSupermarketItemById(id);
+    }
 
     // ---------------------------------------------- Cart Resource Functions ----------------------------------------------
-    // resource function post carts/[int userId](@http:Payload db:CartItem[] cartItems) returns db:CartItemWithRelations[]|error {
-    //     return cart:getCartItems(cartItems, userId);
-    // }
+    resource function post carts/[int userId](@http:Payload cart:CartItem[] cartItems) returns db:CartItemWithRelations[]|error {
+        return cart:getCartItems(cartItems, userId);
+    }
 
     // resource function get carts() returns cart:CartItem[]|error? {
     //     return cart:test();

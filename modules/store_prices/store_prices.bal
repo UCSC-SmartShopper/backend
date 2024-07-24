@@ -1,9 +1,10 @@
-// import backend.db;
-// import backend.errors;
+import backend.connection;
+import backend.db;
+import backend.errors;
 
-// import ballerina/http;
-// import ballerina/persist;
-// import ballerina/time;
+import ballerina/http;
+import ballerina/io;
+import ballerina/persist;
 
 // public type Supermarket record {|
 //     readonly int id;
@@ -16,54 +17,46 @@
 
 // |};
 
-// // public type PriceList record {|
-// //     readonly int id;
-// //     products:Product product;
-// //     Supermarket supermarket;
-// //     int quantity;
-// //     float price;
-// //     float discountedTotal;
-// // |};
+public type SupermarketItemResponse record {|
+    int count;
+    string next;
+    db:SupermarketItem[] results;
+|};
 
-// public type PriceListResponse record {|
-//     int count;
-//     string next;
-//     db:StorePrice[] results;
-// |};
+public type SupermarketItemNotFound record {|
+    *http:NotFound;
+    errors:ErrorDetails body;
+|};
 
-// type PriceListNotFound record {|
-//     *http:NotFound;
-//     errors:ErrorDetails body;
-// |};
+function createSupermarketItemNotFound(int id) returns SupermarketItemNotFound {
+    return {
+        body: {
+            message: "Price List not found",
+            details: string `Price List not found for the given id: ${id}`
+}
+    };
+}
 
-// function createPriceListNotFound(int id) returns PriceListNotFound {
-//     return {
-//         body: {
-//             message: "Price List not found",
-//             details: string `Price List not found for the given id: ${id}`,
-//             timestamp: time:utcNow()
-//         }
-//     };
-// }
+// -------------------------------------------------- Resource Functions --------------------------------------------------
 
-// // -------------------------------------------------- Resource Functions --------------------------------------------------
+db:Client connection = connection:getConnection();
 
-// public final db:Client dbClient = check new ();
+public function getSupermarketItemByProductId(int productId) returns SupermarketItemResponse|SupermarketItemNotFound|error {
+    io:println("productId: ", productId);
+    stream<db:SupermarketItem, persist:Error?> prices = connection->/supermarketitems(whereClause = `"SupermarketItem"."productId"= ${productId}`);
+    db:SupermarketItem[] supermarketItem = check from db:SupermarketItem price in prices
+        select price;
 
-// public function getPriceLists() returns PriceListResponse|persist:Error? {
-//     stream<db:StorePrice, persist:Error?> prices = dbClient->/storeprices();
+    io:println("supermarketItem: ", supermarketItem);
 
-//     db:StorePrice[] priceList = check from db:StorePrice price in prices
-//         select price;
+    return {count: supermarketItem.length(), next: "null", results: supermarketItem};
+}
 
-//     return {count: priceList.length(), next: "null", results: priceList};
-// }
+public function getSupermarketItemById(int id) returns db:SupermarketItem|SupermarketItemNotFound {
+    db:SupermarketItem|persist:Error supermarketItem = connection->/supermarketitems/[id].get(db:SupermarketItem);
 
-// public function getPriceListsByProductId(int productId) returns PriceListResponse|persist:Error? {
-//     stream<db:StorePrice, persist:Error?> prices = dbClient->/storeprices(whereClause = `"PriceList"."productId"=${productId}`);
-//     db:StorePrice[] priceList = check from PriceList price in prices
-//         select price;
-
-//     return {count: priceList.length(), next: "null", results: priceList};
-// }
-
+    if (supermarketItem is persist:Error) {
+        return createSupermarketItemNotFound(id);
+    }
+    return supermarketItem;
+}

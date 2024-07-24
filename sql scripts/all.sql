@@ -549,7 +549,7 @@ VALUES (
     );
 
 INSERT INTO
-    "StorePrice" (
+    "SupermarketItem" (
         "productId",
         "price",
         "availableQuantity",
