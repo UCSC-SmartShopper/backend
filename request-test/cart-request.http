@@ -1,0 +1,37 @@
+GET http://localhost:9090/carts
+
+
+### Get all carts
+POST http://localhost:9090/carts
+Content-Type: application/json
+
+[
+  {
+    "productId": 1,
+    "supermarketId": 1,
+    "quantity": 1
+  },
+  {
+    "productId": 2,
+    "supermarketId": 1,
+    "quantity": 1
+  }
+]
+
+
+### Get all carts
+POST http://localhost:9090/carts
+Content-Type: application/json
+
+[
+    {
+        "productId": 1,
+    "supermarketId": 1,
+    "quantity": 1
+    },
+    {
+        "productId": 5,
+        "supermaketId": 1,
+        "quantity": 1
+    }
+]

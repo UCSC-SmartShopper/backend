@@ -17,7 +17,7 @@ type User record {|
     time:Civil updatedAt;
     time:Civil? deletedAt;
     Consumer? consumer;
-	Supermarket? supermarket;
+    Supermarket? supermarket;
 |};
 
 type Address record {|
@@ -28,7 +28,7 @@ type Address record {|
     string city;
     string location;
     boolean isDefault;
-	Consumer consumer;
+    Consumer consumer;
 |};
 
 type Consumer record {|
@@ -45,6 +45,7 @@ type Product record {|
     string description;
     float price;
     string imageUrl;
+	SupermarketItem[] storeprice;
 |};
 
 type Supermarket record {|
@@ -56,16 +57,25 @@ type Supermarket record {|
     string location;
     string address;
     User supermarketManager;
-	PriceList[] pricelist;
+	SupermarketItem[] storeprice;
 |};
 
-type PriceList record {|
+type SupermarketItem record {|
     @sql:Generated
     readonly int id;
-    int productId;
+    Product product;
     Supermarket supermarket;
     float price;
+    float discount;
+    int availableQuantity;
+	CartItem[] cartitem;
+|};
+
+type CartItem record {|
+    @sql:Generated
+    readonly int id;
+    SupermarketItem supermarketItem;
     int quantity;
-    float discountedTotal;
+    int consumerId;
 |};
 
