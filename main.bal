@@ -1,3 +1,4 @@
+import backend.auth;
 import backend.cart;
 import backend.connection;
 import backend.db;
@@ -6,19 +7,24 @@ import backend.store_prices;
 import backend.supermarkets;
 
 import ballerina/http;
+import ballerina/io;
 import ballerina/persist;
 import ballerina/time;
 
 @http:ServiceConfig {
     cors: {
         allowOrigins: ["*"],
-        allowCredentials: false,
+        allowCredentials: true,
         maxAge: 84900
     }
 }
 service / on new http:Listener(9090) {
 
     db:Client connection = connection:getConnection();
+
+    resource function post login(@http:Payload auth:Credentials credentials) returns auth:UserwithToken|error {
+        return auth:login(credentials);
+    }
 
     resource function get users() returns db:User[]|error? {
         stream<db:User, persist:Error?> users = self.connection->/users.get();
@@ -85,7 +91,8 @@ service / on new http:Listener(9090) {
         return updatedUser;
     }
 
-    resource function get products() returns products:ProductResponse|persist:Error? {
+    resource function get products(http:Request req) returns products:ProductResponse|persist:Error? {
+        io:println(auth:getUser(req));
         return products:getProducts();
     }
 
