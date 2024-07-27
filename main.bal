@@ -127,4 +127,10 @@ service / on new http:Listener(9090) {
         return supermarkets:getSupermarketById(id);
     }
 
+    // resource function get sendsms() returns error? {
+    //     io:println("Sending sms");
+    //     error? sendmail = sms_service:sendsms();
+    //     return sendmail;
+    // }
+
 }
