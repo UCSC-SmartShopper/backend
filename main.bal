@@ -5,11 +5,13 @@ import backend.db;
 import backend.products;
 import backend.store_prices;
 import backend.supermarkets;
+import backend.sms_service;
 
 import ballerina/http;
 import ballerina/io;
 import ballerina/persist;
 import ballerina/time;
+
 
 @http:ServiceConfig {
     cors: {
@@ -127,10 +129,10 @@ service / on new http:Listener(9090) {
         return supermarkets:getSupermarketById(id);
     }
 
-    // resource function get sendsms() returns error? {
-    //     io:println("Sending sms");
-    //     error? sendmail = sms_service:sendsms();
-    //     return sendmail;
-    // }
+    resource function get sendsms() returns error? {
+        io:println("Sending sms");
+        error? sendmail = sms_service:sendsms();
+        return sendmail;
+    }
 
 }
