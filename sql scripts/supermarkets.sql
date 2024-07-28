@@ -9,7 +9,7 @@ INSERT INTO
         "supermarketmanagerId"
     )
 VALUES (
-        'Keels Super',
+        'Keels',
         '+94 11 2303500',
         'https://d36b0zw3cawrft.cloudfront.net/9lokzbu1a2tdd8zb1jx41mexxk70',
         '226 High Level Rd, Maharagama 10280',
@@ -17,7 +17,7 @@ VALUES (
         5
     ),
     (
-        'Glow Mark',
+        'GlowMark',
         '555-555-5555',
         'https://glomark.lk/build/images/logo.9155b058.png',
         '789 Oak St, Midtown',
@@ -25,7 +25,7 @@ VALUES (
         6
     ),
     (
-        'Arpico Super',
+        'Arpico',
         '987-654-3210',
         'https://upload.wikimedia.org/wikipedia/en/0/03/Arpico_Supercenter_logo.png',
         '456 Elm St, Uptown',
@@ -33,7 +33,7 @@ VALUES (
         7
     ),
     (
-        'Keels Super',
+        'Keels',
         '987-654-3210',
         'https://d36b0zw3cawrft.cloudfront.net/9lokzbu1a2tdd8zb1jx41mexxk70',
         'VV8W+834, Colombo - Batticaloa Hwy, Nugegoda',
@@ -41,7 +41,7 @@ VALUES (
         8
     ),
     (
-        'Arpico Super',
+        'Arpico',
         '987-654-3210',
         'https://upload.wikimedia.org/wikipedia/en/0/03/Arpico_Supercenter_logo.png',
         '456 Elm St, Uptown',
@@ -49,7 +49,7 @@ VALUES (
         9
     ),
     (
-        'Arpico Super',
+        'Arpico',
         '987-654-3210',
         'https://upload.wikimedia.org/wikipedia/en/0/03/Arpico_Supercenter_logo.png',
         '456 Elm St, Uptown',
@@ -57,7 +57,7 @@ VALUES (
         10
     ),
     (
-        'Arpico Super',
+        'Arpico',
         '987-654-3210',
         'https://upload.wikimedia.org/wikipedia/en/0/03/Arpico_Supercenter_logo.png',
         '456 Elm St, Uptown',
@@ -65,7 +65,7 @@ VALUES (
         11
     ),
     (
-        'Arpico Super',
+        'Arpico',
         '987-654-3210',
         'https://upload.wikimedia.org/wikipedia/en/0/03/Arpico_Supercenter_logo.png',
         '456 Elm St, Uptown',
@@ -73,7 +73,7 @@ VALUES (
         12
     ),
     (
-        'Arpico Super',
+        'Arpico',
         '987-654-3210',
         'https://upload.wikimedia.org/wikipedia/en/0/03/Arpico_Supercenter_logo.png',
         '456 Elm St, Uptown',
