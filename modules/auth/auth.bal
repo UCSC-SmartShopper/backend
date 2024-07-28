@@ -71,7 +71,7 @@ public function login(Credentials credentials) returns UserwithToken|error {
     if (userArray[0].password == credentials.password) {
         // remove password from the user object
         user = {id: userArray[0].id, name: userArray[0].name, email: userArray[0].email, number: userArray[0].number, profilePic: userArray[0].profilePic,
-            role: userArray[0].userRole};
+            role: userArray[0].role};
         string jwtToken = check jwt:issue(getConfig(user));
         return {user: user, jwtToken: jwtToken};
     }

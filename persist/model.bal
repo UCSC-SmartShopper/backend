@@ -10,7 +10,7 @@ type User record {|
     string password;
     string number;
     string profilePic;
-    string userRole;
+    string role;
     string status;
 
     time:Civil createdAt;
