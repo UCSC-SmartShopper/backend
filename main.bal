@@ -50,7 +50,7 @@ service / on new http:Listener(9090) {
     resource function post consumer(NewUser newUser) returns db:User|persist:Error|http:Conflict & readonly {
         db:UserInsert userInsert = {
             ...newUser,
-            userRole: "consumer",
+            role: "consumer",
             status: "Active",
             createdAt: time:utcToCivil(time:utcNow()),
             updatedAt: time:utcToCivil(time:utcNow()),
@@ -126,5 +126,11 @@ service / on new http:Listener(9090) {
     resource function get supermarkets/[int id]() returns db:Supermarket|supermarkets:SuperMarketNotFound|error? {
         return supermarkets:getSupermarketById(id);
     }
+
+    // resource function get sendsms() returns error? {
+    //     io:println("Sending sms");
+    //     error? sendmail = sms_service:sendsms();
+    //     return sendmail;
+    // }
 
 }
