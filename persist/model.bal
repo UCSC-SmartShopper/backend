@@ -45,7 +45,7 @@ type Product record {|
     string description;
     float price;
     string imageUrl;
-	SupermarketItem[] storeprice;
+    SupermarketItem[] storeprice;
 |};
 
 type Supermarket record {|
@@ -57,7 +57,7 @@ type Supermarket record {|
     string location;
     string address;
     User supermarketManager;
-	SupermarketItem[] storeprice;
+    SupermarketItem[] storeprice;
 |};
 
 type SupermarketItem record {|
@@ -68,7 +68,7 @@ type SupermarketItem record {|
     float price;
     float discount;
     int availableQuantity;
-	CartItem[] cartitem;
+    CartItem[] cartItem;
 |};
 
 type CartItem record {|
@@ -79,3 +79,19 @@ type CartItem record {|
     int consumerId;
 |};
 
+// type Order record {|
+//     @sql:Generated
+//     readonly int id;
+//     Consumer consumer;
+//     OrderItem[] orderItems;
+// |};
+
+// type OrderItem record {|
+//     @sql:Generated
+//     readonly int id;
+// 	   Order order;
+//     Product product;
+//     SupermarketItem supermarketItem;
+//     int quantity;
+//     float price;
+// |};
