@@ -114,9 +114,9 @@ service / on new http:Listener(9090) {
         return cart:getCartItems(userId);
     }
 
-    // resource function get carts() returns cart:CartItem[]|error? {
-    //     return cart:test();
-    // }
+    resource function post carts(cart:CartItem[] cartItems) returns cart:CartItem[]|error? {
+        return cart:saveCartItems(cartItems);
+    }
 
     // ---------------------------------------------- Supermarket Resource Functions ----------------------------------------------
     resource function get supermarkets() returns db:Supermarket[]|error? {
