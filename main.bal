@@ -10,6 +10,7 @@ import ballerina/http;
 import ballerina/io;
 import ballerina/persist;
 import ballerina/time;
+import backend.opportunities;
 import backend.orders;
 // import backend.user;
 
@@ -135,6 +136,18 @@ service / on new http:Listener(9090) {
     //     return sendmail;
     // }
 
+    // resource function get opportunities() returns db:opportunity[]|error?{
+    //     return opportunities:getOpportunities();
+    // }
+
+    resource function get opportunities()returns opportunities:OpportunityResponse|error? {
+        return opportunities:getOpportunities();
+    }
+
+
+     resource function get opportunities/[int id]()returns opportunities:OpportunityNotFound|db:OpportunityWithRelations {
+        return opportunities:getOpportunitiesById(id);
+    }
     // ---------------------------------------------- Order Resource Functions ----------------------------------------------
 
     resource function get orders() returns db:OrderWithRelations[]|error   {

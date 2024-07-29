@@ -38,23 +38,6 @@ type Address record {|
     Consumer consumer;
 |};
 
-type Consumer record {|
-    @sql:Generated
-    readonly int id;
-    User user;
-    Address[] addresses;
-|};
-
-type Product record {|
-    @sql:Generated
-    readonly int id;
-    string name;
-    string description;
-    float price;
-    string imageUrl;
-    SupermarketItem[] storeprice;
-|};
-
 type Supermarket record {|
     @sql:Generated
     readonly int id;
@@ -64,6 +47,17 @@ type Supermarket record {|
     string location;
     string address;
     User supermarketManager;
+    SupermarketItem[] storeprice;
+	OpportunitySupermarket[] opportunitysupermarket;
+|};
+
+type Product record {|
+    @sql:Generated
+    readonly int id;
+    string name;
+    string description;
+    float price;
+    string imageUrl;
     SupermarketItem[] storeprice;
 |};
 
@@ -107,3 +101,32 @@ type Order record {|
     OrderItems[] orderItems;
 |};
 
+type OpportunitySupermarket record {|
+    @sql:Generated
+    readonly int id;
+
+    Supermarket supermarket;
+    Opportunity opportunity;
+|};
+
+type Opportunity record {|
+    @sql:Generated
+    readonly int id;
+    float totalDistance;
+    float tripCost;
+    string orderPlacedOn;
+    Consumer consumer;
+    float deliveryCost;
+    string startLocation;
+    string deliveryLocation;
+	OpportunitySupermarket[] opportunitysupermarket;
+    string status;
+|};
+
+type Consumer record {|
+    @sql:Generated
+    readonly int id;
+    User user;
+    Address[] addresses;
+    Opportunity[] opportunity;
+|};
