@@ -7,7 +7,6 @@ import backend.store_prices;
 import backend.supermarkets;
 
 import ballerina/http;
-import ballerina/io;
 import ballerina/persist;
 import ballerina/time;
 
@@ -92,7 +91,7 @@ service / on new http:Listener(9090) {
     }
 
     resource function get products(http:Request req) returns products:ProductResponse|persist:Error? {
-        io:println(auth:getUser(req));
+        // io:println(auth:getUser(req));
         return products:getProducts();
     }
 
@@ -131,6 +130,27 @@ service / on new http:Listener(9090) {
     //     io:println("Sending sms");
     //     error? sendmail = sms_service:sendsms();
     //     return sendmail;
+    // }
+
+    // resource function post file(http:Caller caller, http:Request req) returns error {
+    //     string content;
+    //     string fileName;
+
+    //     mime:Entity[] bodyParts = check req.getBodyParts();
+
+    //     foreach mime:Entity part in bodyParts {
+    //         mime:ContentDisposition contentDisposition = part.getContentDisposition();
+    //         if (contentDisposition.name == "file") {
+    //             string filePath = "/" + fileName;
+    //             io:file fileHandler = check new io:file(filePath);
+    //             content = handleContent(part);
+    //             fileName = contentDisposition.fileName;
+    //         }
+    //         else {
+    //             submission[contentDisposition.name] = check part.getBodyAsString();
+    //         }
+    //     }
+
     // }
 
 }
