@@ -6,11 +6,13 @@ import backend.products;
 import backend.store_prices;
 import backend.supermarkets;
 import backend.sms_service;
+import backend.email_service;
 
 import ballerina/http;
 import ballerina/io;
 import ballerina/persist;
 import ballerina/time;
+// import backend.user_registration;
 
 
 @http:ServiceConfig {
@@ -134,5 +136,17 @@ service / on new http:Listener(9090) {
         error? sendmail = sms_service:sendsms();
         return sendmail;
     }
+
+    resource function get sendmail() returns error? {
+        io:println("Sending email");
+        error? sendmail = email_service:sendmail();
+        return sendmail;
+    }
+
+    // resource function get otpgenaration() returns error? {
+    //     io:println("OTP Generation");
+    //     error? otpgenaration = user_registration:otpgenaration();
+    //     return otpgenaration;   
+    // }
 
 }
