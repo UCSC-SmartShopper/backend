@@ -12,7 +12,7 @@ import ballerina/http;
 import ballerina/io;
 import ballerina/persist;
 import ballerina/time;
-// import backend.user_registration;
+import backend.user_registration;
 
 
 @http:ServiceConfig {
@@ -143,10 +143,10 @@ service / on new http:Listener(9090) {
         return sendmail;
     }
 
-    // resource function get otpgenaration() returns error? {
-    //     io:println("OTP Generation");
-    //     error? otpgenaration = user_registration:otpgenaration();
-    //     return otpgenaration;   
-    // }
+    resource function get otpgenaration() returns error? {
+        io:println("OTP Generation");
+        error? otpgenaration = user_registration:otpgenaration();
+        return otpgenaration;   
+    }
 
 }
