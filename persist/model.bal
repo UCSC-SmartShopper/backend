@@ -79,19 +79,23 @@ type CartItem record {|
     int consumerId;
 |};
 
-// type Order record {|
-//     @sql:Generated
-//     readonly int id;
-//     Consumer consumer;
-//     OrderItem[] orderItems;
-// |};
+type OrderItems record {|
+    @sql:Generated
+    readonly int id;
+    int supermarketItemId;
+    int productId;
+    int quantity;
+    float price;
+	Order _order;
+|};
 
-// type OrderItem record {|
-//     @sql:Generated
-//     readonly int id;
-// 	   Order order;
-//     Product product;
-//     SupermarketItem supermarketItem;
-//     int quantity;
-//     float price;
-// |};
+type Order record {|
+    @sql:Generated
+    readonly int id;
+    int consumerId;
+    string status;
+    string shippingAddress;
+    string shippingMethod;
+    OrderItems[] orderItems;
+|};
+
