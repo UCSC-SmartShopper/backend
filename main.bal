@@ -8,6 +8,7 @@ import ballerina/http;
 import ballerina/persist;
 import ballerina/time;
 import backend.cart;
+import backend.opportunities;
 
 @http:ServiceConfig {
     cors: {
@@ -120,4 +121,11 @@ service / on new http:Listener(9090) {
         return supermarkets:getSupermarketById(id);
     }
 
+    // resource function get opportunities() returns db:opportunity[]|error?{
+    //     return opportunities:getOpportunities();
+    // }
+
+    resource function get opportunities/[int id](string name)returns json {
+        return opportunities:test(name, id);
+    }
 }

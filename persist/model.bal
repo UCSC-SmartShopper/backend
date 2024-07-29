@@ -36,6 +36,7 @@ type Consumer record {|
     readonly int id;
     User user;
     Address[] addresses;
+    Opportunity? opportunity;
 |};
 
 type Product record {|
@@ -45,7 +46,7 @@ type Product record {|
     string description;
     float price;
     string imageUrl;
-	SupermarketItem[] storeprice;
+    SupermarketItem[] storeprice;
 |};
 
 type Supermarket record {|
@@ -57,7 +58,8 @@ type Supermarket record {|
     string location;
     string address;
     User supermarketManager;
-	SupermarketItem[] storeprice;
+    SupermarketItem[] storeprice;
+    Opportunity opportunity;
 |};
 
 type SupermarketItem record {|
@@ -68,7 +70,7 @@ type SupermarketItem record {|
     float price;
     float discount;
     int availableQuantity;
-	CartItem[] cartitem;
+    CartItem[] cartitem;
 |};
 
 type CartItem record {|
@@ -79,3 +81,27 @@ type CartItem record {|
     int consumerId;
 |};
 
+type Opportunity record {|
+    @sql:Generated
+    readonly int id;
+    Supermarket[] supermarketList;
+    float totalDistance;
+    float tripCost;
+    string orderPlacedOn;
+    Consumer consumer;
+    float deliveryCost;
+    string startLocation;
+    string deliveryLocation;
+|};
+// export interface Opportunity {
+//   id: string;
+//   supermarketList: string[];
+//   totalDistance: number;
+//   tripCost: number;
+
+//   orderPlacedOn: string;
+//   customer: string;
+//   deliveryCost: number;
+//   startLocation: string;
+//   deliveryLocation: string;
+// }
