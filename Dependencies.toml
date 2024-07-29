@@ -380,10 +380,13 @@ modules = [
 	{org = "djaya", packageName = "backend", moduleName = "backend.db"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.email_service"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.errors"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.opportunities"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.orders"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.products"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.sms_service"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.store_prices"},
-	{org = "djaya", packageName = "backend", moduleName = "backend.supermarkets"}
+	{org = "djaya", packageName = "backend", moduleName = "backend.supermarkets"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.user"}
 ]
 
 [[tool]]

@@ -9,6 +9,9 @@ import backend.supermarkets;
 import ballerina/http;
 import ballerina/persist;
 import ballerina/time;
+import backend.opportunities;
+import backend.orders;
+// import backend.user;
 
 @http:ServiceConfig {
     cors: {
@@ -130,6 +133,36 @@ service / on new http:Listener(9090) {
     //     io:println("Sending sms");
     //     error? sendmail = sms_service:sendsms();
     //     return sendmail;
+    // }
+
+    // resource function get opportunities() returns db:opportunity[]|error?{
+    //     return opportunities:getOpportunities();
+    // }
+
+    resource function get opportunities()returns opportunities:OpportunityResponse|error? {
+        return opportunities:getOpportunities();
+    }
+
+
+     resource function get opportunities/[int id]()returns opportunities:OpportunityNotFound|db:OpportunityWithRelations {
+        return opportunities:getOpportunitiesById(id);
+    }
+    // ---------------------------------------------- Order Resource Functions ----------------------------------------------
+
+    resource function get orders() returns db:OrderWithRelations[]|error   {
+        return orders:getOrders();
+    }
+    resource function get orders/[int id]() returns db:OrderWithRelations|orders:OrderNotFound|error?  {
+        return orders:getOrdersById(id);
+    }
+    resource function get cartToOrder(int id) returns db:OrderWithRelations|persist:Error|error   {
+        return orders:cartToOrder(id, "shippingAddress", "shippingMethod");
+    } 
+
+    // ---------------------------------------------- NonVerifyUser Resource Functions ----------------------------------------------
+
+    // resource function get nonVerifyUser() returns  {
+    //     return user:registerNonVerifyUser("contactNo" ,"username");
     // }
 
     // resource function post file(http:Caller caller, http:Request req) returns error {

@@ -20,6 +20,13 @@ type User record {|
     Supermarket? supermarket;
 |};
 
+type NonVerifyUser record {|
+    @sql:Generated
+    readonly int id;
+    string contactNo;
+    string name;
+    string OTP;
+|};
 type Address record {|
     @sql:Generated
     readonly int id;
@@ -31,23 +38,6 @@ type Address record {|
     Consumer consumer;
 |};
 
-type Consumer record {|
-    @sql:Generated
-    readonly int id;
-    User user;
-    Address[] addresses;
-|};
-
-type Product record {|
-    @sql:Generated
-    readonly int id;
-    string name;
-    string description;
-    float price;
-    string imageUrl;
-	SupermarketItem[] storeprice;
-|};
-
 type Supermarket record {|
     @sql:Generated
     readonly int id;
@@ -57,7 +47,18 @@ type Supermarket record {|
     string location;
     string address;
     User supermarketManager;
-	SupermarketItem[] storeprice;
+    SupermarketItem[] storeprice;
+	OpportunitySupermarket[] opportunitysupermarket;
+|};
+
+type Product record {|
+    @sql:Generated
+    readonly int id;
+    string name;
+    string description;
+    float price;
+    string imageUrl;
+    SupermarketItem[] storeprice;
 |};
 
 type SupermarketItem record {|
@@ -68,7 +69,7 @@ type SupermarketItem record {|
     float price;
     float discount;
     int availableQuantity;
-	CartItem[] cartitem;
+    CartItem[] cartItem;
 |};
 
 type CartItem record {|
@@ -79,3 +80,53 @@ type CartItem record {|
     int consumerId;
 |};
 
+type OrderItems record {|
+    @sql:Generated
+    readonly int id;
+    int supermarketItemId;
+    int productId;
+    int quantity;
+    float price;
+	Order _order;
+|};
+
+type Order record {|
+    @sql:Generated
+    readonly int id;
+    int consumerId;
+    string status;
+    string shippingAddress;
+    string shippingMethod;
+    string location;
+    OrderItems[] orderItems;
+|};
+
+type OpportunitySupermarket record {|
+    @sql:Generated
+    readonly int id;
+
+    Supermarket supermarket;
+    Opportunity opportunity;
+|};
+
+type Opportunity record {|
+    @sql:Generated
+    readonly int id;
+    float totalDistance;
+    float tripCost;
+    string orderPlacedOn;
+    Consumer consumer;
+    float deliveryCost;
+    string startLocation;
+    string deliveryLocation;
+	OpportunitySupermarket[] opportunitysupermarket;
+    string status;
+|};
+
+type Consumer record {|
+    @sql:Generated
+    readonly int id;
+    User user;
+    Address[] addresses;
+    Opportunity[] opportunity;
+|};
