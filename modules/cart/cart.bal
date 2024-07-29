@@ -1,12 +1,13 @@
+import backend.connection;
 import backend.db;
 
-import ballerina/io;
 import ballerina/persist;
 
 public type CartItem record {|
     int id?;
     db:SupermarketItem supermarketItem;
     int quantity;
+    int consumerId?;
 |};
 
 public type CartItemResponse record {|
@@ -19,30 +20,41 @@ public type CartItemResponse record {|
 // Then it synced with the database
 // It attach the Product to the CartItem
 
-public final db:Client dbClient = check new ();
-
 public function getCartItems(int userId) returns CartItemResponse|error {
-    stream<CartItem, persist:Error?> CartItemsStream = dbClient->/cartitems(whereClause = `"CartItem"."consumerId"=${userId}`);
+    db:Client connection = connection:getConnection();
+
+    stream<CartItem, persist:Error?> CartItemsStream = connection->/cartitems(whereClause = `"CartItem"."consumerId"=${userId}`);
     CartItem[] CartItems = check from CartItem CartItem in CartItemsStream
         select CartItem;
 
     return {count: CartItems.length(), next: "null", results: CartItems};
 }
 
-public function test() returns CartItem[]|persist:Error? {
-    io:println("hi");
-    return [
-        {
-            "supermarketItem": {
-                "id": 2,
-                "productId": 1,
-                "supermarketId": 2,
-                "price": 5.49,
-                "discount": 1098,
-                "availableQuantity": 200
-            },
-            "quantity": 1
-        }
-];
+public function saveCartItems(int consumerId, CartItem[] cartItems) returns CartItem[]|persist:Error {
+    db:Client connection = connection:getConnection();
+
+    // remove all the cart items from the database
+    _ = check connection->executeNativeSQL(`DELETE FROM "CartItem" WHERE "consumerId" = ${consumerId} `);
+
+    // then add the new cart items to the database
+    db:CartItemInsert[] cartItemInserts = from CartItem cartItem in cartItems
+        select {
+            supermarketitemId: cartItem.supermarketItem.id,
+            quantity: cartItem.quantity,
+            consumerId: consumerId
+        };
+
+    int[]|persist:Error result = connection->/cartitems.post(cartItemInserts);
+
+    if result is persist:Error {
+        return result;
+    }
+
+    // get all the cart items from the database
+    stream<CartItem, persist:Error?> insertedCartItemSteam = connection->/cartitems(whereClause = `"CartItem"."consumerId"=${consumerId}`);
+    CartItem[] insertedCartItems = check from CartItem CartItem in insertedCartItemSteam
+        select CartItem;
+
+    return insertedCartItems;
 
 }

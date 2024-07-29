@@ -2,6 +2,8 @@ import backend.auth;
 import backend.cart;
 import backend.connection;
 import backend.db;
+import backend.opportunities;
+import backend.orders;
 import backend.products;
 import backend.store_prices;
 import backend.supermarkets;
@@ -9,11 +11,12 @@ import backend.sms_service;
 import backend.email_service;
 
 import ballerina/http;
-import ballerina/io;
 import ballerina/persist;
 import ballerina/time;
 import backend.user_registration;
 
+
+// import backend.user;
 
 @http:ServiceConfig {
     cors: {
@@ -54,7 +57,7 @@ service / on new http:Listener(9090) {
     resource function post consumer(NewUser newUser) returns db:User|persist:Error|http:Conflict & readonly {
         db:UserInsert userInsert = {
             ...newUser,
-            userRole: "consumer",
+            role: "consumer",
             status: "Active",
             createdAt: time:utcToCivil(time:utcNow()),
             updatedAt: time:utcToCivil(time:utcNow()),
@@ -96,7 +99,7 @@ service / on new http:Listener(9090) {
     }
 
     resource function get products(http:Request req) returns products:ProductResponse|persist:Error? {
-        io:println(auth:getUser(req));
+        // io:println(auth:getUser(req));
         return products:getProducts();
     }
 
@@ -118,9 +121,10 @@ service / on new http:Listener(9090) {
         return cart:getCartItems(userId);
     }
 
-    // resource function get carts() returns cart:CartItem[]|error? {
-    //     return cart:test();
-    // }
+    resource function post carts(http:Request req, cart:CartItem[] cartItems) returns cart:CartItem[]|error? {
+        auth:User user = check auth:getUser(req);
+        return cart:saveCartItems(user.consumerId ?: 0, cartItems);
+    }
 
     // ---------------------------------------------- Supermarket Resource Functions ----------------------------------------------
     resource function get supermarkets() returns db:Supermarket[]|error? {
@@ -148,5 +152,34 @@ service / on new http:Listener(9090) {
         error? otpgenaration = user_registration:otpgenaration();
         return otpgenaration;   
     }
+
+    // ---------------------------------------------- Opportunities Resource Functions ----------------------------------------------
+    resource function get opportunities() returns opportunities:OpportunityResponse|error? {
+        return opportunities:getOpportunities();
+    }
+
+    resource function get opportunities/[int id]() returns opportunities:OpportunityNotFound|db:OpportunityWithRelations {
+        return opportunities:getOpportunitiesById(id);
+    }
+
+    // ---------------------------------------------- Order Resource Functions ----------------------------------------------
+
+    resource function get orders() returns db:OrderWithRelations[]|error {
+        return orders:getOrders();
+    }
+
+    resource function get orders/[int id]() returns db:OrderWithRelations|orders:OrderNotFound|error? {
+        return orders:getOrdersById(id);
+    }
+
+    resource function post cartToOrder(@http:Payload orders:CartToOrder cartToOrder) returns db:OrderWithRelations|persist:Error|error {
+        return orders:cartToOrder(cartToOrder);
+    }
+
+    // ---------------------------------------------- NonVerifyUser Resource Functions ----------------------------------------------
+
+    // resource function get nonVerifyUser() returns  {
+    //     return user:registerNonVerifyUser("contactNo" ,"username");
+    // }
 
 }
