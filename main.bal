@@ -10,6 +10,7 @@ import ballerina/http;
 import ballerina/io;
 import ballerina/persist;
 import ballerina/time;
+import backend.orders;
 
 @http:ServiceConfig {
     cors: {
@@ -132,5 +133,17 @@ service / on new http:Listener(9090) {
     //     error? sendmail = sms_service:sendsms();
     //     return sendmail;
     // }
+
+    // ---------------------------------------------- Order Resource Functions ----------------------------------------------
+
+    resource function get orders() returns db:OrderWithRelations[]|error   {
+        return orders:getOrders();
+    }
+    resource function get orders/[int id]() returns db:OrderWithRelations|orders:OrderNotFound|error?  {
+        return orders:getOrdersById(id);
+    }
+    resource function get cartToOrder(int id) returns db:OrderWithRelations|persist:Error|error   {
+        return orders:cartToOrder(id);
+    } 
 
 }
