@@ -5,7 +5,7 @@ INSERT INTO
         "password",
         "number",
         "profilePic",
-        "userRole",
+        "role",
         "status",
         "createdAt",
         "updatedAt",

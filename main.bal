@@ -1,3 +1,5 @@
+import backend.auth;
+import backend.cart;
 import backend.connection;
 import backend.db;
 import backend.products;
@@ -5,6 +7,7 @@ import backend.store_prices;
 import backend.supermarkets;
 
 import ballerina/http;
+import ballerina/io;
 import ballerina/persist;
 import ballerina/time;
 import backend.cart;
@@ -13,13 +16,17 @@ import backend.opportunities;
 @http:ServiceConfig {
     cors: {
         allowOrigins: ["*"],
-        allowCredentials: false,
+        allowCredentials: true,
         maxAge: 84900
     }
 }
 service / on new http:Listener(9090) {
 
     db:Client connection = connection:getConnection();
+
+    resource function post login(@http:Payload auth:Credentials credentials) returns auth:UserwithToken|error {
+        return auth:login(credentials);
+    }
 
     resource function get users() returns db:User[]|error? {
         stream<db:User, persist:Error?> users = self.connection->/users.get();
@@ -45,7 +52,7 @@ service / on new http:Listener(9090) {
     resource function post consumer(NewUser newUser) returns db:User|persist:Error|http:Conflict & readonly {
         db:UserInsert userInsert = {
             ...newUser,
-            userRole: "consumer",
+            role: "consumer",
             status: "Active",
             createdAt: time:utcToCivil(time:utcNow()),
             updatedAt: time:utcToCivil(time:utcNow()),
@@ -86,7 +93,8 @@ service / on new http:Listener(9090) {
         return updatedUser;
     }
 
-    resource function get products() returns products:ProductResponse|persist:Error? {
+    resource function get products(http:Request req) returns products:ProductResponse|persist:Error? {
+        io:println(auth:getUser(req));
         return products:getProducts();
     }
 
@@ -104,13 +112,13 @@ service / on new http:Listener(9090) {
     }
 
     // ---------------------------------------------- Cart Resource Functions ----------------------------------------------
-    resource function post carts/[int userId](@http:Payload cart:CartItem[] cartItems) returns db:CartItemWithRelations[]|error {
-        return cart:getCartItems(cartItems, userId);
+    resource function get carts(int userId) returns cart:CartItemResponse|error {
+        return cart:getCartItems(userId);
     }
 
-    // resource function get carts() returns cart:CartItem[]|error? {
-    //     return cart:test();
-    // }
+    resource function post carts(cart:CartItem[] cartItems) returns cart:CartItem[]|error? {
+        return cart:saveCartItems(cartItems);
+    }
 
     // ---------------------------------------------- Supermarket Resource Functions ----------------------------------------------
     resource function get supermarkets() returns db:Supermarket[]|error? {
@@ -120,6 +128,12 @@ service / on new http:Listener(9090) {
     resource function get supermarkets/[int id]() returns db:Supermarket|supermarkets:SuperMarketNotFound|error? {
         return supermarkets:getSupermarketById(id);
     }
+
+    // resource function get sendsms() returns error? {
+    //     io:println("Sending sms");
+    //     error? sendmail = sms_service:sendsms();
+    //     return sendmail;
+    // }
 
     // resource function get opportunities() returns db:opportunity[]|error?{
     //     return opportunities:getOpportunities();

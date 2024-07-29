@@ -1,0 +1,62 @@
+POST http://localhost:9090/carts
+Content-Type: application/json
+
+{
+  "Recipients": [
+    {
+      "Email": "mail@example.com",
+      "Fields": {
+        "city": "New York",
+        "age": "34"
+      }
+    }
+  ],
+  "Content": {
+    "Body": [
+      {
+        "ContentType": "HTML",
+        "Content": "string",
+        "Charset": "string"
+      }
+    ],
+    "Merge": {
+      "city": "New York",
+      "age": "34"
+    },
+    "Attachments": [
+      {
+        "BinaryContent": "string",
+        "Name": "string",
+        "ContentType": "string",
+        "Size": "100"
+      }
+    ],
+    "Headers": {
+      "city": "New York",
+      "age": "34"
+    },
+    "Postback": "string",
+    "EnvelopeFrom": "John Doe <email@domain.com>",
+    "From": "John Doe <email@domain.com>",
+    "ReplyTo": "John Doe <email@domain.com>",
+    "Subject": "Hello!",
+    "TemplateName": "Template01",
+    "AttachFiles": [
+      "preuploaded.jpg"
+    ],
+    "Utm": {
+      "Source": "string",
+      "Medium": "string",
+      "Campaign": "string",
+      "Content": "string"
+    }
+  },
+  "Options": {
+    "TimeOffset": null,
+    "PoolName": "My Custom Pool",
+    "ChannelName": "Channel01",
+    "Encoding": "UserProvided",
+    "TrackOpens": "true",
+    "TrackClicks": "true"
+  }
+}
