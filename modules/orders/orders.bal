@@ -1,21 +1,13 @@
+import backend.connection;
 import backend.db;
 import backend.errors;
 
 import ballerina/http;
-// import ballerina/persist;
+import ballerina/persist;
 import ballerina/time;
+import backend.cart;
 
-public type Order record {|
-    readonly int id;
-|};
-
-public type OrderResponse record {|
-    int count;
-    string next;
-    Order[] results;
-|};
-
-type OrderNotFound record {|
+public type OrderNotFound record {|
     *http:NotFound;
     errors:ErrorDetails body;
 |};
@@ -30,21 +22,59 @@ function createOrderNotFound(int id) returns OrderNotFound {
     };
 }
 
-public final db:Client dbClient = check new ();
+public function getOrders() returns db:OrderWithRelations[]|error {
+    db:Client connection = connection:getConnection();
+    
+    stream<db:OrderWithRelations, persist:Error?> orders = connection->/orders.get();
+    db:OrderWithRelations[] orderList = check from db:OrderWithRelations order1 in orders
+        select order1;
 
-// public function getOrders() returns OrderResponse|persist:Error? {
-//     stream<Order, persist:Error?> Orders = dbClient->/orders.get();
-//     Order[] OrderList = check from Order Order in Orders
-//         select Order;
+    return orderList;
+}
 
-//     return {count: OrderList.length(), next: "null", results: OrderList};
-// }
+public function getOrdersById(int id) returns db:OrderWithRelations|OrderNotFound|error? {
+    db:Client connection = connection:getConnection();
+    db:OrderWithRelations|persist:Error? order2 = connection->/orders/[id](db:OrderWithRelations);
+    if order2 is persist:Error {
+        return createOrderNotFound(id);
+    }
+    return order2;
+}
 
-// public function getOrdersById(int id) returns Order|OrderNotFound|error? {
-//     Order|persist:Error? Order = dbClient->/orders/[id](Order);
-//     if Order is persist:Error {
-//         return createOrderNotFound(id);
-//     }
-//     return Order;
-// }
+public function cartToOrder(int consumerID) returns db:OrderWithRelations|persist:Error|error {
+    db:Client connection = connection:getConnection();
+    stream< cart:CartItem, persist:Error?> cartItemsStream = connection->/cartitems(whereClause = `"CartItem"."cmonsumerId"=${consumerID}`);
+    cart:CartItem[] cartItems = check from cart:CartItem cartItem in cartItemsStream
+        select cartItem;
 
+    db:OrderInsert orderInsert = {
+        consumerId: consumerID
+    };
+    int[]|persist:Error result = connection->/orders.post([orderInsert]);
+
+    if result is persist:Error {
+        return result;
+    }
+
+    int orderId = result[0];
+
+    db:OrderItemsInsert[] orderItemInserts = from cart:CartItem cartItem in cartItems
+        select {
+            supermarketItemId: cartItem.supermarketItem.id,
+            productId: cartItem.supermarketItem.productId,
+            quantity: cartItem.quantity,
+            price: cartItem.supermarketItem.price,
+            _orderId: orderId
+        };
+
+    int[]|persist:Error orderItemResult = connection->/orderitems.post(orderItemInserts);
+
+    if orderItemResult is persist:Error {
+        return orderItemResult;
+    }
+
+    // Remove all the cart items for the consumer from the database
+    _ = check connection->executeNativeSQL(`DELETE FROM "CartItem" WHERE "consumerId" = ${consumerID}`);
+
+    return {id: orderId};
+}
