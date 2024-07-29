@@ -10,7 +10,6 @@ import ballerina/http;
 import ballerina/io;
 import ballerina/persist;
 import ballerina/time;
-import backend.cart;
 import backend.opportunities;
 
 @http:ServiceConfig {
@@ -52,7 +51,7 @@ service / on new http:Listener(9090) {
     resource function post consumer(NewUser newUser) returns db:User|persist:Error|http:Conflict & readonly {
         db:UserInsert userInsert = {
             ...newUser,
-            role: "consumer",
+            userRole: "consumer",
             status: "Active",
             createdAt: time:utcToCivil(time:utcNow()),
             updatedAt: time:utcToCivil(time:utcNow()),
