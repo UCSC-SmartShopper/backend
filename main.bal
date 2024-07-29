@@ -14,6 +14,7 @@ import ballerina/http;
 import ballerina/persist;
 import ballerina/time;
 import backend.user_registration;
+import ballerina/io;
 
 
 // import backend.user;
@@ -149,9 +150,20 @@ service / on new http:Listener(9090) {
 
     resource function get otpgenaration() returns error? {
         io:println("OTP Generation");
-        error? otpgenaration = user_registration:otpgenaration();
+        error? otpgenaration = user_registration:otpgenaration("+94714879783" ,"milinda");
+        
         return otpgenaration;   
     }
+
+    // resource function get verifyOtp() returns user_registration:NonVerifyUser|user_registration:NonVerifyUserNotFound|error? {
+    //     io:println("OTP Verification");
+    //     user_registration:NonVerifyUser|user_registration:NonVerifyUserNotFound|error? verifyOtp = user_registration:verifyOtp("6205" , "+94714879783");
+    //     return verifyOtp;
+        
+    // }
+
+
+
 
     // ---------------------------------------------- Opportunities Resource Functions ----------------------------------------------
     resource function get opportunities() returns opportunities:OpportunityResponse|error? {
