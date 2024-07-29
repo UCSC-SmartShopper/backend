@@ -48,7 +48,10 @@ public function cartToOrder(int consumerID) returns db:OrderWithRelations|persis
         select cartItem;
 
     db:OrderInsert orderInsert = {
-        consumerId: consumerID
+        consumerId: consumerID,
+        shippingAddress: "",
+        shippingMethod: "Standard",
+        status: "Pending"
     };
     int[]|persist:Error result = connection->/orders.post([orderInsert]);
 
