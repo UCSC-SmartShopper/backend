@@ -1,11 +1,18 @@
+import backend.cart;
 import backend.connection;
 import backend.db;
 import backend.errors;
 
 import ballerina/http;
+import ballerina/io;
 import ballerina/persist;
 import ballerina/time;
-import backend.cart;
+
+public type CartToOrder record {
+    int consumerId;
+    string shippingAddress;
+    string shippingMethod;
+};
 
 public type OrderNotFound record {|
     *http:NotFound;
@@ -24,7 +31,7 @@ function createOrderNotFound(int id) returns OrderNotFound {
 
 public function getOrders() returns db:OrderWithRelations[]|error {
     db:Client connection = connection:getConnection();
-    
+
     stream<db:OrderWithRelations, persist:Error?> orders = connection->/orders.get();
     db:OrderWithRelations[] orderList = check from db:OrderWithRelations order1 in orders
         select order1;
@@ -41,14 +48,19 @@ public function getOrdersById(int id) returns db:OrderWithRelations|OrderNotFoun
     return order2;
 }
 
-public function cartToOrder(int consumerID, string shippingAddress, string shippingMethod) returns db:OrderWithRelations|persist:Error|error {
+public function cartToOrder(CartToOrder cartToOrder) returns db:OrderWithRelations|persist:Error|error {
+    int consumerId = cartToOrder.consumerId;
+    string shippingAddress = cartToOrder.shippingAddress;
+    string shippingMethod = cartToOrder.shippingMethod;
+
     db:Client connection = connection:getConnection();
-    stream< cart:CartItem, persist:Error?> cartItemsStream = connection->/cartitems(whereClause = `"CartItem"."cmonsumerId"=${consumerID}`);
+    stream<cart:CartItem, persist:Error?> cartItemsStream = connection->/cartitems();
     cart:CartItem[] cartItems = check from cart:CartItem cartItem in cartItemsStream
+        where cartItem.consumerId == consumerId
         select cartItem;
 
     db:OrderInsert orderInsert = {
-        consumerId: consumerID,
+        consumerId: consumerId,
         status: "ToPay",
         shippingAddress: shippingAddress,
         shippingMethod: shippingMethod,
@@ -71,14 +83,19 @@ public function cartToOrder(int consumerID, string shippingAddress, string shipp
             _orderId: orderId
         };
 
+    io:println(1);
     int[]|persist:Error orderItemResult = connection->/orderitems.post(orderItemInserts);
 
+    io:println(orderItemInserts);
     if orderItemResult is persist:Error {
         return orderItemResult;
     }
+    io:println(2);
 
     // Remove all the cart items for the consumer from the database
-    _ = check connection->executeNativeSQL(`DELETE FROM "CartItem" WHERE "consumerId" = ${consumerID}`);
+    _ = check connection->executeNativeSQL(`DELETE FROM "CartItem" WHERE "consumerId" = ${consumerId}`);
+    // _ = check connection->executeNativeSQL(`DELETE FROM "CartItem" WHERE "consumerId" = ${id} `);
+    io:println(3);
 
     return {id: orderId};
 }

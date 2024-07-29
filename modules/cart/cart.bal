@@ -7,6 +7,7 @@ public type CartItem record {|
     int id?;
     db:SupermarketItem supermarketItem;
     int quantity;
+    int consumerId?;
 |};
 
 public type CartItemResponse record {|
@@ -29,19 +30,18 @@ public function getCartItems(int userId) returns CartItemResponse|error {
     return {count: CartItems.length(), next: "null", results: CartItems};
 }
 
-public function saveCartItems(CartItem[] cartItems) returns CartItem[]|persist:Error {
+public function saveCartItems(int consumerId, CartItem[] cartItems) returns CartItem[]|persist:Error {
     db:Client connection = connection:getConnection();
-    int id = 6;
 
     // remove all the cart items from the database
-    _ = check connection->executeNativeSQL(`DELETE FROM "CartItem" WHERE "consumerId" = ${id} `);
+    _ = check connection->executeNativeSQL(`DELETE FROM "CartItem" WHERE "consumerId" = ${consumerId} `);
 
     // then add the new cart items to the database
     db:CartItemInsert[] cartItemInserts = from CartItem cartItem in cartItems
         select {
             supermarketitemId: cartItem.supermarketItem.id,
             quantity: cartItem.quantity,
-            consumerId: id
+            consumerId: consumerId
         };
 
     int[]|persist:Error result = connection->/cartitems.post(cartItemInserts);
@@ -51,7 +51,7 @@ public function saveCartItems(CartItem[] cartItems) returns CartItem[]|persist:E
     }
 
     // get all the cart items from the database
-    stream<CartItem, persist:Error?> insertedCartItemSteam = connection->/cartitems(whereClause = `"CartItem"."consumerId"=${id}`);
+    stream<CartItem, persist:Error?> insertedCartItemSteam = connection->/cartitems(whereClause = `"CartItem"."consumerId"=${consumerId}`);
     CartItem[] insertedCartItems = check from CartItem CartItem in insertedCartItemSteam
         select CartItem;
 

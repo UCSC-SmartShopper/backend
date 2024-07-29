@@ -2,6 +2,8 @@ import backend.auth;
 import backend.cart;
 import backend.connection;
 import backend.db;
+import backend.opportunities;
+import backend.orders;
 import backend.products;
 import backend.store_prices;
 import backend.supermarkets;
@@ -9,8 +11,7 @@ import backend.supermarkets;
 import ballerina/http;
 import ballerina/persist;
 import ballerina/time;
-import backend.opportunities;
-import backend.orders;
+
 // import backend.user;
 
 @http:ServiceConfig {
@@ -116,8 +117,9 @@ service / on new http:Listener(9090) {
         return cart:getCartItems(userId);
     }
 
-    resource function post carts(cart:CartItem[] cartItems) returns cart:CartItem[]|error? {
-        return cart:saveCartItems(cartItems);
+    resource function post carts(http:Request req, cart:CartItem[] cartItems) returns cart:CartItem[]|error? {
+        auth:User user = check auth:getUser(req);
+        return cart:saveCartItems(user.consumerId ?: 0, cartItems);
     }
 
     // ---------------------------------------------- Supermarket Resource Functions ----------------------------------------------
@@ -135,55 +137,33 @@ service / on new http:Listener(9090) {
     //     return sendmail;
     // }
 
-    // resource function get opportunities() returns db:opportunity[]|error?{
-    //     return opportunities:getOpportunities();
-    // }
-
-    resource function get opportunities()returns opportunities:OpportunityResponse|error? {
+    // ---------------------------------------------- Opportunities Resource Functions ----------------------------------------------
+    resource function get opportunities() returns opportunities:OpportunityResponse|error? {
         return opportunities:getOpportunities();
     }
 
-
-     resource function get opportunities/[int id]()returns opportunities:OpportunityNotFound|db:OpportunityWithRelations {
+    resource function get opportunities/[int id]() returns opportunities:OpportunityNotFound|db:OpportunityWithRelations {
         return opportunities:getOpportunitiesById(id);
     }
+
     // ---------------------------------------------- Order Resource Functions ----------------------------------------------
 
-    resource function get orders() returns db:OrderWithRelations[]|error   {
+    resource function get orders() returns db:OrderWithRelations[]|error {
         return orders:getOrders();
     }
-    resource function get orders/[int id]() returns db:OrderWithRelations|orders:OrderNotFound|error?  {
+
+    resource function get orders/[int id]() returns db:OrderWithRelations|orders:OrderNotFound|error? {
         return orders:getOrdersById(id);
     }
-    resource function get cartToOrder(int id) returns db:OrderWithRelations|persist:Error|error   {
-        return orders:cartToOrder(id, "shippingAddress", "shippingMethod");
-    } 
+
+    resource function post cartToOrder(@http:Payload orders:CartToOrder cartToOrder) returns db:OrderWithRelations|persist:Error|error {
+        return orders:cartToOrder(cartToOrder);
+    }
 
     // ---------------------------------------------- NonVerifyUser Resource Functions ----------------------------------------------
 
     // resource function get nonVerifyUser() returns  {
     //     return user:registerNonVerifyUser("contactNo" ,"username");
-    // }
-
-    // resource function post file(http:Caller caller, http:Request req) returns error {
-    //     string content;
-    //     string fileName;
-
-    //     mime:Entity[] bodyParts = check req.getBodyParts();
-
-    //     foreach mime:Entity part in bodyParts {
-    //         mime:ContentDisposition contentDisposition = part.getContentDisposition();
-    //         if (contentDisposition.name == "file") {
-    //             string filePath = "/" + fileName;
-    //             io:file fileHandler = check new io:file(filePath);
-    //             content = handleContent(part);
-    //             fileName = contentDisposition.fileName;
-    //         }
-    //         else {
-    //             submission[contentDisposition.name] = check part.getBodyAsString();
-    //         }
-    //     }
-
     // }
 
 }

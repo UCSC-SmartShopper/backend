@@ -18,6 +18,8 @@ public type User record {|
     string number;
     string profilePic;
     string role;
+
+    int consumerId?;
 |};
 
 public type UserwithToken record {|
@@ -69,9 +71,23 @@ public function login(Credentials credentials) returns UserwithToken|error {
         return error("User not found");
     }
     if (userArray[0].password == credentials.password) {
-        // remove password from the user object
+        int consumerId = -1;
+
+        if (userArray[0].role == "consumer") {
+            stream<db:Consumer, persist:Error?> consumerStream = connection->/consumers();
+            db:Consumer[] consumerArray = check from db:Consumer u in consumerStream
+                where u.userId == userArray[0].id
+                select u;
+
+            if (consumerArray.length() > 0) {
+                consumerId = consumerArray[0].id;
+            }
+        }
+
         user = {id: userArray[0].id, name: userArray[0].name, email: userArray[0].email, number: userArray[0].number, profilePic: userArray[0].profilePic,
-            role: userArray[0].role};
+            role: userArray[0].role, consumerId: consumerId};
+
+        // remove password from the user object
         string jwtToken = check jwt:issue(getConfig(user));
         return {user: user, jwtToken: jwtToken};
     }
