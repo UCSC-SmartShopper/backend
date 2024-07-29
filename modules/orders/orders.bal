@@ -41,14 +41,18 @@ public function getOrdersById(int id) returns db:OrderWithRelations|OrderNotFoun
     return order2;
 }
 
-public function cartToOrder(int consumerID) returns db:OrderWithRelations|persist:Error|error {
+public function cartToOrder(int consumerID, string shippingAddress, string shippingMethod) returns db:OrderWithRelations|persist:Error|error {
     db:Client connection = connection:getConnection();
     stream< cart:CartItem, persist:Error?> cartItemsStream = connection->/cartitems(whereClause = `"CartItem"."cmonsumerId"=${consumerID}`);
     cart:CartItem[] cartItems = check from cart:CartItem cartItem in cartItemsStream
         select cartItem;
 
     db:OrderInsert orderInsert = {
-        consumerId: consumerID
+        consumerId: consumerID,
+        status: "ToPay",
+        shippingAddress: shippingAddress,
+        shippingMethod: shippingMethod,
+        location: "6.8657635,79.8571086"
     };
     int[]|persist:Error result = connection->/orders.post([orderInsert]);
 

@@ -11,6 +11,7 @@ import ballerina/io;
 import ballerina/persist;
 import ballerina/time;
 import backend.orders;
+// import backend.user;
 
 @http:ServiceConfig {
     cors: {
@@ -143,7 +144,13 @@ service / on new http:Listener(9090) {
         return orders:getOrdersById(id);
     }
     resource function get cartToOrder(int id) returns db:OrderWithRelations|persist:Error|error   {
-        return orders:cartToOrder(id);
+        return orders:cartToOrder(id, "shippingAddress", "shippingMethod");
     } 
+
+    // ---------------------------------------------- NonVerifyUser Resource Functions ----------------------------------------------
+
+    // resource function get nonVerifyUser() returns  {
+    //     return user:registerNonVerifyUser("contactNo" ,"username");
+    // }
 
 }
