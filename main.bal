@@ -2,20 +2,19 @@ import backend.auth;
 import backend.cart;
 import backend.connection;
 import backend.db;
+import backend.email_service;
 import backend.opportunities;
 import backend.orders;
 import backend.products;
+import backend.sms_service;
 import backend.store_prices;
 import backend.supermarkets;
-import backend.sms_service;
-import backend.email_service;
 import backend.user_registration;
 
 import ballerina/http;
+import ballerina/io;
 import ballerina/persist;
 import ballerina/time;
-import ballerina/io;
-
 
 // import backend.user;
 
@@ -33,6 +32,30 @@ service / on new http:Listener(9090) {
     resource function post login(@http:Payload auth:Credentials credentials) returns auth:UserwithToken|error {
         return auth:login(credentials);
     }
+
+    resource function post generate_otp(@http:Payload user_registration:RegisterForm registerForm) returns string|error {
+        return user_registration:otp_genaration(registerForm);
+    }
+
+    resource function post match_otp(@http:Payload user_registration:OtpMappingRequest otpMappingRequest) returns string|error|user_registration:NonVerifyUserNotFound {
+        return user_registration:checkOtpMatching(otpMappingRequest);
+    }
+
+    // resource function post set_password(@http:Payload user_registration:SetPassword setPassword) returns string|error {
+    //     user_registration:OtpMappingRequest otpMappingRequest = {
+    //         contactNumber: setPassword.contactNumber,
+    //         OTP: setPassword.OTP
+    //     };
+
+    //     string|user_registration:NonVerifyUserNotFound checkOtpMatching = check user_registration:checkOtpMatching(otpMappingRequest);
+
+    //     if checkOtpMatching is string && checkOtpMatching == "OTP matched" {
+    //         string result = check user_registration:setPassword(setPassword);
+    //         return result;
+    //     }
+
+    //     return "OTP not matched";
+    // }
 
     resource function get users() returns db:User[]|error? {
         stream<db:User, persist:Error?> users = self.connection->/users.get();
@@ -154,21 +177,11 @@ service / on new http:Listener(9090) {
         return sendmail;
     }
 
-    resource function get otpgenaration() returns error? {
-        io:println("OTP Generation");
-        error? otpgenaration = user_registration:otpgenaration("+94703222635" ,"ashen");
-        
-        return otpgenaration;   
-    }
-
     resource function post checkOtpMatching(@http:Payload user_registration:OtpMappingRequest otpMappingRequest) returns string|error|user_registration:NonVerifyUserNotFound {
         io:println("OTP Matching");
-      return user_registration:checkOtpMatching(otpMappingRequest);
-   
+        return user_registration:checkOtpMatching(otpMappingRequest);
+
     }
-
-
-
 
     // ---------------------------------------------- Opportunities Resource Functions ----------------------------------------------
     resource function get opportunities() returns opportunities:OpportunityResponse|error? {
