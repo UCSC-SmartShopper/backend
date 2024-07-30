@@ -101,7 +101,7 @@ function getConfig(User user) returns jwt:IssuerConfig {
         username: "ballerina",
         audience: ["ballerina", "ballerina.org", "ballerina.io"],
         customClaims: {user: user},
-        expTime: 3600,
+        expTime: 360000,
         signatureConfig: {
             config: {
                 keyFile: "rsa.key"

@@ -20,41 +20,66 @@ public type CartItemResponse record {|
 // Then it synced with the database
 // It attach the Product to the CartItem
 
-public function getCartItems(int userId) returns CartItemResponse|error {
+public function getCartItems(int consumerId) returns CartItemResponse|error {
+    if (consumerId == -1) {
+        return {count: 0, next: "null", results: []};
+    }
+
     db:Client connection = connection:getConnection();
 
-    stream<CartItem, persist:Error?> CartItemsStream = connection->/cartitems(whereClause = `"CartItem"."consumerId"=${userId}`);
+    stream<CartItem, persist:Error?> CartItemsStream = connection->/cartitems(whereClause = `"CartItem"."consumerId"=${consumerId}`);
     CartItem[] CartItems = check from CartItem CartItem in CartItemsStream
         select CartItem;
 
     return {count: CartItems.length(), next: "null", results: CartItems};
 }
 
-public function saveCartItems(int consumerId, CartItem[] cartItems) returns CartItem[]|persist:Error {
+public function addCartItem(int consumerId, CartItem cartItem) returns db:CartItem|int|error {
+    if (consumerId == 0) {
+        return error("Consumer not found");
+    }
+
     db:Client connection = connection:getConnection();
+    int cartItemId = cartItem.id ?: -1;
 
-    // remove all the cart items from the database
-    _ = check connection->executeNativeSQL(`DELETE FROM "CartItem" WHERE "consumerId" = ${consumerId} `);
-
-    // then add the new cart items to the database
-    db:CartItemInsert[] cartItemInserts = from CartItem cartItem in cartItems
-        select {
+    // Create a new cart item if the cart item is not in the database
+    if (cartItemId == -1) {
+        db:CartItemInsert cartItemInsert = {
             supermarketitemId: cartItem.supermarketItem.id,
             quantity: cartItem.quantity,
             consumerId: consumerId
         };
+        int[]|persist:Error result = connection->/cartitems.post([cartItemInsert]);
 
-    int[]|persist:Error result = connection->/cartitems.post(cartItemInserts);
-
-    if result is persist:Error {
-        return result;
+        if (result is persist:Error) {
+            return error("Error while adding the cart item");
+        }
+        return result[0];
     }
 
-    // get all the cart items from the database
-    stream<CartItem, persist:Error?> insertedCartItemSteam = connection->/cartitems(whereClause = `"CartItem"."consumerId"=${consumerId}`);
-    CartItem[] insertedCartItems = check from CartItem CartItem in insertedCartItemSteam
-        select CartItem;
+    // Update the cart item if the cart item is already in the database
+    db:CartItemUpdate cartItemUpdate = {
+            supermarketitemId: cartItem.supermarketItem.id,
+            quantity: cartItem.quantity,
+            consumerId: consumerId
+        };
+    db:CartItem|persist:Error result = connection->/cartitems/[cartItemId].put(cartItemUpdate);
+    if result is persist:Error {
+        return error("Error while updating the cart item");
+    }
+    return result;
+}
 
-    return insertedCartItems;
+public function removeCartItem(int consumerId, int id) returns db:CartItem|error {
+    if (consumerId == 0) {
+        return error("Consumer not found");
+    }
+
+    db:Client connection = connection:getConnection();
+    db:CartItem|persist:Error result = connection->/cartitems/[id].delete;
+    if result is persist:Error {
+        return error("Error while deleting the cart item");
+    }
+    return result;
 
 }

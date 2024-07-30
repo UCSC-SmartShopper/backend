@@ -45,6 +45,7 @@ public function getSupermarketItemByProductId(int productId) returns Supermarket
     io:println("productId: ", productId);
     stream<db:SupermarketItem, persist:Error?> prices = connection->/supermarketitems(whereClause = `"SupermarketItem"."productId"= ${productId}`);
     db:SupermarketItem[] supermarketItem = check from db:SupermarketItem price in prices
+        order by price.price
         select price;
 
     io:println("supermarketItem: ", supermarketItem);

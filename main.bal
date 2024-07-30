@@ -118,13 +118,19 @@ service / on new http:Listener(9090) {
     }
 
     // ---------------------------------------------- Cart Resource Functions ----------------------------------------------
-    resource function get carts(int userId) returns cart:CartItemResponse|error {
-        return cart:getCartItems(userId);
+    resource function get carts(http:Request req) returns cart:CartItemResponse|error {
+        auth:User user = check auth:getUser(req);
+        return cart:getCartItems(user.consumerId ?: -1);
     }
 
-    resource function post carts(http:Request req, cart:CartItem[] cartItems) returns cart:CartItem[]|error? {
+    resource function post carts(http:Request req, cart:CartItem cartItem) returns db:CartItem|int|error {
         auth:User user = check auth:getUser(req);
-        return cart:saveCartItems(user.consumerId ?: 0, cartItems);
+        return cart:addCartItem(user.consumerId ?: -1, cartItem);
+    }
+
+    resource function delete carts(http:Request req, int id) returns db:CartItem|error {
+        auth:User user = check auth:getUser(req);
+        return cart:removeCartItem(user.consumerId ?: -1, id);
     }
 
     // ---------------------------------------------- Supermarket Resource Functions ----------------------------------------------
