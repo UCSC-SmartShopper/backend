@@ -9,11 +9,11 @@ import backend.store_prices;
 import backend.supermarkets;
 import backend.sms_service;
 import backend.email_service;
+import backend.user_registration;
 
 import ballerina/http;
 import ballerina/persist;
 import ballerina/time;
-import backend.user_registration;
 import ballerina/io;
 
 
@@ -150,17 +150,16 @@ service / on new http:Listener(9090) {
 
     resource function get otpgenaration() returns error? {
         io:println("OTP Generation");
-        error? otpgenaration = user_registration:otpgenaration("+94714879783" ,"milinda");
+        error? otpgenaration = user_registration:otpgenaration("+94703222635" ,"ashen");
         
         return otpgenaration;   
     }
 
-    // resource function get verifyOtp() returns user_registration:NonVerifyUser|user_registration:NonVerifyUserNotFound|error? {
-    //     io:println("OTP Verification");
-    //     user_registration:NonVerifyUser|user_registration:NonVerifyUserNotFound|error? verifyOtp = user_registration:verifyOtp("6205" , "+94714879783");
-    //     return verifyOtp;
-        
-    // }
+    resource function post checkOtpMatching(@http:Payload user_registration:OtpMappingRequest otpMappingRequest) returns string|error|user_registration:NonVerifyUserNotFound {
+        io:println("OTP Matching");
+      return user_registration:checkOtpMatching(otpMappingRequest);
+   
+    }
 
 
 

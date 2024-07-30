@@ -18,6 +18,11 @@ public type NonVerifyUser record {|
     string OTP;
 |};
 
+public type OtpMappingRequest record {|
+    string contactNo;
+    string OTP;
+|};
+
 public type NonVerifyUserNotFound record {|
     *http:NotFound;
     errors:ErrorDetails body;
@@ -96,12 +101,38 @@ public function otpgenaration(string phone , string name) returns error? {
 
 }
 
-// public function verifyOtp(string otp , string phone) returns NonVerifyUser|NonVerifyUserNotFound|error? {
-//     stream<NonVerifyUser, persist:Error?> nonVerifyUserStream = connection->/nonverifyusers(whereClause = `"NonVerifyUser"."contactNo"='${phone}' AND "NonVerifyUser"."OTP"='${otp}'`);
-//     NonVerifyUser[] nonVerifyUser = check from NonVerifyUser n in nonVerifyUserStream
-//         select n;
-//     if (nonVerifyUser.length() == 0) {
-//         return createNonVerifyUserNotFound(otp);
-//     }
-//     return nonVerifyUser[0];
-// }
+public function getUserByNumber(string phone) returns NonVerifyUser|NonVerifyUserNotFound|error? {
+    stream<NonVerifyUser, persist:Error?> nonVerifyUserStream = connection->/nonverifyusers();
+    NonVerifyUser[] nonVerifyUser = check from NonVerifyUser n in nonVerifyUserStream
+        where n.contactNo == phone
+        select n;
+    if (nonVerifyUser.length() == 0) {
+        return createNonVerifyUserNotFound(phone);
+    }
+    return nonVerifyUser[0];
+}
+
+public function checkOtpMatching( OtpMappingRequest otpMappingRequest ) returns string|error|NonVerifyUserNotFound {
+    string phone = otpMappingRequest.contactNo;
+    string otp = otpMappingRequest.OTP;
+
+    stream<NonVerifyUser, persist:Error?> nonVerifyUserStream = connection->/nonverifyusers();
+    NonVerifyUser[] nonVerifyUser = check from NonVerifyUser n in nonVerifyUserStream
+        where n.contactNo == phone
+        select n;
+
+        io:println(nonVerifyUser);
+        
+    if (nonVerifyUser.length() == 0) {
+        return createNonVerifyUserNotFound(phone);
+    }
+    NonVerifyUser user = nonVerifyUser[0];
+    if (user.OTP == otp) {
+        io:println("OTP Matched");
+        return "OTP Matched";
+    }
+        return "OTP Not Matched";
+    
+}
+
+
