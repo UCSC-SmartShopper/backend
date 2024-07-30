@@ -83,7 +83,7 @@ twilio:Client twilioClient = check new (twilioConfig);
 
 public function sendOtp(string otp, string phone, string name) returns error? {
     twilio:CreateMessageRequest messageRequest = {
-        To: phone,
+        To: "+94"+phone.substring(1),
         From: "+16513173849",
         Body: "Hi " + name + ", Your OTP Code is : " + otp
     };
