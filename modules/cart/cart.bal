@@ -69,3 +69,17 @@ public function addCartItem(int consumerId, CartItem cartItem) returns db:CartIt
     }
     return result;
 }
+
+public function removeCartItem(int consumerId, int id) returns db:CartItem|error {
+    if (consumerId == 0) {
+        return error("Consumer not found");
+    }
+
+    db:Client connection = connection:getConnection();
+    db:CartItem|persist:Error result = connection->/cartitems/[id].delete;
+    if result is persist:Error {
+        return error("Error while deleting the cart item");
+    }
+    return result;
+
+}

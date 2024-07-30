@@ -123,6 +123,11 @@ service / on new http:Listener(9090) {
         return cart:addCartItem(user.consumerId ?: -1, cartItem);
     }
 
+    resource function delete carts(http:Request req, int id) returns db:CartItem|error {
+        auth:User user = check auth:getUser(req);
+        return cart:removeCartItem(user.consumerId ?: -1, id);
+    }
+
     // ---------------------------------------------- Supermarket Resource Functions ----------------------------------------------
     resource function get supermarkets() returns db:Supermarket[]|error? {
         return supermarkets:getSupermarkets();
