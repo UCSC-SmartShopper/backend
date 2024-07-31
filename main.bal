@@ -60,6 +60,7 @@ service / on new http:Listener(9090) {
     resource function get users() returns db:User[]|error? {
         stream<db:User, persist:Error?> users = self.connection->/users.get();
         return from db:User user in users
+            order by user.id
             select user;
     }
 

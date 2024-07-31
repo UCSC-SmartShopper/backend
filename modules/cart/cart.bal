@@ -30,6 +30,7 @@ public function getCartItems(int consumerId) returns CartItemResponse|error {
 
     stream<CartItem, persist:Error?> CartItemsStream = connection->/cartitems(whereClause = `"CartItem"."consumerId"=${consumerId}`);
     CartItem[] CartItems = check from CartItem CartItem in CartItemsStream
+        order by CartItem.id descending
         select CartItem;
 
     return {count: CartItems.length(), next: "null", results: CartItems};

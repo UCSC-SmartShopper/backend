@@ -77,6 +77,7 @@ public function login(Credentials credentials) returns UserwithToken|error {
             stream<db:Consumer, persist:Error?> consumerStream = connection->/consumers();
             db:Consumer[] consumerArray = check from db:Consumer u in consumerStream
                 where u.userId == userArray[0].id
+                order by u.id descending
                 select u;
 
 
