@@ -6,7 +6,7 @@ import ballerina/jwt;
 import ballerina/persist;
 
 public type Credentials record {|
-    string email;
+    string email_or_number;
     string password?;
 |};
 
@@ -60,12 +60,12 @@ public function getUser(http:Request req) returns User|error {
 
 public function login(Credentials credentials) returns UserwithToken|error {
 
-    User user;
-
     stream<db:User, persist:Error?> userStream = connection->/users();
     db:User[] userArray = check from db:User u in userStream
-        where u.email == credentials.email
+        where u.email == credentials.email_or_number || u.number == credentials.email_or_number
+        order by u.id descending
         select u;
+
 
     if (userArray.length() == 0) {
         return error("User not found");
@@ -79,12 +79,13 @@ public function login(Credentials credentials) returns UserwithToken|error {
                 where u.userId == userArray[0].id
                 select u;
 
+
             if (consumerArray.length() > 0) {
                 consumerId = consumerArray[0].id;
             }
         }
 
-        user = {id: userArray[0].id, name: userArray[0].name, email: userArray[0].email, number: userArray[0].number, profilePic: userArray[0].profilePic,
+        User user = {id: userArray[0].id, name: userArray[0].name, email: userArray[0].email, number: userArray[0].number, profilePic: userArray[0].profilePic,
             role: userArray[0].role, consumerId: consumerId};
 
         // remove password from the user object
@@ -101,7 +102,7 @@ function getConfig(User user) returns jwt:IssuerConfig {
         username: "ballerina",
         audience: ["ballerina", "ballerina.org", "ballerina.io"],
         customClaims: {user: user},
-        expTime: 3600,
+        expTime: 360000,
         signatureConfig: {
             config: {
                 keyFile: "rsa.key"

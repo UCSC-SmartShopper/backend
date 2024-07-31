@@ -23,10 +23,13 @@ type User record {|
 type NonVerifyUser record {|
     @sql:Generated
     readonly int id;
-    string contactNo;
     string name;
+    string email;
+    string contactNo;
     string OTP;
+    string password;
 |};
+
 type Address record {|
     @sql:Generated
     readonly int id;
@@ -98,6 +101,7 @@ type Order record {|
     string shippingAddress;
     string shippingMethod;
     string location;
+    string supermarketIdList;
     OrderItems[] orderItems;
 |};
 

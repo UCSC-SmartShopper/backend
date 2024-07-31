@@ -476,7 +476,7 @@ VALUES (
         5
     ),
     (
-        'Glow Mark',
+        'Glomark',
         '555-555-5555',
         'https://glomark.lk/build/images/logo.9155b058.png',
         '789 Oak St, Midtown',
