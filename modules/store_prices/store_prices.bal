@@ -3,7 +3,6 @@ import backend.db;
 import backend.errors;
 
 import ballerina/http;
-import ballerina/io;
 import ballerina/persist;
 
 // public type Supermarket record {|
@@ -42,12 +41,11 @@ function createSupermarketItemNotFound(int id) returns SupermarketItemNotFound {
 db:Client connection = connection:getConnection();
 
 public function getSupermarketItemByProductId(int productId) returns SupermarketItemResponse|SupermarketItemNotFound|error {
-    io:println("productId: ", productId);
     stream<db:SupermarketItem, persist:Error?> prices = connection->/supermarketitems(whereClause = `"SupermarketItem"."productId"= ${productId}`);
     db:SupermarketItem[] supermarketItem = check from db:SupermarketItem price in prices
+        order by price.price
         select price;
 
-    io:println("supermarketItem: ", supermarketItem);
 
     return {count: supermarketItem.length(), next: "null", results: supermarketItem};
 }

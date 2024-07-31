@@ -2,6 +2,7 @@ import backend.connection;
 import backend.db;
 
 import ballerina/persist;
+import ballerina/io;
 
 public type CartItem record {|
     int id?;
@@ -35,6 +36,7 @@ public function getCartItems(int consumerId) returns CartItemResponse|error {
 }
 
 public function addCartItem(int consumerId, CartItem cartItem) returns db:CartItem|int|error {
+    io:println(cartItem);
     if (consumerId == 0) {
         return error("Consumer not found");
     }
@@ -68,4 +70,18 @@ public function addCartItem(int consumerId, CartItem cartItem) returns db:CartIt
         return error("Error while updating the cart item");
     }
     return result;
+}
+
+public function removeCartItem(int consumerId, int id) returns db:CartItem|error {
+    if (consumerId == 0) {
+        return error("Consumer not found");
+    }
+
+    db:Client connection = connection:getConnection();
+    db:CartItem|persist:Error result = connection->/cartitems/[id].delete;
+    if result is persist:Error {
+        return error("Error while deleting the cart item");
+    }
+    return result;
+
 }

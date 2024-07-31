@@ -2,13 +2,17 @@ import backend.auth;
 import backend.cart;
 import backend.connection;
 import backend.db;
+import backend.email_service;
 import backend.opportunities;
 import backend.orders;
 import backend.products;
+import backend.sms_service;
 import backend.store_prices;
 import backend.supermarkets;
+import backend.user_registration;
 
 import ballerina/http;
+import ballerina/io;
 import ballerina/persist;
 import ballerina/time;
 
@@ -28,6 +32,30 @@ service / on new http:Listener(9090) {
     resource function post login(@http:Payload auth:Credentials credentials) returns auth:UserwithToken|error {
         return auth:login(credentials);
     }
+
+    resource function post generate_otp(@http:Payload user_registration:RegisterForm registerForm) returns string|error {
+        return user_registration:otp_genaration(registerForm);
+    }
+
+    resource function post match_otp(@http:Payload user_registration:OtpMappingRequest otpMappingRequest) returns string|error|user_registration:NonVerifyUserNotFound {
+        return user_registration:checkOtpMatching(otpMappingRequest);
+    }
+
+    // resource function post set_password(@http:Payload user_registration:SetPassword setPassword) returns string|error {
+    //     user_registration:OtpMappingRequest otpMappingRequest = {
+    //         contactNumber: setPassword.contactNumber,
+    //         OTP: setPassword.OTP
+    //     };
+
+    //     string|user_registration:NonVerifyUserNotFound checkOtpMatching = check user_registration:checkOtpMatching(otpMappingRequest);
+
+    //     if checkOtpMatching is string && checkOtpMatching == "OTP matched" {
+    //         string result = check user_registration:setPassword(setPassword);
+    //         return result;
+    //     }
+
+    //     return "OTP not matched";
+    // }
 
     resource function get users() returns db:User[]|error? {
         stream<db:User, persist:Error?> users = self.connection->/users.get();
@@ -123,6 +151,11 @@ service / on new http:Listener(9090) {
         return cart:addCartItem(user.consumerId ?: -1, cartItem);
     }
 
+    resource function delete carts(http:Request req, int id) returns db:CartItem|error {
+        auth:User user = check auth:getUser(req);
+        return cart:removeCartItem(user.consumerId ?: -1, id);
+    }
+
     // ---------------------------------------------- Supermarket Resource Functions ----------------------------------------------
     resource function get supermarkets() returns db:Supermarket[]|error? {
         return supermarkets:getSupermarkets();
@@ -132,11 +165,23 @@ service / on new http:Listener(9090) {
         return supermarkets:getSupermarketById(id);
     }
 
-    // resource function get sendsms() returns error? {
-    //     io:println("Sending sms");
-    //     error? sendmail = sms_service:sendsms();
-    //     return sendmail;
-    // }
+    resource function get sendsms() returns error? {
+        io:println("Sending sms");
+        error? sendmail = sms_service:sendsms();
+        return sendmail;
+    }
+
+    resource function get sendmail() returns error? {
+        io:println("Sending email");
+        error? sendmail = email_service:sendmail();
+        return sendmail;
+    }
+
+    resource function post checkOtpMatching(@http:Payload user_registration:OtpMappingRequest otpMappingRequest) returns string|error|user_registration:NonVerifyUserNotFound {
+        io:println("OTP Matching");
+        return user_registration:checkOtpMatching(otpMappingRequest);
+
+    }
 
     // ---------------------------------------------- Opportunities Resource Functions ----------------------------------------------
     resource function get opportunities() returns opportunities:OpportunityResponse|error? {
