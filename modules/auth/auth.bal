@@ -2,7 +2,6 @@ import backend.connection;
 import backend.db;
 
 import ballerina/http;
-import ballerina/io;
 import ballerina/jwt;
 import ballerina/persist;
 
@@ -60,8 +59,6 @@ public function getUser(http:Request req) returns User|error {
 }
 
 public function login(Credentials credentials) returns UserwithToken|error {
-    io:println(credentials.email_or_number);
-    io:println(credentials.password);
 
     stream<db:User, persist:Error?> userStream = connection->/users();
     db:User[] userArray = check from db:User u in userStream
@@ -69,7 +66,6 @@ public function login(Credentials credentials) returns UserwithToken|error {
         order by u.id descending
         select u;
 
-    io:println(userStream);
 
     if (userArray.length() == 0) {
         return error("User not found");
@@ -82,6 +78,7 @@ public function login(Credentials credentials) returns UserwithToken|error {
             db:Consumer[] consumerArray = check from db:Consumer u in consumerStream
                 where u.userId == userArray[0].id
                 select u;
+
 
             if (consumerArray.length() > 0) {
                 consumerId = consumerArray[0].id;

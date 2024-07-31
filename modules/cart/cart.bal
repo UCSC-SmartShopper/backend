@@ -2,6 +2,7 @@ import backend.connection;
 import backend.db;
 
 import ballerina/persist;
+import ballerina/io;
 
 public type CartItem record {|
     int id?;
@@ -35,6 +36,7 @@ public function getCartItems(int consumerId) returns CartItemResponse|error {
 }
 
 public function addCartItem(int consumerId, CartItem cartItem) returns db:CartItem|int|error {
+    io:println(cartItem);
     if (consumerId == 0) {
         return error("Consumer not found");
     }

@@ -93,40 +93,42 @@ public function sendOtp(string otp, string phone, string name) returns error? {
     io:println("Message Status: ", response.status);
 }
 
-public function setPassword(SetPassword setPassword) returns string|error {
-    stream<NonVerifyUser, persist:Error?> nonVerifyUserStream = connection->/nonverifyusers();
-    NonVerifyUser[] nonVerifyUser = check from NonVerifyUser n in nonVerifyUserStream
-        where n.contactNo == setPassword.contactNumber
-        order by n.id descending
-        select n;
+// public function setPassword(SetPassword setPassword) returns string|error {
+//     stream<NonVerifyUser, persist:Error?> nonVerifyUserStream = connection->/nonverifyusers();
+//     NonVerifyUser[] nonVerifyUser = check from NonVerifyUser n in nonVerifyUserStream
+//         where n.contactNo == setPassword.contactNumber
+//         order by n.id descending
+//         select n;
 
-    if (nonVerifyUser.length() == 0) {
-        return error("Non-Verify User not found");
-    }
+//     if (nonVerifyUser.length() == 0) {
+//         return error("Non-Verify User not found");
+//     }
 
-    NonVerifyUser user = nonVerifyUser[0];
+//     NonVerifyUser user = nonVerifyUser[0];
 
-    db:UserInsert userInsert = {
-        email: "",
-        number: setPassword.contactNumber,
-        name: user.name,
-        password: setPassword.password,
-        role: "consumer",
-        status: "Active",
-        profilePic: "",
-        createdAt: time:utcToCivil(time:utcNow()),
-        updatedAt: time:utcToCivil(time:utcNow()),
-        deletedAt: ()
-    };
+//     db:UserInsert userInsert = {
+//         email: "",
+//         number: setPassword.contactNumber,
+//         name: user.name,
+//         password: setPassword.password,
+//         role: "consumer",
+//         status: "Active",
+//         profilePic: "",
+//         createdAt: time:utcToCivil(time:utcNow()),
+//         updatedAt: time:utcToCivil(time:utcNow()),
+//         deletedAt: ()
+//     };
 
-    int[]|persist:Error result = connection->/users.post([userInsert]);
-    if (result is persist:Error) {
-        return error("Error while creating User");
-    }
+//     int[]|persist:Error result = connection->/users.post([userInsert]);
+//     if (result is persist:Error) {
+//         return error("Error while creating User");
+//     }
 
-    return "Success";
+    
 
-}
+//     return "Success";
+
+// }
 
 public function otp_genaration(RegisterForm registerForm) returns string|error {
     int|error otp = generateOtp();
@@ -200,6 +202,17 @@ public function checkOtpMatching(OtpMappingRequest otpMappingRequest) returns st
     int[]|persist:Error result = connection->/users.post([userInsert]);
     if (result is persist:Error) {
         return error("Error while creating User");
+    }
+
+    int userId = result[0];
+    // inster user to consumer tabele
+    db:ConsumerInsert consumerInsert = {
+        userId: userId
+    };
+
+    int[]|persist:Error consumerResult = connection->/consumers.post([consumerInsert]);
+    if (consumerResult is persist:Error) {
+        return error("Error while creating Consumer");
     }
 
     return "Success";
