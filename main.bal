@@ -203,6 +203,7 @@ service / on new http:Listener(9090) {
     }
 
     resource function post cartToOrder(@http:Payload orders:CartToOrder cartToOrder) returns db:OrderWithRelations|persist:Error|error {
+        io:println(cartToOrder);
         return orders:cartToOrder(cartToOrder);
     }
 
