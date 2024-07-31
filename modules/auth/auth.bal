@@ -43,24 +43,42 @@ public type UserwithToken record {|
 db:Client connection = connection:getConnection();
 
 public function getUser(http:Request req) returns User|error {
-    http:Cookie[] cookies = req.getCookies();
-
-    if (cookies.length() > 0) {
-        http:Cookie[] filteredCookies = cookies.filter(cookie => cookie.name == "token");
-
-        if (filteredCookies.length() == 0) {
-            return error("Token not found");
-        }
-
-        string jwtToken = filteredCookies[0].value;
-
+    // get barrier token from the request
+    string|error authHeader = req.getHeader("Authorization");
+    if (authHeader is error) {
+        return error("Authorization header not found");
+    }
+    
+    if (authHeader.length() > 7 && authHeader.substring(0, 7) == "Bearer ") {
+        string jwtToken = authHeader.substring(7);
         jwt:Payload jwtPayload = check jwt:validate(jwtToken, validatorConfig);
         json userJson = <json>jwtPayload["user"];
         User user = check userJson.cloneWithType(User);
         return user;
-    } else {
+    }else {
         return error("Token not found");
     }
+
+
+
+    // http:Cookie[] cookies = req.getCookies();
+
+    // if (cookies.length() > 0) {
+    //     http:Cookie[] filteredCookies = cookies.filter(cookie => cookie.name == "token");
+
+    //     if (filteredCookies.length() == 0) {
+    //         return error("Token not found");
+    //     }
+
+    //     string jwtToken = filteredCookies[0].value;
+
+    //     jwt:Payload jwtPayload = check jwt:validate(jwtToken, validatorConfig);
+    //     json userJson = <json>jwtPayload["user"];
+    //     User user = check userJson.cloneWithType(User);
+    //     return user;
+    // } else {
+    //     return error("Token not found");
+    // }
 
 }
 
