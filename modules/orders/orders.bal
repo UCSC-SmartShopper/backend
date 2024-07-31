@@ -58,13 +58,22 @@ public function cartToOrder(CartToOrder cartToOrder) returns db:OrderWithRelatio
     cart:CartItem[] cartItems = check from cart:CartItem cartItem in cartItemsStream
         where cartItem.consumerId == consumerId
         select cartItem;
+    
+    string supermarketIdList = "";
+    foreach cart:CartItem cartItem in cartItems {
+        if supermarketIdList != "" {
+            supermarketIdList += ",";
+        }
+        supermarketIdList += cartItem.supermarketItem.id.toString();
+    }
 
     db:OrderInsert orderInsert = {
         consumerId: consumerId,
         status: "ToPay",
         shippingAddress: shippingAddress,
         shippingMethod: shippingMethod,
-        location: "6.8657635,79.8571086"
+        location: "6.8657635,79.8571086",
+        supermarketIdList: supermarketIdList
     };
     int[]|persist:Error result = connection->/orders.post([orderInsert]);
 
@@ -94,7 +103,6 @@ public function cartToOrder(CartToOrder cartToOrder) returns db:OrderWithRelatio
 
     // Remove all the cart items for the consumer from the database
     _ = check connection->executeNativeSQL(`DELETE FROM "CartItem" WHERE "consumerId" = ${consumerId}`);
-    // _ = check connection->executeNativeSQL(`DELETE FROM "CartItem" WHERE "consumerId" = ${id} `);
     io:println(3);
 
     return {id: orderId};
