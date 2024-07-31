@@ -46,7 +46,13 @@ public function getUser(http:Request req) returns User|error {
     http:Cookie[] cookies = req.getCookies();
 
     if (cookies.length() > 0) {
-        string jwtToken = cookies.filter(cookie => cookie.name == "token")[0].value;
+        http:Cookie[] filteredCookies = cookies.filter(cookie => cookie.name == "token");
+
+        if (filteredCookies.length() == 0) {
+            return error("Token not found");
+        }
+
+        string jwtToken = filteredCookies[0].value;
 
         jwt:Payload jwtPayload = check jwt:validate(jwtToken, validatorConfig);
         json userJson = <json>jwtPayload["user"];

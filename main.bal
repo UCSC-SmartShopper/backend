@@ -20,9 +20,10 @@ import ballerina/time;
 
 @http:ServiceConfig {
     cors: {
-        allowOrigins: ["*"],
+        allowOrigins: ["https://smart-shopper-frontend.vercel.app", "http://localhost:5173", "*"],
         allowCredentials: true,
         maxAge: 84900
+    
     }
 }
 service / on new http:Listener(9090) {
