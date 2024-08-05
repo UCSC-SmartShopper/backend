@@ -52,6 +52,7 @@ public function cartToOrder(CartToOrder cartToOrder) returns db:OrderWithRelatio
     int consumerId = cartToOrder.consumerId;
     string shippingAddress = cartToOrder.shippingAddress;
     string shippingMethod = cartToOrder.shippingMethod;
+    time:Utc utc = time:utcNow();
 
     db:Client connection = connection:getConnection();
     stream<cart:CartItem, persist:Error?> cartItemsStream = connection->/cartitems();
@@ -73,7 +74,8 @@ public function cartToOrder(CartToOrder cartToOrder) returns db:OrderWithRelatio
         shippingAddress: shippingAddress,
         shippingMethod: shippingMethod,
         location: "6.8657635,79.8571086",
-        supermarketIdList: supermarketIdList
+        supermarketIdList: supermarketIdList,
+        startDate: utc
     };
     int[]|persist:Error result = connection->/orders.post([orderInsert]);
 

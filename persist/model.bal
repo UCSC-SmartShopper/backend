@@ -102,6 +102,7 @@ type Order record {|
     string shippingMethod;
     string location;
     string supermarketIdList;
+    time:Utc startDate;
     OrderItems[] orderItems;
 |};
 
