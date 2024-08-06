@@ -84,6 +84,8 @@ public function getUser(http:Request req) returns User|error {
 
 public function login(Credentials credentials) returns UserwithToken|error {
 
+
+
     stream<db:User, persist:Error?> userStream = connection->/users();
     db:User[] userArray = check from db:User u in userStream
         where u.email == credentials.email_or_number || u.number == credentials.email_or_number
