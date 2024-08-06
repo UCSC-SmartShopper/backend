@@ -125,6 +125,9 @@ type Opportunity record {|
     string deliveryLocation;
 	OpportunitySupermarket[] opportunitysupermarket;
     string status;
+
+    int orderId;
+    int driverId;
 |};
 
 type Consumer record {|
@@ -134,3 +137,4 @@ type Consumer record {|
     Address[] addresses;
     Opportunity[] opportunity;
 |};
+

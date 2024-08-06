@@ -1,3 +1,4 @@
+import backend.auth;
 import backend.connection;
 import backend.db;
 import backend.errors;
@@ -14,6 +15,10 @@ public type OpportunityResponse record {|
     int count;
     string next;
     db:OpportunityWithRelations[] results;
+|};
+
+public type AcceptOpportunityRequest record {|
+    int opportunityId;
 |};
 
 function createOpportunityNotFound(int id) returns OpportunityNotFound {
@@ -43,4 +48,16 @@ public function getOpportunitiesById(int id) returns OpportunityNotFound|db:Oppo
         return createOpportunityNotFound(id);
     }
     return opportunity;
+}
+
+public function accept_opportunity(auth:User user, int id) returns db:Opportunity|error {
+    db:Client connection = connection:getConnection();
+
+    db:OpportunityUpdate opportunityUpdate = {status: "Accepted", driverId: user.id};
+
+    db:Opportunity|persist:Error updatedOpportunity = connection->/opportunities/[id].put(opportunityUpdate);
+    if updatedOpportunity is persist:Error {
+        return error("Accepting opportunity failed");
+    }
+    return updatedOpportunity;
 }

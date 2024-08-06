@@ -23,7 +23,7 @@ import ballerina/time;
         allowOrigins: ["https://smart-shopper-frontend.vercel.app", "http://localhost:5173", "*"],
         allowCredentials: true,
         maxAge: 84900
-    
+
     }
 }
 service / on new http:Listener(9090) {
@@ -87,7 +87,8 @@ service / on new http:Listener(9090) {
             status: "Active",
             createdAt: time:utcToCivil(time:utcNow()),
             updatedAt: time:utcToCivil(time:utcNow()),
-            deletedAt: ()};
+            deletedAt: ()
+        };
 
         int[]|persist:Error result = self.connection->/users.post([userInsert]);
 
@@ -194,6 +195,10 @@ service / on new http:Listener(9090) {
         return opportunities:getOpportunitiesById(id);
     }
 
+    resource function post accept_opportunity/[int id](http:Request req) returns db:Opportunity|error {
+        auth:User user = check auth:getUser(req);
+        return opportunities:accept_opportunity(user,id);
+    }
     // ---------------------------------------------- Order Resource Functions ----------------------------------------------
 
     resource function get orders() returns db:OrderWithRelations[]|error {
