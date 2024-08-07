@@ -211,8 +211,9 @@ service / on new http:Listener(9090) {
     }
     // ---------------------------------------------- Order Resource Functions ----------------------------------------------
 
-    resource function get orders() returns db:OrderWithRelations[]|error {
-        return orders:getOrders();
+    resource function get orders(http:Request req) returns orders:OrderResponse|error {
+        auth:User user = check auth:getUser(req);
+        return orders:getOrders(user);
     }
 
     resource function get orders/[int id]() returns db:OrderWithRelations|orders:OrderNotFound|error? {
