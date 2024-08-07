@@ -11,6 +11,14 @@ public type AdvertisementNotFound record {|
     errors:ErrorDetails body;
 |};
 
+public type AdvertisementInsert record {|
+    string image;
+    string status;
+    string startDate;
+    string endDate;
+    string priority;
+|};
+
 function advertisementNotFound(int id) returns AdvertisementNotFound {
     return {
         body: {
@@ -38,5 +46,25 @@ public function getAdvertisementsById(int id) returns db:Advertisement|Advertise
         return advertisementNotFound(id);
     }
     return advertisement;
+}
+
+public function addAdvertisement(AdvertisementInsert advertisementN) returns db:Advertisement|error{
+    db:Client connection = connection:getConnection();
+    db:AdvertisementInsert advertisementInsert = {
+        image: advertisementN.image,
+        status: advertisementN.status,
+        startDate: advertisementN.startDate,
+        endDate: advertisementN.endDate,
+        priority: advertisementN.priority
+    };
+    int[]|persist:Error result = connection->/advertisements.post([advertisementInsert]);
+
+    if result is persist:Error {
+        return error("Error while adding the advertisement");
+    }
+    db:Advertisement advertisement = {...advertisementInsert, id: result[0]};
+    return advertisement;
+
+
 }
 

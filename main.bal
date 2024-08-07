@@ -239,6 +239,10 @@ service / on new http:Listener(9090) {
         return advertisements:getAdvertisementsById(id);
     }
 
+    resource function post advertisements(http:Request req, @http:Payload db:AdvertisementInsert advertisement) returns db:Advertisement|error {
+        return advertisements:addAdvertisement(advertisement);
+    }
+
    
 
 }
