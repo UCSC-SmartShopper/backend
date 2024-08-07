@@ -423,7 +423,7 @@ modules = [
 ]
 
 [[package]]
-org = "smartshopper"
+org = "djaya"
 name = "backend"
 version = "0.1.0"
 dependencies = [
@@ -445,7 +445,6 @@ dependencies = [
 ]
 modules = [
 	{org = "djaya", packageName = "backend", moduleName = "backend"},
-	{org = "djaya", packageName = "backend", moduleName = "backend.advertisements"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.auth"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.cart"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.connection"},
