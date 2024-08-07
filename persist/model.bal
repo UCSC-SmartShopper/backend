@@ -51,7 +51,8 @@ type Supermarket record {|
     string address;
     User supermarketManager;
     SupermarketItem[] storeprice;
-	OpportunitySupermarket[] opportunitysupermarket;
+    OpportunitySupermarket[] opportunitysupermarket;
+	SupermarketOrder? supermarketorder;
 |};
 
 type Product record {|
@@ -90,7 +91,7 @@ type OrderItems record {|
     int productId;
     int quantity;
     float price;
-	Order _order;
+    Order _order;
 |};
 
 type Order record {|
@@ -101,10 +102,21 @@ type Order record {|
     string shippingAddress;
     string shippingMethod;
     string location;
-    string supermarketIdList;
     OrderItems[] orderItems;
 
     time:Civil orderPlacedOn;
+
+	SupermarketOrder[] supermarketorder;
+|};
+
+type SupermarketOrder record {|
+    @sql:Generated
+    readonly int id;
+    string status;
+    string qrCode;
+
+    Order _order;
+    Supermarket supermarket;
 |};
 
 type OpportunitySupermarket record {|
@@ -125,7 +137,7 @@ type Opportunity record {|
     float deliveryCost;
     string startLocation;
     string deliveryLocation;
-	OpportunitySupermarket[] opportunitysupermarket;
+    OpportunitySupermarket[] opportunitysupermarket;
     string status;
 
     int orderId;
