@@ -103,6 +103,8 @@ type Order record {|
     string location;
     string supermarketIdList;
     OrderItems[] orderItems;
+
+    time:Civil orderPlacedOn;
 |};
 
 type OpportunitySupermarket record {|
@@ -125,6 +127,9 @@ type Opportunity record {|
     string deliveryLocation;
 	OpportunitySupermarket[] opportunitysupermarket;
     string status;
+
+    int orderId;
+    int driverId;
 |};
 
 type Consumer record {|
