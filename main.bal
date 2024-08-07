@@ -191,7 +191,7 @@ service / on new http:Listener(9090) {
     }
 
     resource function post checkOtpMatching(@http:Payload user_registration:OtpMappingRequest otpMappingRequest) returns string|error|user_registration:NonVerifyUserNotFound {
-        io:println("OTP Matching");
+        // io:println("OTP Matching");
         return user_registration:checkOtpMatching(otpMappingRequest);
 
     }
