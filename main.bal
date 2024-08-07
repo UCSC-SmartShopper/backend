@@ -224,4 +224,8 @@ service / on new http:Listener(9090) {
     //     return user:registerNonVerifyUser("contactNo" ,"username");
     // }
 
+    //---------------------------------Advertisement Resource Functions----------------------------------------------
+
+  
+
 }

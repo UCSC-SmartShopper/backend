@@ -32,14 +32,6 @@ dependencies = [
 
 [[package]]
 org = "ballerina"
-name = "cloud"
-version = "3.0.1"
-modules = [
-	{org = "ballerina", packageName = "cloud", moduleName = "cloud"}
-]
-
-[[package]]
-org = "ballerina"
 name = "constraint"
 version = "1.5.0"
 dependencies = [
@@ -408,11 +400,10 @@ modules = [
 ]
 
 [[package]]
-org = "djaya"
+org = "smartshopper"
 name = "backend"
 version = "0.1.0"
 dependencies = [
-	{org = "ballerina", name = "cloud"},
 	{org = "ballerina", name = "email"},
 	{org = "ballerina", name = "http"},
 	{org = "ballerina", name = "io"},
@@ -429,22 +420,23 @@ dependencies = [
 	{org = "ballerinax", name = "twilio"}
 ]
 modules = [
-	{org = "djaya", packageName = "backend", moduleName = "backend"},
-	{org = "djaya", packageName = "backend", moduleName = "backend.auth"},
-	{org = "djaya", packageName = "backend", moduleName = "backend.cart"},
-	{org = "djaya", packageName = "backend", moduleName = "backend.connection"},
-	{org = "djaya", packageName = "backend", moduleName = "backend.db"},
-	{org = "djaya", packageName = "backend", moduleName = "backend.email_service"},
-	{org = "djaya", packageName = "backend", moduleName = "backend.errors"},
-	{org = "djaya", packageName = "backend", moduleName = "backend.file_service"},
-	{org = "djaya", packageName = "backend", moduleName = "backend.opportunities"},
-	{org = "djaya", packageName = "backend", moduleName = "backend.orders"},
-	{org = "djaya", packageName = "backend", moduleName = "backend.products"},
-	{org = "djaya", packageName = "backend", moduleName = "backend.sms_service"},
-	{org = "djaya", packageName = "backend", moduleName = "backend.store_prices"},
-	{org = "djaya", packageName = "backend", moduleName = "backend.supermarkets"},
-	{org = "djaya", packageName = "backend", moduleName = "backend.user"},
-	{org = "djaya", packageName = "backend", moduleName = "backend.user_registration"}
+	{org = "smartshopper", packageName = "backend", moduleName = "backend"},
+	{org = "smartshopper", packageName = "backend", moduleName = "backend.advertisements"},
+	{org = "smartshopper", packageName = "backend", moduleName = "backend.auth"},
+	{org = "smartshopper", packageName = "backend", moduleName = "backend.cart"},
+	{org = "smartshopper", packageName = "backend", moduleName = "backend.connection"},
+	{org = "smartshopper", packageName = "backend", moduleName = "backend.db"},
+	{org = "smartshopper", packageName = "backend", moduleName = "backend.email_service"},
+	{org = "smartshopper", packageName = "backend", moduleName = "backend.errors"},
+	{org = "smartshopper", packageName = "backend", moduleName = "backend.file_service"},
+	{org = "smartshopper", packageName = "backend", moduleName = "backend.opportunities"},
+	{org = "smartshopper", packageName = "backend", moduleName = "backend.orders"},
+	{org = "smartshopper", packageName = "backend", moduleName = "backend.products"},
+	{org = "smartshopper", packageName = "backend", moduleName = "backend.sms_service"},
+	{org = "smartshopper", packageName = "backend", moduleName = "backend.store_prices"},
+	{org = "smartshopper", packageName = "backend", moduleName = "backend.supermarkets"},
+	{org = "smartshopper", packageName = "backend", moduleName = "backend.user"},
+	{org = "smartshopper", packageName = "backend", moduleName = "backend.user_registration"}
 ]
 
 [[tool]]
