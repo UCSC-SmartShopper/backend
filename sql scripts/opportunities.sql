@@ -20,27 +20,29 @@
 -- 	PRIMARY KEY("id")
 -- );
 
-
-INSERT INTO "Opportunity" (
-    "totalDistance",
-    "tripCost",
-    "orderPlacedOn",
-    "consumerId",
-    "deliveryCost",
-    "startLocation",
-    "deliveryLocation",
-    "status"
-) VALUES 
-    (
-        12.3,        
+INSERT INTO
+    "Opportunity" (
+        "totalDistance",
+        "tripCost",
+        "orderPlacedOn",
+        "consumerId",
+        "deliveryCost",
+        "startLocation",
+        "deliveryLocation",
+        "status" ,"orderId" ,"driverId"
+    )
+VALUES (
+        12.3,
         180.0,
         '2024-07-28',
-        2,      
-        45.0,        
-        'Origin A',  
-        'Destination A', 
-        'Pending' 
-    ), 
+        2,
+        45.0,
+        'Origin A',
+        'Destination A',
+        'Pending',
+        2,
+        2
+    ),
     (
         8.5,
         120.0,
@@ -49,7 +51,9 @@ INSERT INTO "Opportunity" (
         25.0,
         'Origin B',
         'Destination B',
-        'Cancelled'
+        'Cancelled',
+        1,
+        1
     ),
     (
         15.0,
@@ -59,8 +63,10 @@ INSERT INTO "Opportunity" (
         55.0,
         'Origin C',
         'Destination C',
-        'Delivered'
-    ), 
+        'Delivered',
+        3,
+        3
+    ),
     (
         10.2,
         130.0,
@@ -69,8 +75,10 @@ INSERT INTO "Opportunity" (
         35.0,
         'Origin D',
         'Destination D',
-        'Pending'
-    ), 
+        'Pending',
+        4,
+        2
+    ),
     (
         22.7,
         270.0,
@@ -79,21 +87,23 @@ INSERT INTO "Opportunity" (
         60.0,
         'Origin E',
         'Destination E',
-        'Delivered'
+        'Delivered',
+        2,
+        4
     );
 
-
-INSERT INTO "OpportunitySupermarket" (
-    "supermarketId",
-    "opportunityId"
-) VALUES
-    (1, 1), 
-    (2, 1), 
-    (1, 2), 
-    (3, 2), 
-    (2, 3), 
-    (3, 3), 
-    (1, 4), 
-    (2, 4), 
-    (3, 5), 
-    (1, 5); 
+INSERT INTO
+    "OpportunitySupermarket" (
+        "supermarketId",
+        "opportunityId"
+    )
+VALUES (1, 1),
+    (2, 1),
+    (1, 2),
+    (3, 2),
+    (2, 3),
+    (3, 3),
+    (1, 4),
+    (2, 4),
+    (3, 5),
+    (1, 5);
