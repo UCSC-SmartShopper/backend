@@ -213,9 +213,8 @@ service / on new http:Listener(9090) {
         return orders:getOrdersById(id);
     }
 
-    resource function post cartToOrder(@http:Payload orders:CartToOrder cartToOrder) returns db:OrderWithRelations|persist:Error|error {
-        io:println(cartToOrder);
-        return orders:cartToOrder(cartToOrder);
+    resource function post cartToOrder(@http:Payload orders:CartToOrderRequest cartToOrderRequest) returns db:OrderWithRelations|persist:Error|error {
+        return orders:cartToOrder(cartToOrderRequest);
     }
 
     // ---------------------------------------------- NonVerifyUser Resource Functions ----------------------------------------------

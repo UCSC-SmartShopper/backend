@@ -1,5 +1,6 @@
 import backend.connection;
 import backend.db;
+// import backend.user;
 
 import ballerina/http;
 import ballerina/jwt;
@@ -27,19 +28,6 @@ public type UserwithToken record {|
     string jwtToken;
 |};
 
-// jwt:IssuerConfig issuerConfig = {
-//     issuer: "ballerina",
-//     username: "ballerina",
-//     audience: ["ballerina", "ballerina.org", "ballerina.io"],
-//     customClaims: {"scp": "admin"},
-//     expTime: 3600,
-//     signatureConfig: {
-//         config: {
-//             keyFile: "rsa.key"
-//         }
-//     }
-// };
-
 db:Client connection = connection:getConnection();
 
 public function getUser(http:Request req) returns User|error {
@@ -48,43 +36,20 @@ public function getUser(http:Request req) returns User|error {
     if (authHeader is error) {
         return error("Authorization header not found");
     }
-    
+
     if (authHeader.length() > 7 && authHeader.substring(0, 7) == "Bearer ") {
         string jwtToken = authHeader.substring(7);
         jwt:Payload jwtPayload = check jwt:validate(jwtToken, validatorConfig);
         json userJson = <json>jwtPayload["user"];
         User user = check userJson.cloneWithType(User);
         return user;
-    }else {
+    } else {
         return error("Token not found");
     }
-
-
-
-    // http:Cookie[] cookies = req.getCookies();
-
-    // if (cookies.length() > 0) {
-    //     http:Cookie[] filteredCookies = cookies.filter(cookie => cookie.name == "token");
-
-    //     if (filteredCookies.length() == 0) {
-    //         return error("Token not found");
-    //     }
-
-    //     string jwtToken = filteredCookies[0].value;
-
-    //     jwt:Payload jwtPayload = check jwt:validate(jwtToken, validatorConfig);
-    //     json userJson = <json>jwtPayload["user"];
-    //     User user = check userJson.cloneWithType(User);
-    //     return user;
-    // } else {
-    //     return error("Token not found");
-    // }
 
 }
 
 public function login(Credentials credentials) returns UserwithToken|error {
-
-
 
     stream<db:User, persist:Error?> userStream = connection->/users();
     db:User[] userArray = check from db:User u in userStream
@@ -92,32 +57,28 @@ public function login(Credentials credentials) returns UserwithToken|error {
         order by u.id descending
         select u;
 
-
     if (userArray.length() == 0) {
         return error("User not found");
     }
-    if (userArray[0].password == credentials.password) {
-        int consumerId = -1;
 
-        if (userArray[0].role == "consumer") {
-            stream<db:Consumer, persist:Error?> consumerStream = connection->/consumers();
-            db:Consumer[] consumerArray = check from db:Consumer u in consumerStream
-                where u.userId == userArray[0].id
-                order by u.id descending
-                select u;
+    db:User user = userArray[0];
+    if (user.password == credentials.password) {
 
+        User jwtUser = {id: user.id, name: user.name, email: user.email, number: user.number, profilePic: user.profilePic, role: user.role};
 
-            if (consumerArray.length() > 0) {
-                consumerId = consumerArray[0].id;
+        match user.role {
+            "consumer" => {
+                int consumerId = getConsumerId(user.id);
+                jwtUser.consumerId = consumerId;
             }
+            // "driver" => {
+            //     int driverId = getDriverId(user.id);
+            //     jwtUser.driverId = driverId;
+            // }
         }
 
-        User user = {id: userArray[0].id, name: userArray[0].name, email: userArray[0].email, number: userArray[0].number, profilePic: userArray[0].profilePic,
-            role: userArray[0].role, consumerId: consumerId};
-
-        // remove password from the user object
-        string jwtToken = check jwt:issue(getConfig(user));
-        return {user: user, jwtToken: jwtToken};
+        string jwtToken = check jwt:issue(getConfig(jwtUser));
+        return {user: jwtUser, jwtToken: jwtToken};
     }
     return error("Password incorrect");
 
@@ -146,3 +107,37 @@ jwt:ValidatorConfig validatorConfig = {
         certFile: "rsa.pub"
     }
 };
+
+function getConsumerId(int userId) returns int {
+    int consumerId = -1;
+    do {
+        stream<db:Consumer, persist:Error?> consumerStream = connection->/consumers();
+        db:Consumer[] consumerArray = check from db:Consumer u in consumerStream
+            where u.userId == userId
+            order by u.id descending
+            select u;
+        if (consumerArray.length() > 0) {
+            consumerId = consumerArray[0].id;
+        }
+    } on fail {
+        consumerId = -1;
+    }
+    return consumerId;
+}
+
+// function getDriverId(int userId) returns int {
+//     int driverId = -1;
+//     do {
+//         stream<db:Consumer, persist:Error?> driverStream = connection->/drivers();
+//         db:Consumer[] driverArray = check from db:Consumer u in driverStream
+//             where u.userId == userId
+//             order by u.id descending
+//             select u;
+//         if (driverArray.length() > 0) {
+//             driverId = driverArray[0].id;
+//         }
+//     } on fail {
+//         driverId = -1;
+//     }
+//     return driverId;
+// }

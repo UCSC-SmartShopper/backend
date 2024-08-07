@@ -8,7 +8,7 @@ import ballerina/io;
 import ballerina/persist;
 import ballerina/time;
 
-public type CartToOrder record {
+public type CartToOrderRequest record {
     int consumerId;
     string shippingAddress;
     string shippingMethod;
@@ -42,29 +42,30 @@ public function getOrders() returns db:OrderWithRelations[]|error {
 public function getOrdersById(int id) returns db:OrderWithRelations|OrderNotFound|error? {
     db:Client connection = connection:getConnection();
     db:OrderWithRelations|persist:Error? order2 = connection->/orders/[id](db:OrderWithRelations);
+    io:println(order2);
     if order2 is persist:Error {
         return createOrderNotFound(id);
     }
     return order2;
 }
 
-public function cartToOrder(CartToOrder cartToOrder) returns db:OrderWithRelations|persist:Error|error {
-    int consumerId = cartToOrder.consumerId;
-    string shippingAddress = cartToOrder.shippingAddress;
-    string shippingMethod = cartToOrder.shippingMethod;
+public function cartToOrder(CartToOrderRequest cartToOrderRequest) returns db:OrderWithRelations|persist:Error|error {
+    int consumerId = cartToOrderRequest.consumerId;
+    string shippingAddress = cartToOrderRequest.shippingAddress;
+    string shippingMethod = cartToOrderRequest.shippingMethod;
 
     db:Client connection = connection:getConnection();
     stream<cart:CartItem, persist:Error?> cartItemsStream = connection->/cartitems();
     cart:CartItem[] cartItems = check from cart:CartItem cartItem in cartItemsStream
         where cartItem.consumerId == consumerId
         select cartItem;
-    
+
     string supermarketIdList = "";
     foreach cart:CartItem cartItem in cartItems {
         if supermarketIdList != "" {
             supermarketIdList += ",";
         }
-        supermarketIdList += cartItem.supermarketItem.id.toString();
+        supermarketIdList += cartItem.supermarketItem.supermarketId.toString();
     }
 
     db:OrderInsert orderInsert = {
@@ -73,7 +74,8 @@ public function cartToOrder(CartToOrder cartToOrder) returns db:OrderWithRelatio
         shippingAddress: shippingAddress,
         shippingMethod: shippingMethod,
         location: "6.8657635,79.8571086",
-        supermarketIdList: supermarketIdList
+        supermarketIdList: supermarketIdList,
+        orderPlacedOn: time:utcToCivil(time:utcNow())
     };
     int[]|persist:Error result = connection->/orders.post([orderInsert]);
 
