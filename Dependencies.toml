@@ -169,6 +169,15 @@ dependencies = [
 
 [[package]]
 org = "ballerina"
+name = "lang.error"
+version = "0.0.0"
+scope = "testOnly"
+dependencies = [
+	{org = "ballerina", name = "jballerina.java"}
+]
+
+[[package]]
+org = "ballerina"
 name = "lang.int"
 version = "0.0.0"
 dependencies = [
@@ -314,6 +323,20 @@ dependencies = [
 
 [[package]]
 org = "ballerina"
+name = "test"
+version = "0.0.0"
+scope = "testOnly"
+dependencies = [
+	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerina", name = "lang.array"},
+	{org = "ballerina", name = "lang.error"}
+]
+modules = [
+	{org = "ballerina", packageName = "test", moduleName = "test"}
+]
+
+[[package]]
+org = "ballerina"
 name = "time"
 version = "2.4.0"
 dependencies = [
@@ -400,7 +423,7 @@ modules = [
 ]
 
 [[package]]
-org = "smartshopper"
+org = "djaya"
 name = "backend"
 version = "0.1.0"
 dependencies = [
@@ -412,6 +435,7 @@ dependencies = [
 	{org = "ballerina", name = "persist"},
 	{org = "ballerina", name = "random"},
 	{org = "ballerina", name = "sql"},
+	{org = "ballerina", name = "test"},
 	{org = "ballerina", name = "time"},
 	{org = "ballerinai", name = "observe"},
 	{org = "ballerinax", name = "persist.sql"},
@@ -420,23 +444,23 @@ dependencies = [
 	{org = "ballerinax", name = "twilio"}
 ]
 modules = [
-	{org = "smartshopper", packageName = "backend", moduleName = "backend"},
-	{org = "smartshopper", packageName = "backend", moduleName = "backend.advertisements"},
-	{org = "smartshopper", packageName = "backend", moduleName = "backend.auth"},
-	{org = "smartshopper", packageName = "backend", moduleName = "backend.cart"},
-	{org = "smartshopper", packageName = "backend", moduleName = "backend.connection"},
-	{org = "smartshopper", packageName = "backend", moduleName = "backend.db"},
-	{org = "smartshopper", packageName = "backend", moduleName = "backend.email_service"},
-	{org = "smartshopper", packageName = "backend", moduleName = "backend.errors"},
-	{org = "smartshopper", packageName = "backend", moduleName = "backend.file_service"},
-	{org = "smartshopper", packageName = "backend", moduleName = "backend.opportunities"},
-	{org = "smartshopper", packageName = "backend", moduleName = "backend.orders"},
-	{org = "smartshopper", packageName = "backend", moduleName = "backend.products"},
-	{org = "smartshopper", packageName = "backend", moduleName = "backend.sms_service"},
-	{org = "smartshopper", packageName = "backend", moduleName = "backend.store_prices"},
-	{org = "smartshopper", packageName = "backend", moduleName = "backend.supermarkets"},
-	{org = "smartshopper", packageName = "backend", moduleName = "backend.user"},
-	{org = "smartshopper", packageName = "backend", moduleName = "backend.user_registration"}
+	{org = "djaya", packageName = "backend", moduleName = "backend"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.auth"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.cart"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.connection"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.db"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.deliveries"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.email_service"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.errors"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.file_service"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.opportunities"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.orders"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.products"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.sms_service"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.store_prices"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.supermarkets"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.user"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.user_registration"}
 ]
 
 [[tool]]
