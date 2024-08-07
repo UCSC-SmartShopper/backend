@@ -10,6 +10,7 @@ import backend.sms_service;
 import backend.store_prices;
 import backend.supermarkets;
 import backend.user_registration;
+import backend.advertisements;
 
 import ballerina/http;
 import ballerina/io;
@@ -226,6 +227,10 @@ service / on new http:Listener(9090) {
 
     //---------------------------------Advertisement Resource Functions----------------------------------------------
 
-  
+    resource function get advertisements() returns db:Advertisement[]|error?{
+        return advertisements:getAdvertisements();
+    }
+
+    
 
 }
