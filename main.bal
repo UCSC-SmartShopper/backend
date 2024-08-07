@@ -231,6 +231,10 @@ service / on new http:Listener(9090) {
         return advertisements:getAdvertisements();
     }
 
-    
+    resource function get advertisements/[int id]() returns db:Advertisement|advertisements:AdvertisementNotFound|error? {
+        return advertisements:getAdvertisementsById(id);
+    }
+
+   
 
 }
