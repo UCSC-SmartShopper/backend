@@ -10,6 +10,7 @@ import backend.sms_service;
 import backend.store_prices;
 import backend.supermarkets;
 import backend.user_registration;
+import backend.advertisements;
 
 import ballerina/http;
 import ballerina/io;
@@ -190,7 +191,7 @@ service / on new http:Listener(9090) {
     }
 
     resource function post checkOtpMatching(@http:Payload user_registration:OtpMappingRequest otpMappingRequest) returns string|error|user_registration:NonVerifyUserNotFound {
-        io:println("OTP Matching");
+        // io:println("OTP Matching");
         return user_registration:checkOtpMatching(otpMappingRequest);
 
     }
@@ -227,5 +228,13 @@ service / on new http:Listener(9090) {
     // resource function get nonVerifyUser() returns  {
     //     return user:registerNonVerifyUser("contactNo" ,"username");
     // }
+
+    //---------------------------------Advertisement Resource Functions----------------------------------------------
+
+    resource function get advertisements() returns db:Advertisement[]|error?{
+        return advertisements:getAdvertisements();
+    }
+
+    
 
 }

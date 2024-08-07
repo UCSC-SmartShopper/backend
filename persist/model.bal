@@ -152,3 +152,12 @@ type Consumer record {|
     Opportunity[] opportunity;
 |};
 
+type Advertisement record{|
+    @sql:Generated
+    readonly int id;
+    string image;
+    string status;
+    string startDate;
+    string endDate;
+    string priority;
+    |};
