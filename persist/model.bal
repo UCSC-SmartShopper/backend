@@ -87,7 +87,7 @@ type CartItem record {|
 type OrderItems record {|
     @sql:Generated
     readonly int id;
-    int supermarketItemId;
+    int supermarketId;
     int productId;
     int quantity;
     float price;
@@ -106,7 +106,7 @@ type Order record {|
 
     time:Civil orderPlacedOn;
 
-	SupermarketOrder[] supermarketorder;
+	SupermarketOrder[] supermarketOrders;
 |};
 
 type SupermarketOrder record {|

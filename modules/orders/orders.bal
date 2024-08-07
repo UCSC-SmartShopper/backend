@@ -5,7 +5,6 @@ import backend.db;
 import backend.errors;
 
 import ballerina/http;
-import ballerina/io;
 import ballerina/persist;
 import ballerina/time;
 
@@ -13,6 +12,10 @@ public type CartToOrderRequest record {
     int consumerId;
     string shippingAddress;
     string shippingMethod;
+};
+
+public type OrderReadyRequest record {
+    int supermarketOrderId;
 };
 
 public type OrderResponse record {|
@@ -47,7 +50,7 @@ public function getOrders(auth:User user) returns OrderResponse|error {
 
     if (user.role == "supermarket") {
         db:OrderWithRelations[] filteredOrders = from db:OrderWithRelations _order in orderList
-            let db:SupermarketOrderOptionalized[] supermarketOrders = _order.supermarketorder ?: []
+            let db:SupermarketOrderOptionalized[] supermarketOrders = _order.supermarketOrders ?: []
             where supermarketOrders.some((i) => i.supermarketId == user.supermarketId)
             select _order;
 
@@ -67,7 +70,7 @@ public function getOrders(auth:User user) returns OrderResponse|error {
 public function getOrdersById(int id) returns db:OrderWithRelations|OrderNotFound|error? {
     db:Client connection = connection:getConnection();
     db:OrderWithRelations|persist:Error? order2 = connection->/orders/[id](db:OrderWithRelations);
-    io:println(order2);
+
     if order2 is persist:Error {
         return createOrderNotFound(id);
     }
@@ -125,7 +128,7 @@ public function cartToOrder(CartToOrderRequest cartToOrderRequest) returns db:Or
     // -------------------------- Create the Order Items --------------------------
     db:OrderItemsInsert[] orderItemInserts = from cart:CartItem cartItem in cartItems
         select {
-                supermarketItemId: cartItem.supermarketItem.id,
+                supermarketId: cartItem.supermarketItem.supermarketId,
                 productId: cartItem.supermarketItem.productId,
                 quantity: cartItem.quantity,
                 price: cartItem.supermarketItem.price,
@@ -134,7 +137,6 @@ public function cartToOrder(CartToOrderRequest cartToOrderRequest) returns db:Or
 
     int[]|persist:Error orderItemResult = connection->/orderitems.post(orderItemInserts);
 
-    io:println(orderItemInserts);
     if orderItemResult is persist:Error {
         return orderItemResult;
     }
@@ -143,4 +145,31 @@ public function cartToOrder(CartToOrderRequest cartToOrderRequest) returns db:Or
     _ = check connection->executeNativeSQL(`DELETE FROM "CartItem" WHERE "consumerId" = ${consumerId}`);
 
     return {id: orderId};
+}
+
+public function supermarket_order_ready(auth:User user, OrderReadyRequest orderReadyRequest) returns db:SupermarketOrderWithRelations|OrderNotFound|http:Unauthorized|error {
+    int supermarketId = user.supermarketId ?: -1;
+    int supermarketOrderId = orderReadyRequest.supermarketOrderId;
+
+    db:Client connection = connection:getConnection();
+    db:SupermarketOrderWithRelations|persist:Error supermarketOrder = connection->/supermarketorders/[supermarketOrderId](db:SupermarketOrderWithRelations);
+
+    if supermarketOrder is persist:Error {
+        return createOrderNotFound(supermarketOrderId);
+    }
+
+    if (supermarketOrder.supermarketId != supermarketId) {
+        return http:UNAUTHORIZED;
+    }
+
+    db:SupermarketOrderUpdate supermarketOrderUpdate = {
+        status: "Ready"
+    };
+
+    db:SupermarketOrderWithRelations|persist:Error updatedSupermarketOrder = connection->/supermarketorders/[supermarketOrderId].put(supermarketOrderUpdate);
+
+    if updatedSupermarketOrder is persist:Error {
+        return error("Error updating the supermarket order");
+    }
+    return updatedSupermarketOrder;
 }

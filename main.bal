@@ -1,3 +1,4 @@
+import backend.advertisements;
 import backend.auth;
 import backend.cart;
 import backend.connection;
@@ -10,7 +11,6 @@ import backend.sms_service;
 import backend.store_prices;
 import backend.supermarkets;
 import backend.user_registration;
-import backend.advertisements;
 
 import ballerina/http;
 import ballerina/io;
@@ -207,8 +207,9 @@ service / on new http:Listener(9090) {
 
     resource function post accept_opportunity/[int id](http:Request req) returns db:Opportunity|error {
         auth:User user = check auth:getUser(req);
-        return opportunities:accept_opportunity(user,id);
+        return opportunities:accept_opportunity(user, id);
     }
+
     // ---------------------------------------------- Order Resource Functions ----------------------------------------------
 
     resource function get orders(http:Request req) returns orders:OrderResponse|error {
@@ -224,6 +225,11 @@ service / on new http:Listener(9090) {
         return orders:cartToOrder(cartToOrderRequest);
     }
 
+    resource function post supermarket_order_ready(http:Request req, orders:OrderReadyRequest orderReadyRequest) returns db:SupermarketOrderWithRelations|orders:OrderNotFound|http:Unauthorized|error {
+        auth:User user = check auth:getUser(req);
+        return orders:supermarket_order_ready(user, orderReadyRequest);
+    }
+
     // ---------------------------------------------- NonVerifyUser Resource Functions ----------------------------------------------
 
     // resource function get nonVerifyUser() returns  {
@@ -232,10 +238,8 @@ service / on new http:Listener(9090) {
 
     //---------------------------------Advertisement Resource Functions----------------------------------------------
 
-    resource function get advertisements() returns db:Advertisement[]|error?{
+    resource function get advertisements() returns db:Advertisement[]|error? {
         return advertisements:getAdvertisements();
     }
-
-    
 
 }
