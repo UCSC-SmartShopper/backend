@@ -146,16 +146,25 @@ service / on new http:Listener(9090) {
     // ---------------------------------------------- Cart Resource Functions ----------------------------------------------
     resource function get carts(http:Request req) returns cart:CartItemResponse|error {
         auth:User user = check auth:getUser(req);
+        io:println(user);
         return cart:getCartItems(user.consumerId ?: -1);
     }
 
-    resource function post carts(http:Request req, cart:CartItem cartItem) returns db:CartItem|int|error {
+    resource function post carts(http:Request req, cart:CartItemInsert cartItem) returns db:CartItem|int|error {
         auth:User user = check auth:getUser(req);
+        io:println("addCartItem");
         return cart:addCartItem(user.consumerId ?: -1, cartItem);
+    }
+
+    resource function patch carts(http:Request req, cart:CartItem cartItem) returns db:CartItem|int|error {
+        auth:User user = check auth:getUser(req);
+        io:println("updateCartItem");
+        return cart:updateCartItem(user.consumerId ?: -1, cartItem);
     }
 
     resource function delete carts(http:Request req, int id) returns db:CartItem|error {
         auth:User user = check auth:getUser(req);
+        io:println("removeCartItem");
         return cart:removeCartItem(user.consumerId ?: -1, id);
     }
 
@@ -209,9 +218,8 @@ service / on new http:Listener(9090) {
         return orders:getOrdersById(id);
     }
 
-    resource function post cartToOrder(@http:Payload orders:CartToOrder cartToOrder) returns db:OrderWithRelations|persist:Error|error {
-        io:println(cartToOrder);
-        return orders:cartToOrder(cartToOrder);
+    resource function post cartToOrder(@http:Payload orders:CartToOrderRequest cartToOrderRequest) returns db:OrderWithRelations|persist:Error|error {
+        return orders:cartToOrder(cartToOrderRequest);
     }
 
     // ---------------------------------------------- NonVerifyUser Resource Functions ----------------------------------------------

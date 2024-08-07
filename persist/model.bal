@@ -103,6 +103,8 @@ type Order record {|
     string location;
     string supermarketIdList;
     OrderItems[] orderItems;
+
+    time:Civil orderPlacedOn;
 |};
 
 type OpportunitySupermarket record {|
