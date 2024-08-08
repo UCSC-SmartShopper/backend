@@ -1,3 +1,4 @@
+import backend.advertisements;
 import backend.auth;
 import backend.cart;
 import backend.connection;
@@ -20,9 +21,10 @@ import ballerina/time;
 
 @http:ServiceConfig {
     cors: {
-        allowOrigins: ["*"],
+        allowOrigins: ["https://smart-shopper-frontend.vercel.app", "http://localhost:5173", "*"],
         allowCredentials: true,
         maxAge: 84900
+
     }
 }
 service / on new http:Listener(9090) {
@@ -60,6 +62,7 @@ service / on new http:Listener(9090) {
     resource function get users() returns db:User[]|error? {
         stream<db:User, persist:Error?> users = self.connection->/users.get();
         return from db:User user in users
+            order by user.id
             select user;
     }
 
@@ -85,7 +88,8 @@ service / on new http:Listener(9090) {
             status: "Active",
             createdAt: time:utcToCivil(time:utcNow()),
             updatedAt: time:utcToCivil(time:utcNow()),
-            deletedAt: ()};
+            deletedAt: ()
+        };
 
         int[]|persist:Error result = self.connection->/users.post([userInsert]);
 
@@ -143,16 +147,25 @@ service / on new http:Listener(9090) {
     // ---------------------------------------------- Cart Resource Functions ----------------------------------------------
     resource function get carts(http:Request req) returns cart:CartItemResponse|error {
         auth:User user = check auth:getUser(req);
+        io:println(user);
         return cart:getCartItems(user.consumerId ?: -1);
     }
 
-    resource function post carts(http:Request req, cart:CartItem cartItem) returns db:CartItem|int|error {
+    resource function post carts(http:Request req, cart:CartItemInsert cartItem) returns db:CartItem|int|error {
         auth:User user = check auth:getUser(req);
+        io:println("addCartItem");
         return cart:addCartItem(user.consumerId ?: -1, cartItem);
+    }
+
+    resource function patch carts(http:Request req, cart:CartItem cartItem) returns db:CartItem|int|error {
+        auth:User user = check auth:getUser(req);
+        io:println("updateCartItem");
+        return cart:updateCartItem(user.consumerId ?: -1, cartItem);
     }
 
     resource function delete carts(http:Request req, int id) returns db:CartItem|error {
         auth:User user = check auth:getUser(req);
+        io:println("removeCartItem");
         return cart:removeCartItem(user.consumerId ?: -1, id);
     }
 
@@ -178,7 +191,7 @@ service / on new http:Listener(9090) {
     }
 
     resource function post checkOtpMatching(@http:Payload user_registration:OtpMappingRequest otpMappingRequest) returns string|error|user_registration:NonVerifyUserNotFound {
-        io:println("OTP Matching");
+        // io:println("OTP Matching");
         return user_registration:checkOtpMatching(otpMappingRequest);
 
     }
@@ -192,18 +205,29 @@ service / on new http:Listener(9090) {
         return opportunities:getOpportunitiesById(id);
     }
 
+    resource function post accept_opportunity/[int id](http:Request req) returns db:Opportunity|error {
+        auth:User user = check auth:getUser(req);
+        return opportunities:accept_opportunity(user, id);
+    }
+
     // ---------------------------------------------- Order Resource Functions ----------------------------------------------
 
-    resource function get orders() returns db:OrderWithRelations[]|error {
-        return orders:getOrders();
+    resource function get orders(http:Request req) returns orders:OrderResponse|error {
+        auth:User user = check auth:getUser(req);
+        return orders:getOrders(user);
     }
 
     resource function get orders/[int id]() returns db:OrderWithRelations|orders:OrderNotFound|error? {
         return orders:getOrdersById(id);
     }
 
-    resource function post cartToOrder(@http:Payload orders:CartToOrder cartToOrder) returns db:OrderWithRelations|persist:Error|error {
-        return orders:cartToOrder(cartToOrder);
+    resource function post cartToOrder(@http:Payload orders:CartToOrderRequest cartToOrderRequest) returns db:OrderWithRelations|persist:Error|error {
+        return orders:cartToOrder(cartToOrderRequest);
+    }
+
+    resource function post supermarket_order_ready(http:Request req, orders:OrderReadyRequest orderReadyRequest) returns db:SupermarketOrderWithRelations|orders:OrderNotFound|http:Unauthorized|error {
+        auth:User user = check auth:getUser(req);
+        return orders:supermarket_order_ready(user, orderReadyRequest);
     }
 
     // ---------------------------------------------- NonVerifyUser Resource Functions ----------------------------------------------
@@ -211,5 +235,29 @@ service / on new http:Listener(9090) {
     // resource function get nonVerifyUser() returns  {
     //     return user:registerNonVerifyUser("contactNo" ,"username");
     // }
+
+    //---------------------------------Advertisement Resource Functions----------------------------------------------
+
+    resource function get advertisements() returns db:Advertisement[]|error? {
+        return advertisements:getAdvertisements();
+    }
+
+
+    resource function get advertisements/[int id]() returns db:Advertisement|advertisements:AdvertisementNotFound|error? {
+        return advertisements:getAdvertisementsById(id);
+    }
+
+    resource function post advertisements(http:Request req, @http:Payload db:AdvertisementInsert advertisement) returns db:Advertisement|error {
+        return advertisements:addAdvertisement(advertisement);
+    }
+
+    resource function patch advertisement/[int id](http:Request req,@http:Payload db:AdvertisementUpdate advertisement) returns db:Advertisement|advertisements:AdvertisementNotFound|error? {
+        return advertisements:updateAdvertisement(id, advertisement);
+    }
+
+    resource function patch deactivate_advertisements/[int id]() returns error?{
+        return advertisements:deactivateAdvertisement(id);
+    }
+
 
 }
