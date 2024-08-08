@@ -144,6 +144,13 @@ service / on new http:Listener(9090) {
         return store_prices:getSupermarketItemById(id);
     }
 
+    resource function get pricelists/supermarket(@http:Query int SupermarketId) returns store_prices:SupermarketItemResponse|store_prices:SupermarketItemNotFound|error { 
+        io:println("SupermarketId from main: ", SupermarketId);
+        return store_prices:getSupermarketItemsBySupermarketId(SupermarketId);
+    }
+
+    
+
     // ---------------------------------------------- Cart Resource Functions ----------------------------------------------
     resource function get carts(http:Request req) returns cart:CartItemResponse|error {
         auth:User user = check auth:getUser(req);

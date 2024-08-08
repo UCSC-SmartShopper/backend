@@ -1,20 +1,13 @@
 import backend.connection;
 import backend.db;
 import backend.errors;
+// import backend.products;
 
 import ballerina/http;
 import ballerina/persist;
+import ballerina/io;
 
-// public type Supermarket record {|
-//     readonly int id;
-//     string name;
-//     string contactNo;
-//     string logo;
-//     string location;
-//     string address;
-//     int supermarketmanagerId;
 
-// |};
 
 public type SupermarketItemResponse record {|
     int count;
@@ -58,3 +51,22 @@ public function getSupermarketItemById(int id) returns db:SupermarketItem|Superm
     }
     return supermarketItem;
 }
+
+
+public function getSupermarketItemsBySupermarketId(int SupermarketId) returns SupermarketItemResponse|SupermarketItemNotFound|error {
+    io:println("SupermarketId: ", SupermarketId);
+
+    stream<db:SupermarketItem, persist:Error?> supermarketItemStream = connection->/supermarketitems(whereClause = `"SupermarketItem"."supermarketId"= ${SupermarketId}`);
+    db:SupermarketItem[] supermarketitems = check from db:SupermarketItem item in supermarketItemStream
+        select item;
+    io:println("SupermarketItems: ", supermarketitems);
+
+    return {
+        count: supermarketitems.length(),
+        next: "null",
+        results: supermarketitems
+    };
+}
+
+
+
