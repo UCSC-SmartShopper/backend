@@ -251,4 +251,22 @@ service / on new http:Listener(9090) {
         return advertisements:getAdvertisements();
     }
 
+
+    resource function get advertisements/[int id]() returns db:Advertisement|advertisements:AdvertisementNotFound|error? {
+        return advertisements:getAdvertisementsById(id);
+    }
+
+    resource function post advertisements(http:Request req, @http:Payload db:AdvertisementInsert advertisement) returns db:Advertisement|error {
+        return advertisements:addAdvertisement(advertisement);
+    }
+
+    resource function patch advertisement/[int id](http:Request req,@http:Payload db:AdvertisementUpdate advertisement) returns db:Advertisement|advertisements:AdvertisementNotFound|error? {
+        return advertisements:updateAdvertisement(id, advertisement);
+    }
+
+    resource function patch deactivate_advertisements/[int id]() returns error?{
+        return advertisements:deactivateAdvertisement(id);
+    }
+
+
 }
