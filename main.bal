@@ -126,6 +126,7 @@ service / on new http:Listener(9090) {
         return updatedUser;
     }
 
+    // ---------------------------------------------- Products Resource Functions ----------------------------------------------
     resource function get products(http:Request req) returns products:ProductResponse|persist:Error? {
         // io:println(auth:getUser(req));
         return products:getProducts();
@@ -135,13 +136,21 @@ service / on new http:Listener(9090) {
         return products:getProductsById(id);
     }
 
-    // ---------------------------------------------- Store Price Resource Functions ----------------------------------------------
-    resource function get storeprices(@http:Query int productId) returns store_prices:SupermarketItemResponse|store_prices:SupermarketItemNotFound|error {
-        return store_prices:getSupermarketItemByProductId(productId);
+    // ---------------------------------------------- Supermarket Items Resource Functions ----------------------------------------------
+    resource function get supermarketitems(http:Request req, @http:Query int productId) returns store_prices:SupermarketItemResponse|store_prices:SupermarketItemNotFound|error {
+        auth:User user = check auth:getUser(req);
+        // if user is supermarket manager then return all items belongs to the supermarket
+        return store_prices:getSupermarketItemByProductId(user, productId);
     }
 
-    resource function get pricelists/[int id]() returns db:SupermarketItem|store_prices:SupermarketItemNotFound {
+    resource function get supermarketitems/[int id]() returns db:SupermarketItem|store_prices:SupermarketItemNotFound {
         return store_prices:getSupermarketItemById(id);
+    }
+
+    resource function post supermarketitems(http:Request req, @http:Payload db:SupermarketItem supermarketItem) returns error|db:SupermarketItem|store_prices:SupermarketItemNotFound {
+        auth:User user = check auth:getUser(req);
+        // if user is supermarket manager then return all items belongs to the supermarket
+        return store_prices:editSupermarketItem(user, supermarketItem);
     }
 
     // ---------------------------------------------- Cart Resource Functions ----------------------------------------------
