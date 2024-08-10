@@ -52,3 +52,4 @@ public function getProductsById(int id) returns Product|ProductNotFound|error? {
     return product;
 }
 
+

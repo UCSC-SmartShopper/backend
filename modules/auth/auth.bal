@@ -21,6 +21,7 @@ public type User record {|
     string role;
 
     int consumerId?;
+    int supermarketId?;
 |};
 
 public type UserwithToken record {|
@@ -67,9 +68,13 @@ public function login(Credentials credentials) returns UserwithToken|error {
         User jwtUser = {id: user.id, name: user.name, email: user.email, number: user.number, profilePic: user.profilePic, role: user.role};
 
         match user.role {
-            "consumer" => {
+            "Consumer" => {
                 int consumerId = getConsumerId(user.id);
                 jwtUser.consumerId = consumerId;
+            }
+            "Supermarket Manager" => {
+                int supermarketId = getSupermarketId(user.id);
+                jwtUser.supermarketId = supermarketId;
             }
             // "driver" => {
             //     int driverId = getDriverId(user.id);
@@ -123,6 +128,23 @@ function getConsumerId(int userId) returns int {
         consumerId = -1;
     }
     return consumerId;
+}
+
+function getSupermarketId(int userId) returns int {
+    int supermarketId = -1;
+    do {
+        stream<db:Supermarket, persist:Error?> supermarketStream = connection->/supermarkets();
+        db:Supermarket[] supermarketArray = check from db:Supermarket s in supermarketStream
+            where s.supermarketmanagerId == userId
+            order by s.id descending
+            select s;
+        if (supermarketArray.length() > 0) {
+            supermarketId = supermarketArray[0].id;
+        }
+    } on fail {
+        supermarketId = -1;
+    }
+    return supermarketId;
 }
 
 // function getDriverId(int userId) returns int {
