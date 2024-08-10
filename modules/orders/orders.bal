@@ -48,7 +48,7 @@ public function getOrders(auth:User user) returns OrderResponse|error {
         order by _order.id descending
         select _order;
 
-    if (user.role == "supermarket") {
+    if (user.role == "Supermarket Manager") {
         db:OrderWithRelations[] filteredOrders = from db:OrderWithRelations _order in orderList
             let db:SupermarketOrderOptionalized[] supermarketOrders = _order.supermarketOrders ?: []
             where supermarketOrders.some((i) => i.supermarketId == user.supermarketId)
@@ -56,7 +56,7 @@ public function getOrders(auth:User user) returns OrderResponse|error {
 
         orders = filteredOrders;
 
-    } else if (user.role == "consumer") {
+    } else if (user.role == "Consumer") {
         db:OrderWithRelations[] userOrders = from db:OrderWithRelations _order in orderList
             where _order.consumerId == user.id
             select _order;

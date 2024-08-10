@@ -84,7 +84,7 @@ service / on new http:Listener(9090) {
     resource function post consumer(NewUser newUser) returns db:User|persist:Error|http:Conflict & readonly {
         db:UserInsert userInsert = {
             ...newUser,
-            role: "consumer",
+            role: "Consumer",
             status: "Active",
             createdAt: time:utcToCivil(time:utcNow()),
             updatedAt: time:utcToCivil(time:utcNow()),
