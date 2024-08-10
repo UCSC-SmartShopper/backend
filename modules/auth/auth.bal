@@ -68,11 +68,11 @@ public function login(Credentials credentials) returns UserwithToken|error {
         User jwtUser = {id: user.id, name: user.name, email: user.email, number: user.number, profilePic: user.profilePic, role: user.role};
 
         match user.role {
-            "consumer" => {
+            "Consumer" => {
                 int consumerId = getConsumerId(user.id);
                 jwtUser.consumerId = consumerId;
             }
-            "supermarket" => {
+            "Supermarket Manager" => {
                 int supermarketId = getSupermarketId(user.id);
                 jwtUser.supermarketId = supermarketId;
             }

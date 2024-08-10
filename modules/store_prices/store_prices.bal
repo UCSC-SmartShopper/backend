@@ -48,7 +48,7 @@ public function getSupermarketItemByProductId(auth:User user, int productId) ret
 
     stream<db:SupermarketItem, persist:Error?> prices = connection->/supermarketitems();
     db:SupermarketItem[] supermarketItem = check from db:SupermarketItem price in prices
-        where (user.role == "consumer" && price.productId == productId) || (user.role == "supermarket" && price.supermarketId == user.supermarketId)
+        where (user.role == "Consumer" && price.productId == productId) || (user.role == "Supermarket Manager" && price.supermarketId == user.supermarketId)
         order by price.id
         select price;
 

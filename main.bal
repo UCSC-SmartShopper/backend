@@ -128,7 +128,6 @@ service / on new http:Listener(9090) {
 
     // ---------------------------------------------- Products Resource Functions ----------------------------------------------
     resource function get products(http:Request req) returns products:ProductResponse|persist:Error? {
-        // io:println(auth:getUser(req));
         return products:getProducts();
     }
 
@@ -149,32 +148,27 @@ service / on new http:Listener(9090) {
 
     resource function post supermarketitems(http:Request req, @http:Payload db:SupermarketItem supermarketItem) returns error|db:SupermarketItem|store_prices:SupermarketItemNotFound {
         auth:User user = check auth:getUser(req);
-        // if user is supermarket manager then return all items belongs to the supermarket
         return store_prices:editSupermarketItem(user, supermarketItem);
     }
 
     // ---------------------------------------------- Cart Resource Functions ----------------------------------------------
     resource function get carts(http:Request req) returns cart:CartItemResponse|error {
         auth:User user = check auth:getUser(req);
-        io:println(user);
         return cart:getCartItems(user.consumerId ?: -1);
     }
 
     resource function post carts(http:Request req, cart:CartItemInsert cartItem) returns db:CartItem|int|error {
         auth:User user = check auth:getUser(req);
-        io:println("addCartItem");
         return cart:addCartItem(user.consumerId ?: -1, cartItem);
     }
 
     resource function patch carts(http:Request req, cart:CartItem cartItem) returns db:CartItem|int|error {
         auth:User user = check auth:getUser(req);
-        io:println("updateCartItem");
         return cart:updateCartItem(user.consumerId ?: -1, cartItem);
     }
 
     resource function delete carts(http:Request req, int id) returns db:CartItem|error {
         auth:User user = check auth:getUser(req);
-        io:println("removeCartItem");
         return cart:removeCartItem(user.consumerId ?: -1, id);
     }
 
@@ -202,7 +196,6 @@ service / on new http:Listener(9090) {
     resource function post checkOtpMatching(@http:Payload user_registration:OtpMappingRequest otpMappingRequest) returns string|error|user_registration:NonVerifyUserNotFound {
         // io:println("OTP Matching");
         return user_registration:checkOtpMatching(otpMappingRequest);
-
     }
 
     // ---------------------------------------------- Opportunities Resource Functions ----------------------------------------------
