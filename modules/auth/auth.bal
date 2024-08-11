@@ -35,7 +35,7 @@ db:Client connection = connection:getConnection();
 
 public function getUser(http:Request req) returns User|error {
     // get barrier token from the request
-    string|error authHeader = req.getHeader("Authorization");
+    string|error authHeader = req.getHeader("authorization");
     if (authHeader is error) {
         return error("Authorization header not found");
     }
