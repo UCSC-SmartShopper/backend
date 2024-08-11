@@ -22,6 +22,8 @@ public type User record {|
 
     int consumerId?;
     int supermarketId?;
+    int driverId?;
+    
 |};
 
 public type UserwithToken record {|

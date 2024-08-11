@@ -4,6 +4,7 @@ import backend.errors;
 import ballerina/http;
 import ballerina/persist;
 import ballerina/time;
+import backend.connection;
 
 public type Product record {|
     readonly int id;
@@ -34,10 +35,10 @@ function createProductNotFound(int id) returns ProductNotFound {
     };
 }
 
-public final db:Client dbClient = check new ();
 
 public function getProducts() returns ProductResponse|persist:Error? {
-    stream<Product, persist:Error?> products = dbClient->/products.get();
+    db:Client connection = connection:getConnection();
+    stream<Product, persist:Error?> products = connection->/products.get();
     Product[] productList = check from Product product in products
         select product;
 
@@ -45,7 +46,9 @@ public function getProducts() returns ProductResponse|persist:Error? {
 }
 
 public function getProductsById(int id) returns Product|ProductNotFound|error? {
-    Product|persist:Error? product = dbClient->/products/[id](Product);
+    db:Client connection = connection:getConnection();
+
+    Product|persist:Error? product = connection->/products/[id](Product);
     if product is persist:Error {
         return createProductNotFound(id);
     }
