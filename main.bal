@@ -219,4 +219,8 @@ service / on new http:Listener(9090) {
         return advertisements:deactivateAdvertisement(id);
     }
 
+    resource function get headers(http:Request req) returns string[] {
+        return req.getHeaderNames();
+    }
+
 }
