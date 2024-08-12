@@ -175,7 +175,7 @@ public type SupermarketWithRelations record {|
     UserOptionalized supermarketManager?;
     SupermarketItemOptionalized[] storeprice?;
     OpportunitySupermarketOptionalized[] opportunitysupermarket?;
-    SupermarketOrderOptionalized supermarketorder?;
+    SupermarketOrderOptionalized[] supermarketorder?;
 |};
 
 public type SupermarketTargetType typedesc<SupermarketWithRelations>;

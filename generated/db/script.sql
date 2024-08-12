@@ -100,7 +100,7 @@ CREATE TABLE "SupermarketOrder" (
 	"qrCode" VARCHAR(191) NOT NULL,
 	"_orderId" INT NOT NULL,
 	FOREIGN KEY("_orderId") REFERENCES "Order"("id"),
-	"supermarketId" INT UNIQUE NOT NULL,
+	"supermarketId" INT NOT NULL,
 	FOREIGN KEY("supermarketId") REFERENCES "Supermarket"("id"),
 	PRIMARY KEY("id")
 );
