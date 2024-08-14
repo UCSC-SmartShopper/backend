@@ -20,6 +20,8 @@ import ballerina/time;
 
 // import backend.user;
 
+
+
 @http:ServiceConfig {
     cors: {
         allowOrigins: ["https://smart-shopper-frontend.vercel.app", "http://localhost:5173", "*"],
@@ -217,6 +219,12 @@ service / on new http:Listener(9090) {
 
     resource function patch deactivate_advertisements/[int id]() returns error? {
         return advertisements:deactivateAdvertisement(id);
+    }
+
+    // ---------------------------------------------- User Resource Functions ----------------------------------------------
+
+    resource function post supermarket(@http:Payload supermarkets:NewSupermarket newSupermarket) returns db:User|persist:Error|error? {
+        return check supermarkets:registerSupermarket(newSupermarket);
     }
 
 }
