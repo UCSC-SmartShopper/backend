@@ -4,10 +4,24 @@ import backend.errors;
 
 import ballerina/http;
 import ballerina/persist;
+import ballerina/time;
 
 public type SuperMarketNotFound record {|
     *http:NotFound;
     errors:ErrorDetails body;
+|};
+
+public type NewSupermarket record {|
+    string name;
+    string contactNo;
+    string logo;
+    string location;
+    string address;
+    string email;
+    string password;
+    string role;
+    string status;
+    string supermarketManagerId;
 |};
 
 function createSuperMarketNotFound(int id) returns SuperMarketNotFound {
@@ -36,4 +50,61 @@ public function getSupermarketById(int id) returns db:Supermarket|SuperMarketNot
         return createSuperMarketNotFound(id);
     }
     return supermarket;
+}
+
+// create supermarket
+
+public function registerSupermarket(NewSupermarket supermarket) returns db:User|persist:Error|error? {
+
+    // Insert user information
+    db:UserInsert userInsert = {
+        name: supermarket.name,
+        email: supermarket.email,
+        password: supermarket.password,
+        number: supermarket.contactNo,
+        profilePic: supermarket.logo,
+        role: "supermarket",
+        status: "Active",
+        createdAt: time:utcToCivil(time:utcNow()),
+        updatedAt: time:utcToCivil(time:utcNow()),
+        deletedAt: ()
+    };
+
+    int[]|persist:Error userResult = connection->/users.post([userInsert]);
+
+    if userResult is persist:Error {
+        if userResult is persist:AlreadyExistsError {
+            return error("User already exists");
+        }
+        return userResult;
+    }
+
+    // Create user object to return
+    db:User user = {...userInsert, id: userResult[0]};
+
+    // Insert supermarket information
+    db:SupermarketInsert supermarketInsert = {
+        name: supermarket.name,
+        contactNo: supermarket.contactNo,
+        logo: supermarket.logo,
+        location: supermarket.location,
+        address: supermarket.address,
+        supermarketmanagerId: user.id
+    };
+
+    int[]|persist:Error supermarketResult = connection->/supermarkets.post([supermarketInsert]);
+
+    // if supermarketResult is persist:Error {
+    //     return supermarketResult;
+    // }
+
+    if supermarketResult is persist:Error {
+        if supermarketResult is persist:AlreadyExistsError {
+            return error("User already exists");
+        }
+        return supermarketResult;
+    }
+
+    // Return the created user
+    return user;
 }
