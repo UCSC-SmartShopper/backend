@@ -191,7 +191,7 @@ public function checkOtpMatching(OtpMappingRequest otpMappingRequest) returns st
         number: user.contactNo,
         name: user.name,
         password: user.password,
-        role: "consumer",
+        role: "Consumer",
         status: "Active",
         profilePic: "",
         createdAt: time:utcToCivil(time:utcNow()),

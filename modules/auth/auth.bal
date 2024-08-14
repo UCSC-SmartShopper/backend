@@ -22,6 +22,8 @@ public type User record {|
 
     int consumerId?;
     int supermarketId?;
+    int driverId?;
+    
 |};
 
 public type UserwithToken record {|
@@ -33,7 +35,7 @@ db:Client connection = connection:getConnection();
 
 public function getUser(http:Request req) returns User|error {
     // get barrier token from the request
-    string|error authHeader = req.getHeader("Authorization");
+    string|error authHeader = req.getHeader("jwt-key");
     if (authHeader is error) {
         return error("Authorization header not found");
     }
@@ -68,11 +70,11 @@ public function login(Credentials credentials) returns UserwithToken|error {
         User jwtUser = {id: user.id, name: user.name, email: user.email, number: user.number, profilePic: user.profilePic, role: user.role};
 
         match user.role {
-            "consumer" => {
+            "Consumer" => {
                 int consumerId = getConsumerId(user.id);
                 jwtUser.consumerId = consumerId;
             }
-            "supermarket" => {
+            "Supermarket Manager" => {
                 int supermarketId = getSupermarketId(user.id);
                 jwtUser.supermarketId = supermarketId;
             }

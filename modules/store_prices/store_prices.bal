@@ -1,3 +1,4 @@
+import backend.auth;
 import backend.connection;
 import backend.db;
 import backend.errors;
@@ -33,12 +34,16 @@ function createSupermarketItemNotFound(int id) returns SupermarketItemNotFound {
 
 db:Client connection = connection:getConnection();
 
-public function getSupermarketItemByProductId(int productId) returns SupermarketItemResponse|SupermarketItemNotFound|error {
-    stream<db:SupermarketItem, persist:Error?> prices = connection->/supermarketitems(whereClause = `"SupermarketItem"."productId"= ${productId}`);
-    db:SupermarketItem[] supermarketItem = check from db:SupermarketItem price in prices
-        order by price.price
-        select price;
+public function getSupermarketItemByProductId(auth:User user, int productId) returns SupermarketItemResponse|SupermarketItemNotFound|error {
 
+    // if user is supermarket manager then return all items belongs to the supermarket
+    // if user is consumer then return supermarket item for the given product id
+
+    stream<db:SupermarketItem, persist:Error?> prices = connection->/supermarketitems();
+    db:SupermarketItem[] supermarketItem = check from db:SupermarketItem price in prices
+        where (user.role == "Consumer" && price.productId == productId) || (user.role == "Supermarket Manager" && price.supermarketId == user.supermarketId)
+        order by price.id
+        select price;
 
     return {count: supermarketItem.length(), next: "null", results: supermarketItem};
 }
@@ -50,6 +55,26 @@ public function getSupermarketItemById(int id) returns db:SupermarketItem|Superm
         return createSupermarketItemNotFound(id);
     }
     return supermarketItem;
+}
+
+public function editSupermarketItem(auth:User user, db:SupermarketItem supermarketItem) returns db:SupermarketItem|SupermarketItemNotFound {
+
+    int supermarketItemId = supermarketItem.id;
+
+    db:SupermarketItemUpdate supermarketItemUpdate = {
+        price: supermarketItem.price,
+        productId: supermarketItem.productId,
+        supermarketId: supermarketItem.supermarketId,
+        discount: supermarketItem.discount,
+        availableQuantity: supermarketItem.availableQuantity
+    };
+
+    db:SupermarketItem|persist:Error UpdatedSupermarketItem = connection->/supermarketitems/[supermarketItemId].put(supermarketItemUpdate);
+
+    if (UpdatedSupermarketItem is persist:Error) {
+        return createSupermarketItemNotFound(supermarketItemId);
+    }
+    return UpdatedSupermarketItem;
 }
 
 

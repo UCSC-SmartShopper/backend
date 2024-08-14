@@ -10,6 +10,7 @@ import backend.products;
 import backend.sms_service;
 import backend.store_prices;
 import backend.supermarkets;
+import backend.user;
 import backend.user_registration;
 
 import ballerina/http;
@@ -43,22 +44,6 @@ service / on new http:Listener(9090) {
         return user_registration:checkOtpMatching(otpMappingRequest);
     }
 
-    // resource function post set_password(@http:Payload user_registration:SetPassword setPassword) returns string|error {
-    //     user_registration:OtpMappingRequest otpMappingRequest = {
-    //         contactNumber: setPassword.contactNumber,
-    //         OTP: setPassword.OTP
-    //     };
-
-    //     string|user_registration:NonVerifyUserNotFound checkOtpMatching = check user_registration:checkOtpMatching(otpMappingRequest);
-
-    //     if checkOtpMatching is string && checkOtpMatching == "OTP matched" {
-    //         string result = check user_registration:setPassword(setPassword);
-    //         return result;
-    //     }
-
-    //     return "OTP not matched";
-    // }
-
     resource function get users() returns db:User[]|error? {
         stream<db:User, persist:Error?> users = self.connection->/users.get();
         return from db:User user in users
@@ -66,25 +51,15 @@ service / on new http:Listener(9090) {
             select user;
     }
 
-    resource function get users/[int id]() returns db:UserWithRelations|DataNotFound|error? {
-        db:UserWithRelations|persist:Error? user = self.connection->/users/[id](db:UserWithRelations);
-        if user is () {
-            DataNotFound notFound = {
-                body: {
-                    message: "User not found",
-                    details: string `User not found for the given id: ${id}`,
-                    timestamp: time:utcNow()
-                }
-            };
-            return notFound;
-        }
-        return user;
+    resource function get users/[int id](http:Request req) returns db:UserWithRelations|http:Unauthorized|user:UserNotFound|error {
+        auth:User user = check auth:getUser(req);
+        return user:get_user(user, id);
     }
 
     resource function post consumer(NewUser newUser) returns db:User|persist:Error|http:Conflict & readonly {
         db:UserInsert userInsert = {
             ...newUser,
-            role: "consumer",
+            role: "Consumer",
             status: "Active",
             createdAt: time:utcToCivil(time:utcNow()),
             updatedAt: time:utcToCivil(time:utcNow()),
@@ -105,29 +80,13 @@ service / on new http:Listener(9090) {
         return user;
     }
 
-    resource function patch users/[int id](@http:Payload db:UserUpdate user) returns db:User|DataNotFound|error? {
-        db:User|persist:Error result = self.connection->/users/[id].put(user);
-
-        if result is persist:Error {
-            if result is persist:NotFoundError {
-                DataNotFound notFound = {
-                    body: {
-                        message: "User not found",
-                        details: string `User not found for the given id: ${id}`,
-                        timestamp: time:utcNow()
-                    }
-                };
-                return notFound;
-            }
-            return result;
-        }
-
-        db:User updatedUser = check self.connection->/users/[id](db:User);
-        return updatedUser;
+    resource function patch users/[int id](http:Request req, @http:Payload db:UserUpdate userUpdate) returns db:User|DataNotFound|error {
+        auth:User user = check auth:getUser(req);
+        return user:update_user(user, userUpdate);
     }
 
+    // ---------------------------------------------- Products Resource Functions ----------------------------------------------
     resource function get products(http:Request req) returns products:ProductResponse|persist:Error? {
-        // io:println(auth:getUser(req));
         return products:getProducts();
     }
 
@@ -135,44 +94,40 @@ service / on new http:Listener(9090) {
         return products:getProductsById(id);
     }
 
-    // ---------------------------------------------- Store Price Resource Functions ----------------------------------------------
-    resource function get storeprices(@http:Query int productId) returns store_prices:SupermarketItemResponse|store_prices:SupermarketItemNotFound|error {
-        return store_prices:getSupermarketItemByProductId(productId);
+    // ---------------------------------------------- Supermarket Items Resource Functions ----------------------------------------------
+    resource function get supermarketitems(http:Request req, @http:Query int productId) returns store_prices:SupermarketItemResponse|store_prices:SupermarketItemNotFound|error {
+        auth:User user = check auth:getUser(req);
+        // if user is supermarket manager then return all items belongs to the supermarket
+        return store_prices:getSupermarketItemByProductId(user, productId);
     }
 
-    resource function get pricelists/[int id]() returns db:SupermarketItem|store_prices:SupermarketItemNotFound {
+    resource function get supermarketitems/[int id]() returns db:SupermarketItem|store_prices:SupermarketItemNotFound {
         return store_prices:getSupermarketItemById(id);
     }
 
-    resource function get pricelists/supermarket(@http:Query int SupermarketId) returns store_prices:SupermarketItemResponse|store_prices:SupermarketItemNotFound|error { 
-        io:println("SupermarketId from main: ", SupermarketId);
-        return store_prices:getSupermarketItemsBySupermarketId(SupermarketId);
+    resource function post supermarketitems(http:Request req, @http:Payload db:SupermarketItem supermarketItem) returns error|db:SupermarketItem|store_prices:SupermarketItemNotFound {
+        auth:User user = check auth:getUser(req);
+        return store_prices:editSupermarketItem(user, supermarketItem);
     }
-
-    
 
     // ---------------------------------------------- Cart Resource Functions ----------------------------------------------
     resource function get carts(http:Request req) returns cart:CartItemResponse|error {
         auth:User user = check auth:getUser(req);
-        io:println(user);
         return cart:getCartItems(user.consumerId ?: -1);
     }
 
     resource function post carts(http:Request req, cart:CartItemInsert cartItem) returns db:CartItem|int|error {
         auth:User user = check auth:getUser(req);
-        io:println("addCartItem");
         return cart:addCartItem(user.consumerId ?: -1, cartItem);
     }
 
     resource function patch carts(http:Request req, cart:CartItem cartItem) returns db:CartItem|int|error {
         auth:User user = check auth:getUser(req);
-        io:println("updateCartItem");
         return cart:updateCartItem(user.consumerId ?: -1, cartItem);
     }
 
     resource function delete carts(http:Request req, int id) returns db:CartItem|error {
         auth:User user = check auth:getUser(req);
-        io:println("removeCartItem");
         return cart:removeCartItem(user.consumerId ?: -1, id);
     }
 
@@ -200,7 +155,6 @@ service / on new http:Listener(9090) {
     resource function post checkOtpMatching(@http:Payload user_registration:OtpMappingRequest otpMappingRequest) returns string|error|user_registration:NonVerifyUserNotFound {
         // io:println("OTP Matching");
         return user_registration:checkOtpMatching(otpMappingRequest);
-
     }
 
     // ---------------------------------------------- Opportunities Resource Functions ----------------------------------------------
@@ -249,7 +203,6 @@ service / on new http:Listener(9090) {
         return advertisements:getAdvertisements();
     }
 
-
     resource function get advertisements/[int id]() returns db:Advertisement|advertisements:AdvertisementNotFound|error? {
         return advertisements:getAdvertisementsById(id);
     }
@@ -258,13 +211,12 @@ service / on new http:Listener(9090) {
         return advertisements:addAdvertisement(advertisement);
     }
 
-    resource function patch advertisement/[int id](http:Request req,@http:Payload db:AdvertisementUpdate advertisement) returns db:Advertisement|advertisements:AdvertisementNotFound|error? {
+    resource function patch advertisement/[int id](http:Request req, @http:Payload db:AdvertisementUpdate advertisement) returns db:Advertisement|advertisements:AdvertisementNotFound|error? {
         return advertisements:updateAdvertisement(id, advertisement);
     }
 
-    resource function patch deactivate_advertisements/[int id]() returns error?{
+    resource function patch deactivate_advertisements/[int id]() returns error? {
         return advertisements:deactivateAdvertisement(id);
     }
-
 
 }
