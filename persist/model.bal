@@ -30,6 +30,23 @@ type NonVerifyUser record {|
     string password;
 |};
 
+type NonVerifiedDriver record {|
+    @sql:Generated
+    readonly int id;
+    string name;
+    string nic;
+    string email;
+    string contactNo;
+    string OTP;
+    string courierCompany;
+    string vehicleType;
+    string vehicleColor;
+    string vehicleName;
+    string vehicleNumber;
+    string password;
+    string otpStatus;
+|};
+
 type Address record {|
     @sql:Generated
     readonly int id;
@@ -52,7 +69,7 @@ type Supermarket record {|
     User supermarketManager;
     SupermarketItem[] storeprice;
     OpportunitySupermarket[] opportunitysupermarket;
-	SupermarketOrder? supermarketorder;
+    SupermarketOrder? supermarketorder;
 |};
 
 type Product record {|
@@ -106,7 +123,7 @@ type Order record {|
 
     time:Civil orderPlacedOn;
 
-	SupermarketOrder[] supermarketOrders;
+    SupermarketOrder[] supermarketOrders;
 |};
 
 type SupermarketOrder record {|
@@ -152,7 +169,7 @@ type Consumer record {|
     Opportunity[] opportunity;
 |};
 
-type Advertisement record{|
+type Advertisement record {|
     @sql:Generated
     readonly int id;
     string image;
@@ -160,4 +177,4 @@ type Advertisement record{|
     string startDate;
     string endDate;
     string priority;
-    |};
+|};

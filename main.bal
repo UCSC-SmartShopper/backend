@@ -43,6 +43,16 @@ service / on new http:Listener(9090) {
         return user_registration:checkOtpMatching(otpMappingRequest);
     }
 
+    // ---------------------------------------------- Driver Signup Resource Functions ----------------------------------------------
+
+    resource function post driver_otp(@http:Payload user_registration:DriverPersonalDetails driverPersonalDetails) returns error|int {
+        return user_registration:driver_otp_genaration(driverPersonalDetails);
+    }
+
+    resource function post match_driver_otp(@http:Payload user_registration:DriverOtp driverOtp) returns db:NonVerifiedDriver|error {
+        return user_registration:matchDriverOTP(driverOtp);
+    }
+
     // resource function post set_password(@http:Payload user_registration:SetPassword setPassword) returns string|error {
     //     user_registration:OtpMappingRequest otpMappingRequest = {
     //         contactNumber: setPassword.contactNumber,
@@ -244,7 +254,6 @@ service / on new http:Listener(9090) {
         return advertisements:getAdvertisements();
     }
 
-
     resource function get advertisements/[int id]() returns db:Advertisement|advertisements:AdvertisementNotFound|error? {
         return advertisements:getAdvertisementsById(id);
     }
@@ -253,13 +262,12 @@ service / on new http:Listener(9090) {
         return advertisements:addAdvertisement(advertisement);
     }
 
-    resource function patch advertisement/[int id](http:Request req,@http:Payload db:AdvertisementUpdate advertisement) returns db:Advertisement|advertisements:AdvertisementNotFound|error? {
+    resource function patch advertisement/[int id](http:Request req, @http:Payload db:AdvertisementUpdate advertisement) returns db:Advertisement|advertisements:AdvertisementNotFound|error? {
         return advertisements:updateAdvertisement(id, advertisement);
     }
 
-    resource function patch deactivate_advertisements/[int id]() returns error?{
+    resource function patch deactivate_advertisements/[int id]() returns error? {
         return advertisements:deactivateAdvertisement(id);
     }
-
 
 }
