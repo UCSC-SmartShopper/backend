@@ -58,7 +58,8 @@ public function getOrders(auth:User user) returns OrderResponse|error {
 
     } else if (user.role == "Consumer") {
         db:OrderWithRelations[] userOrders = from db:OrderWithRelations _order in orderList
-            where _order.consumerId == user.id
+            where _order.consumerId == user.consumerId
+            order by _order.id descending
             select _order;
 
         orders = userOrders;

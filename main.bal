@@ -10,6 +10,7 @@ import backend.products;
 import backend.sms_service;
 import backend.store_prices;
 import backend.supermarkets;
+import backend.user;
 import backend.user_registration;
 
 import ballerina/http;
@@ -76,19 +77,9 @@ service / on new http:Listener(9090) {
             select user;
     }
 
-    resource function get users/[int id]() returns db:UserWithRelations|DataNotFound|error? {
-        db:UserWithRelations|persist:Error? user = self.connection->/users/[id](db:UserWithRelations);
-        if user is () {
-            DataNotFound notFound = {
-                body: {
-                    message: "User not found",
-                    details: string `User not found for the given id: ${id}`,
-                    timestamp: time:utcNow()
-                }
-            };
-            return notFound;
-        }
-        return user;
+    resource function get users/[int id](http:Request req) returns db:UserWithRelations|http:Unauthorized|user:UserNotFound|error {
+        auth:User user = check auth:getUser(req);
+        return user:get_user(user, id);
     }
 
     resource function post consumer(NewUser newUser) returns db:User|persist:Error|http:Conflict & readonly {
@@ -115,25 +106,9 @@ service / on new http:Listener(9090) {
         return user;
     }
 
-    resource function patch users/[int id](@http:Payload db:UserUpdate user) returns db:User|DataNotFound|error? {
-        db:User|persist:Error result = self.connection->/users/[id].put(user);
-
-        if result is persist:Error {
-            if result is persist:NotFoundError {
-                DataNotFound notFound = {
-                    body: {
-                        message: "User not found",
-                        details: string `User not found for the given id: ${id}`,
-                        timestamp: time:utcNow()
-                    }
-                };
-                return notFound;
-            }
-            return result;
-        }
-
-        db:User updatedUser = check self.connection->/users/[id](db:User);
-        return updatedUser;
+    resource function patch users/[int id](http:Request req, @http:Payload db:UserUpdate userUpdate) returns db:User|DataNotFound|error {
+        auth:User user = check auth:getUser(req);
+        return user:update_user(user, userUpdate);
     }
 
     // ---------------------------------------------- Products Resource Functions ----------------------------------------------

@@ -69,7 +69,7 @@ type Supermarket record {|
     User supermarketManager;
     SupermarketItem[] storeprice;
     OpportunitySupermarket[] opportunitysupermarket;
-    SupermarketOrder? supermarketorder;
+	SupermarketOrder[] supermarketorder;
 |};
 
 type Product record {|
