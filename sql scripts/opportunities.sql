@@ -87,7 +87,7 @@ VALUES (
         60.0,
         'Origin E',
         'Destination E',
-        'Delivered',
+        'Pending',
         2,
         4
     );

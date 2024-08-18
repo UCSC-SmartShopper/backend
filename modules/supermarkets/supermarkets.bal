@@ -20,9 +20,10 @@ function createSuperMarketNotFound(int id) returns SuperMarketNotFound {
 }
 
 
-db:Client connection = connection:getConnection();
+
 
 public function getSupermarkets() returns db:Supermarket[]|error? {
+    db:Client connection = connection:getConnection();
     stream<db:Supermarket, persist:Error?> supermarketStream = connection->/supermarkets.get();
     db:Supermarket[] supermarkets = check from db:Supermarket supermarket in supermarketStream
         select supermarket;
@@ -31,6 +32,7 @@ public function getSupermarkets() returns db:Supermarket[]|error? {
 }
 
 public function getSupermarketById(int id) returns db:Supermarket|SuperMarketNotFound|error? {
+    db:Client connection = connection:getConnection();
     db:Supermarket|persist:Error? supermarket = connection->/supermarkets/[id](db:Supermarket);
     if (supermarket is ()) {
         return createSuperMarketNotFound(id);

@@ -28,11 +28,23 @@ public type SetPassword record {|
     string password;
 |};
 
+public type DriverOtp record {|
+    string OTP;
+    int id;
+|};
+
 public type RegisterForm record {|
     string name;
     string email;
     string contactNumber;
     string password;
+|};
+
+public type DriverPersonalDetails record {|
+    string name;
+    string nic;
+    string email;
+    string contactNo;
 |};
 
 public type NonVerifyUserNotFound record {|
@@ -60,19 +72,6 @@ twilio:ConnectionConfig twilioConfig = {
     }
 };
 
-db:Client connection = connection:getConnection();
-
-// public function createNonVerifyUser(string contactNo, string username, string otp) returns int[]|persist:Error {
-
-//     db:NonVerifyUserInsert nonVerifyUser = {
-//         contactNo: contactNo,
-//         name: username,
-//         OTP: otp
-//     };
-//     int[]|persist:Error result = connection->/nonverifyusers.post([nonVerifyUser]);
-//     return result;
-// }
-
 public function generateOtp() returns int|error {
     int randomInteger = check random:createIntInRange(100000, 999999);
     io:println(randomInteger);
@@ -83,7 +82,7 @@ twilio:Client twilioClient = check new (twilioConfig);
 
 public function sendOtp(string otp, string phone, string name) returns error? {
     twilio:CreateMessageRequest messageRequest = {
-        To: "+94"+phone.substring(1),
+        To: "+94" + phone.substring(1),
         From: "+16513173849",
         Body: "Hi " + name + ", Your OTP Code is : " + otp
     };
@@ -92,43 +91,6 @@ public function sendOtp(string otp, string phone, string name) returns error? {
 
     io:println("Message Status: ", response.status);
 }
-
-// public function setPassword(SetPassword setPassword) returns string|error {
-//     stream<NonVerifyUser, persist:Error?> nonVerifyUserStream = connection->/nonverifyusers();
-//     NonVerifyUser[] nonVerifyUser = check from NonVerifyUser n in nonVerifyUserStream
-//         where n.contactNo == setPassword.contactNumber
-//         order by n.id descending
-//         select n;
-
-//     if (nonVerifyUser.length() == 0) {
-//         return error("Non-Verify User not found");
-//     }
-
-//     NonVerifyUser user = nonVerifyUser[0];
-
-//     db:UserInsert userInsert = {
-//         email: "",
-//         number: setPassword.contactNumber,
-//         name: user.name,
-//         password: setPassword.password,
-//         role: "consumer",
-//         status: "Active",
-//         profilePic: "",
-//         createdAt: time:utcToCivil(time:utcNow()),
-//         updatedAt: time:utcToCivil(time:utcNow()),
-//         deletedAt: ()
-//     };
-
-//     int[]|persist:Error result = connection->/users.post([userInsert]);
-//     if (result is persist:Error) {
-//         return error("Error while creating User");
-//     }
-
-    
-
-//     return "Success";
-
-// }
 
 public function otp_genaration(RegisterForm registerForm) returns string|error {
     int|error otp = generateOtp();
@@ -147,6 +109,7 @@ public function otp_genaration(RegisterForm registerForm) returns string|error {
         OTP: otp_string
     };
 
+    db:Client connection = connection:getConnection();
     int[]|persist:Error result = connection->/nonverifyusers.post([nonVerifyUser]);
 
     if (result is persist:Error) {
@@ -157,6 +120,7 @@ public function otp_genaration(RegisterForm registerForm) returns string|error {
 }
 
 public function getUserByNumber(string phone) returns NonVerifyUser|NonVerifyUserNotFound|error? {
+    db:Client connection = connection:getConnection();
     stream<NonVerifyUser, persist:Error?> nonVerifyUserStream = connection->/nonverifyusers();
     NonVerifyUser[] nonVerifyUser = check from NonVerifyUser n in nonVerifyUserStream
         where n.contactNo == phone
@@ -171,6 +135,7 @@ public function checkOtpMatching(OtpMappingRequest otpMappingRequest) returns st
     string phone = otpMappingRequest.contactNumber;
     string otp = otpMappingRequest.OTP;
 
+    db:Client connection = connection:getConnection();
     stream<db:NonVerifyUser, persist:Error?> nonVerifyUserStream = connection->/nonverifyusers();
     db:NonVerifyUser[] nonVerifyUser = check from db:NonVerifyUser n in nonVerifyUserStream
         where n.contactNo == phone && n.OTP == otp
@@ -219,3 +184,56 @@ public function checkOtpMatching(OtpMappingRequest otpMappingRequest) returns st
 
 }
 
+public function driver_otp_genaration(DriverPersonalDetails driverPersonalDetails) returns error|int {
+    int|error otp = generateOtp();
+    string otp_string = (check otp).toString();
+    io:println("Generated OTP: " + otp_string);
+
+    // send otp to  non-verify driver's mobile
+    check sendOtp(otp_string, driverPersonalDetails.contactNo, driverPersonalDetails.name);
+
+    // create non-verify driver and insert into db
+    db:NonVerifiedDriverInsert nonVerifyDriver = {
+        name: driverPersonalDetails.name,
+        nic: driverPersonalDetails.nic,
+        email: driverPersonalDetails.email,
+        contactNo: driverPersonalDetails.contactNo,
+        OTP: otp_string,
+
+        courierCompany: "",
+        vehicleType: "",
+        vehicleColor: "",
+        vehicleName: "",
+        vehicleNumber: "",
+        password: "",
+        otpStatus: ""
+    };
+
+    db:Client connection = connection:getConnection();
+    int[]|persist:Error result = connection->/nonverifieddrivers.post([nonVerifyDriver]);
+
+    if (result is persist:Error || result.length() == 0) {
+        return error("Error while creating Non-Verify Driver");
+    }
+
+    return result[0];
+}
+
+public function match_driver_otp(DriverOtp driverOtp) returns db:NonVerifiedDriver|error {
+    db:Client connection = connection:getConnection();
+
+    db:NonVerifiedDriver|persist:Error result = connection->/nonverifieddrivers/[driverOtp.id](db:NonVerifiedDriver);
+
+    if result is persist:Error {
+        return error("Driver not found.");
+    }
+
+    if (driverOtp.OTP != result.OTP) {
+        return error("Otp does not matched.");
+    }
+    db:NonVerifiedDriverUpdate nonVerifiedDriverUpdate = {otpStatus: "Verified"};
+
+    db:NonVerifiedDriver|persist:Error updatedDriver = connection->/nonverifieddrivers/[driverOtp.id].put(nonVerifiedDriverUpdate);
+    return updatedDriver;
+
+}

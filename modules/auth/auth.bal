@@ -1,5 +1,6 @@
 import backend.connection;
 import backend.db;
+
 // import backend.user;
 
 import ballerina/http;
@@ -23,15 +24,13 @@ public type User record {|
     int consumerId?;
     int supermarketId?;
     int driverId?;
-    
+
 |};
 
 public type UserwithToken record {|
     User user;
     string jwtToken;
 |};
-
-db:Client connection = connection:getConnection();
 
 public function getUser(http:Request req) returns User|error {
     // get barrier token from the request
@@ -54,6 +53,7 @@ public function getUser(http:Request req) returns User|error {
 
 public function login(Credentials credentials) returns UserwithToken|error {
 
+    db:Client connection = connection:getConnection();
     stream<db:User, persist:Error?> userStream = connection->/users();
     db:User[] userArray = check from db:User u in userStream
         where u.email == credentials.email_or_number || u.number == credentials.email_or_number
@@ -78,10 +78,10 @@ public function login(Credentials credentials) returns UserwithToken|error {
                 int supermarketId = getSupermarketId(user.id);
                 jwtUser.supermarketId = supermarketId;
             }
-            // "driver" => {
-            //     int driverId = getDriverId(user.id);
-            //     jwtUser.driverId = driverId;
-            // }
+            "Driver" => {
+                int driverId = getDriverId(user.id);
+                jwtUser.driverId = driverId;
+            }
         }
 
         string jwtToken = check jwt:issue(getConfig(jwtUser));
@@ -118,6 +118,7 @@ jwt:ValidatorConfig validatorConfig = {
 function getConsumerId(int userId) returns int {
     int consumerId = -1;
     do {
+        db:Client connection = connection:getConnection();
         stream<db:Consumer, persist:Error?> consumerStream = connection->/consumers();
         db:Consumer[] consumerArray = check from db:Consumer u in consumerStream
             where u.userId == userId
@@ -135,6 +136,7 @@ function getConsumerId(int userId) returns int {
 function getSupermarketId(int userId) returns int {
     int supermarketId = -1;
     do {
+        db:Client connection = connection:getConnection();
         stream<db:Supermarket, persist:Error?> supermarketStream = connection->/supermarkets();
         db:Supermarket[] supermarketArray = check from db:Supermarket s in supermarketStream
             where s.supermarketmanagerId == userId
@@ -149,19 +151,20 @@ function getSupermarketId(int userId) returns int {
     return supermarketId;
 }
 
-// function getDriverId(int userId) returns int {
-//     int driverId = -1;
-//     do {
-//         stream<db:Consumer, persist:Error?> driverStream = connection->/drivers();
-//         db:Consumer[] driverArray = check from db:Consumer u in driverStream
-//             where u.userId == userId
-//             order by u.id descending
-//             select u;
-//         if (driverArray.length() > 0) {
-//             driverId = driverArray[0].id;
-//         }
-//     } on fail {
-//         driverId = -1;
-//     }
-//     return driverId;
-// }
+function getDriverId(int userId) returns int {
+    return 3;
+    // int driverId = -1;
+    // do {
+    //     stream<db:Consumer, persist:Error?> driverStream = connection->/drivers();
+    //     db:Consumer[] driverArray = check from db:Consumer u in driverStream
+    //         where u.userId == userId
+    //         order by u.id descending
+    //         select u;
+    //     if (driverArray.length() > 0) {
+    //         driverId = driverArray[0].id;
+    //     }
+    // } on fail {
+    //     driverId = -1;
+    // }
+    // return driverId;
+}

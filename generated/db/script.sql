@@ -17,6 +17,24 @@ DROP TABLE IF EXISTS "User";
 DROP TABLE IF EXISTS "NonVerifyUser";
 DROP TABLE IF EXISTS "Product";
 DROP TABLE IF EXISTS "Advertisement";
+DROP TABLE IF EXISTS "NonVerifiedDriver";
+
+CREATE TABLE "NonVerifiedDriver" (
+	"id"  SERIAL,
+	"name" VARCHAR(191) NOT NULL,
+	"nic" VARCHAR(191) NOT NULL,
+	"email" VARCHAR(191) NOT NULL,
+	"contactNo" VARCHAR(191) NOT NULL,
+	"OTP" VARCHAR(191) NOT NULL,
+	"courierCompany" VARCHAR(191) NOT NULL,
+	"vehicleType" VARCHAR(191) NOT NULL,
+	"vehicleColor" VARCHAR(191) NOT NULL,
+	"vehicleName" VARCHAR(191) NOT NULL,
+	"vehicleNumber" VARCHAR(191) NOT NULL,
+	"password" VARCHAR(191) NOT NULL,
+	"otpStatus" VARCHAR(191) NOT NULL,
+	PRIMARY KEY("id")
+);
 
 CREATE TABLE "Advertisement" (
 	"id"  SERIAL,
@@ -100,7 +118,7 @@ CREATE TABLE "SupermarketOrder" (
 	"qrCode" VARCHAR(191) NOT NULL,
 	"_orderId" INT NOT NULL,
 	FOREIGN KEY("_orderId") REFERENCES "Order"("id"),
-	"supermarketId" INT UNIQUE NOT NULL,
+	"supermarketId" INT NOT NULL,
 	FOREIGN KEY("supermarketId") REFERENCES "Supermarket"("id"),
 	PRIMARY KEY("id")
 );

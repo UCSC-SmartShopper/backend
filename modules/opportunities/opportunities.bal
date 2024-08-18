@@ -30,11 +30,16 @@ function createOpportunityNotFound(int id) returns OpportunityNotFound {
     };
 }
 
-public function getOpportunities() returns OpportunityResponse|error? {
+public function getOpportunities(auth:User user, string status) returns OpportunityResponse|http:Unauthorized|error? {
+    if (user.role != "Driver") {
+        return http:UNAUTHORIZED;
+    }
+
     db:Client connection = connection:getConnection();
 
     stream<db:OpportunityWithRelations, persist:Error?> opportunityStream = connection->/opportunities.get();
     db:OpportunityWithRelations[] opportunities = check from db:OpportunityWithRelations opportunity in opportunityStream
+        where (opportunity.status == status) && (status == "Pending" || opportunity.driverId == user.driverId)
         select opportunity;
 
     return {count: opportunities.length(), next: "", results: opportunities};
@@ -61,3 +66,16 @@ public function accept_opportunity(auth:User user, int id) returns db:Opportunit
     }
     return updatedOpportunity;
 }
+
+public function complete_delivery(auth:User user, int id) returns db:Opportunity|error {
+    db:Client connection = connection:getConnection();
+
+    db:OpportunityUpdate opportunityUpdate = {status: "Delivered"};
+
+    db:Opportunity|persist:Error updatedOpportunity = connection->/opportunities/[id].put(opportunityUpdate);
+    if updatedOpportunity is persist:Error {
+        return error("Completing delivery failed");
+    }
+    return updatedOpportunity;
+}
+

@@ -104,6 +104,70 @@ public type NonVerifyUserUpdate record {|
     string password?;
 |};
 
+public type NonVerifiedDriver record {|
+    readonly int id;
+    string name;
+    string nic;
+    string email;
+    string contactNo;
+    string OTP;
+    string courierCompany;
+    string vehicleType;
+    string vehicleColor;
+    string vehicleName;
+    string vehicleNumber;
+    string password;
+    string otpStatus;
+|};
+
+public type NonVerifiedDriverOptionalized record {|
+    int id?;
+    string name?;
+    string nic?;
+    string email?;
+    string contactNo?;
+    string OTP?;
+    string courierCompany?;
+    string vehicleType?;
+    string vehicleColor?;
+    string vehicleName?;
+    string vehicleNumber?;
+    string password?;
+    string otpStatus?;
+|};
+
+public type NonVerifiedDriverTargetType typedesc<NonVerifiedDriverOptionalized>;
+
+public type NonVerifiedDriverInsert record {|
+    string name;
+    string nic;
+    string email;
+    string contactNo;
+    string OTP;
+    string courierCompany;
+    string vehicleType;
+    string vehicleColor;
+    string vehicleName;
+    string vehicleNumber;
+    string password;
+    string otpStatus;
+|};
+
+public type NonVerifiedDriverUpdate record {|
+    string name?;
+    string nic?;
+    string email?;
+    string contactNo?;
+    string OTP?;
+    string courierCompany?;
+    string vehicleType?;
+    string vehicleColor?;
+    string vehicleName?;
+    string vehicleNumber?;
+    string password?;
+    string otpStatus?;
+|};
+
 public type Address record {|
     readonly int id;
     string addressName;
@@ -175,7 +239,7 @@ public type SupermarketWithRelations record {|
     UserOptionalized supermarketManager?;
     SupermarketItemOptionalized[] storeprice?;
     OpportunitySupermarketOptionalized[] opportunitysupermarket?;
-    SupermarketOrderOptionalized supermarketorder?;
+    SupermarketOrderOptionalized[] supermarketorder?;
 |};
 
 public type SupermarketTargetType typedesc<SupermarketWithRelations>;
