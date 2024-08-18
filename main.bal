@@ -182,8 +182,9 @@ service / on new http:Listener(9090) {
     }
 
     // ---------------------------------------------- Opportunities Resource Functions ----------------------------------------------
-    resource function get opportunities() returns opportunities:OpportunityResponse|error? {
-        return opportunities:getOpportunities();
+    resource function get opportunities(http:Request req, @http:Query string status) returns opportunities:OpportunityResponse|http:Unauthorized|error?|error {
+        auth:User user = check auth:getUser(req);
+        return opportunities:getOpportunities(user, status);
     }
 
     resource function get opportunities/[int id]() returns opportunities:OpportunityNotFound|db:OpportunityWithRelations {
