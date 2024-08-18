@@ -55,6 +55,12 @@ service / on new http:Listener(9090) {
         return user_registration:match_driver_otp(driverOtp);
     }
 
+    resource function get driver_requests(http:Request req) returns db:NonVerifiedDriver|error {
+        auth:User user = check auth:getUser(req);
+        return user_registration:get_all_driver_requests(user);
+    }
+
+
     // resource function post set_password(@http:Payload user_registration:SetPassword setPassword) returns string|error {
     //     user_registration:OtpMappingRequest otpMappingRequest = {
     //         contactNumber: setPassword.contactNumber,

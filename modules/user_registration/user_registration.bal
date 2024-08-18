@@ -237,3 +237,15 @@ public function match_driver_otp(DriverOtp driverOtp) returns db:NonVerifiedDriv
     return updatedDriver;
 
 }
+
+public function get_all_driver_requests(auth:User user) returns ProductResponse|persist:Error? {
+    if user.role!= "Courier Company Manager" {
+        return http:UNAUTHORIZED;
+    }
+    db:Client connection = connection:getConnection();
+    stream<Product, persist:Error?> products = connection->/nonverifieddrivers()
+    Product[] productList = check from Product product in products
+        select product;
+
+    return {count: productList.length(), next: "null", results: productList};
+}
