@@ -197,6 +197,11 @@ service / on new http:Listener(9090) {
         return opportunities:accept_opportunity(user, id);
     }
 
+    resource function post complete_delivery/[int id](http:Request req) returns db:Opportunity|error {
+        auth:User user = check auth:getUser(req);
+        return opportunities:complete_delivery(user, id);
+    }
+
     // ---------------------------------------------- Order Resource Functions ----------------------------------------------
 
     resource function get orders(http:Request req) returns orders:OrderResponse|error {

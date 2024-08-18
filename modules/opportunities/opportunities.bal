@@ -61,3 +61,17 @@ public function accept_opportunity(auth:User user, int id) returns db:Opportunit
     }
     return updatedOpportunity;
 }
+
+
+public function complete_delivery(auth:User user, int id) returns db:Opportunity|error {
+    db:Client connection = connection:getConnection();
+
+    db:OpportunityUpdate opportunityUpdate = {status: "Delivered"};
+
+    db:Opportunity|persist:Error updatedOpportunity = connection->/opportunities/[id].put(opportunityUpdate);
+    if updatedOpportunity is persist:Error {
+        return error("Completing delivery failed");
+    }
+    return updatedOpportunity;
+}
+
