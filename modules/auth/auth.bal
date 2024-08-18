@@ -1,5 +1,6 @@
 import backend.connection;
 import backend.db;
+
 // import backend.user;
 
 import ballerina/http;
@@ -23,7 +24,7 @@ public type User record {|
     int consumerId?;
     int supermarketId?;
     int driverId?;
-    
+
 |};
 
 public type UserwithToken record {|
@@ -78,10 +79,10 @@ public function login(Credentials credentials) returns UserwithToken|error {
                 int supermarketId = getSupermarketId(user.id);
                 jwtUser.supermarketId = supermarketId;
             }
-            // "driver" => {
-            //     int driverId = getDriverId(user.id);
-            //     jwtUser.driverId = driverId;
-            // }
+            "Driver" => {
+                int driverId = getDriverId(user.id);
+                jwtUser.driverId = driverId;
+            }
         }
 
         string jwtToken = check jwt:issue(getConfig(jwtUser));
@@ -149,19 +150,20 @@ function getSupermarketId(int userId) returns int {
     return supermarketId;
 }
 
-// function getDriverId(int userId) returns int {
-//     int driverId = -1;
-//     do {
-//         stream<db:Consumer, persist:Error?> driverStream = connection->/drivers();
-//         db:Consumer[] driverArray = check from db:Consumer u in driverStream
-//             where u.userId == userId
-//             order by u.id descending
-//             select u;
-//         if (driverArray.length() > 0) {
-//             driverId = driverArray[0].id;
-//         }
-//     } on fail {
-//         driverId = -1;
-//     }
-//     return driverId;
-// }
+function getDriverId(int userId) returns int {
+    return 3;
+    // int driverId = -1;
+    // do {
+    //     stream<db:Consumer, persist:Error?> driverStream = connection->/drivers();
+    //     db:Consumer[] driverArray = check from db:Consumer u in driverStream
+    //         where u.userId == userId
+    //         order by u.id descending
+    //         select u;
+    //     if (driverArray.length() > 0) {
+    //         driverId = driverArray[0].id;
+    //     }
+    // } on fail {
+    //     driverId = -1;
+    // }
+    // return driverId;
+}

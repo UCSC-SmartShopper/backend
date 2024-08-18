@@ -39,7 +39,7 @@ public function getOpportunities(auth:User user, string status) returns Opportun
 
     stream<db:OpportunityWithRelations, persist:Error?> opportunityStream = connection->/opportunities.get();
     db:OpportunityWithRelations[] opportunities = check from db:OpportunityWithRelations opportunity in opportunityStream
-        where (status == "Pending") || (opportunity.driverId == user.driverId && opportunity.status == status)
+        where (opportunity.status == status) && (status == "Pending" || opportunity.driverId == user.driverId)
         select opportunity;
 
     return {count: opportunities.length(), next: "", results: opportunities};
