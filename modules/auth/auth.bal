@@ -32,8 +32,6 @@ public type UserwithToken record {|
     string jwtToken;
 |};
 
-db:Client connection = connection:getConnection();
-
 public function getUser(http:Request req) returns User|error {
     // get barrier token from the request
     string|error authHeader = req.getHeader("jwt-key");
@@ -55,6 +53,7 @@ public function getUser(http:Request req) returns User|error {
 
 public function login(Credentials credentials) returns UserwithToken|error {
 
+    db:Client connection = connection:getConnection();
     stream<db:User, persist:Error?> userStream = connection->/users();
     db:User[] userArray = check from db:User u in userStream
         where u.email == credentials.email_or_number || u.number == credentials.email_or_number
@@ -119,6 +118,7 @@ jwt:ValidatorConfig validatorConfig = {
 function getConsumerId(int userId) returns int {
     int consumerId = -1;
     do {
+        db:Client connection = connection:getConnection();
         stream<db:Consumer, persist:Error?> consumerStream = connection->/consumers();
         db:Consumer[] consumerArray = check from db:Consumer u in consumerStream
             where u.userId == userId
@@ -136,6 +136,7 @@ function getConsumerId(int userId) returns int {
 function getSupermarketId(int userId) returns int {
     int supermarketId = -1;
     do {
+        db:Client connection = connection:getConnection();
         stream<db:Supermarket, persist:Error?> supermarketStream = connection->/supermarkets();
         db:Supermarket[] supermarketArray = check from db:Supermarket s in supermarketStream
             where s.supermarketmanagerId == userId
