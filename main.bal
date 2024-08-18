@@ -1,7 +1,6 @@
 import backend.advertisements;
 import backend.auth;
 import backend.cart;
-import backend.connection;
 import backend.db;
 import backend.email_service;
 import backend.opportunities;
@@ -16,13 +15,12 @@ import backend.user_registration;
 import ballerina/http;
 import ballerina/io;
 import ballerina/persist;
-import ballerina/time;
 
 // import backend.user;
 
 @http:ServiceConfig {
     cors: {
-        allowOrigins: [ "*"],
+        allowOrigins: ["*"],
         allowCredentials: true,
         maxAge: 84900
 
@@ -30,8 +28,9 @@ import ballerina/time;
 }
 service / on new http:Listener(9090) {
 
-    db:Client connection = connection:getConnection();
+    // db:Client connection = connection:getConnection();
 
+    // ---------------------------------------------- User Login and Signup Resource Functions ----------------------------------------------
     resource function post login(@http:Payload auth:Credentials credentials) returns auth:UserwithToken|error {
         return auth:login(credentials);
     }
@@ -46,12 +45,14 @@ service / on new http:Listener(9090) {
 
     // ---------------------------------------------- Driver Signup Resource Functions ----------------------------------------------
 
+    // get the otp 
     resource function post driver_otp(@http:Payload user_registration:DriverPersonalDetails driverPersonalDetails) returns error|int {
         return user_registration:driver_otp_genaration(driverPersonalDetails);
     }
 
+    // match the otp and create a driver request
     resource function post match_driver_otp(@http:Payload user_registration:DriverOtp driverOtp) returns db:NonVerifiedDriver|error {
-        return user_registration:matchDriverOTP(driverOtp);
+        return user_registration:match_driver_otp(driverOtp);
     }
 
     // resource function post set_password(@http:Payload user_registration:SetPassword setPassword) returns string|error {
@@ -70,11 +71,8 @@ service / on new http:Listener(9090) {
     //     return "OTP not matched";
     // }
 
-    resource function get users() returns db:User[]|error? {
-        stream<db:User, persist:Error?> users = self.connection->/users.get();
-        return from db:User user in users
-            order by user.id
-            select user;
+    resource function get users() returns user:UserResponse|http:Unauthorized|error {
+        return user:get_all_user();
     }
 
     resource function get users/[int id](http:Request req) returns db:UserWithRelations|http:Unauthorized|user:UserNotFound|error {
@@ -82,29 +80,29 @@ service / on new http:Listener(9090) {
         return user:get_user(user, id);
     }
 
-    resource function post consumer(NewUser newUser) returns db:User|persist:Error|http:Conflict & readonly {
-        db:UserInsert userInsert = {
-            ...newUser,
-            role: "Consumer",
-            status: "Active",
-            createdAt: time:utcToCivil(time:utcNow()),
-            updatedAt: time:utcToCivil(time:utcNow()),
-            deletedAt: ()
-        };
+    // resource function post consumer(NewUser newUser) returns db:User|persist:Error|http:Conflict & readonly {
+    //     db:UserInsert userInsert = {
+    //         ...newUser,
+    //         role: "Consumer",
+    //         status: "Active",
+    //         createdAt: time:utcToCivil(time:utcNow()),
+    //         updatedAt: time:utcToCivil(time:utcNow()),
+    //         deletedAt: ()
+    //     };
 
-        int[]|persist:Error result = self.connection->/users.post([userInsert]);
+    //     int[]|persist:Error result = self.connection->/users.post([userInsert]);
 
-        if result is persist:Error {
-            if result is persist:AlreadyExistsError {
-                return http:CONFLICT;
-            }
-            return result;
-        }
+    //     if result is persist:Error {
+    //         if result is persist:AlreadyExistsError {
+    //             return http:CONFLICT;
+    //         }
+    //         return result;
+    //     }
 
-        db:User user = {...userInsert, id: result[0]};
+    //     db:User user = {...userInsert, id: result[0]};
 
-        return user;
-    }
+    //     return user;
+    // }
 
     resource function patch users/[int id](http:Request req, @http:Payload db:UserUpdate userUpdate) returns db:User|DataNotFound|error {
         auth:User user = check auth:getUser(req);

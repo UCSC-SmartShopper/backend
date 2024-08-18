@@ -12,6 +12,12 @@ public type UserNotFound record {|
     errors:ErrorDetails body;
 |};
 
+public type UserResponse record {|
+    int count;
+    string next;
+    db:User[] results;
+|};
+
 function createUserNotFound(int id) returns UserNotFound {
     return {
         body: {
@@ -20,6 +26,23 @@ function createUserNotFound(int id) returns UserNotFound {
             timestamp: time:utcNow()
         }
     };
+}
+
+public function get_all_user() returns UserResponse|http:Unauthorized|error {
+
+    // string[] authorizedRoles = ["Admin", "SupermarketManager", "Driver"];
+
+    // if !authorizedRoles.some((role) => role == user.role) {
+    //     return http:UNAUTHORIZED;
+    // }
+
+    db:Client connection = connection:getConnection();
+    stream<db:User, persist:Error?> users = connection->/users.get();
+    db:User[] userList = check from db:User user in users
+        order by user.id descending
+        select user;
+
+    return {count: userList.length(), next: "null", results: userList};
 }
 
 public function get_user(auth:User user, int id) returns db:UserWithRelations|http:Unauthorized|UserNotFound {
