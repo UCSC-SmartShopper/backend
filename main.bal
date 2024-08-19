@@ -55,6 +55,17 @@ service / on new http:Listener(9090) {
         return user_registration:match_driver_otp(driverOtp);
     }
 
+    // finalizing the driver signup
+    resource function post update_driver_signup/[int id](@http:Payload db:NonVerifiedDriverOptionalized driverUpdate) returns db:NonVerifiedDriver|error {
+        return user_registration:update_driver_signup(driverUpdate,id);
+    }
+
+    resource function get driver_requests(http:Request req) returns user_registration:DriverRequestsResponse|http:Unauthorized|persist:Error?|error {
+        auth:User user = check auth:getUser(req);
+        return user_registration:get_all_driver_requests(user);
+    }
+
+
     // resource function post set_password(@http:Payload user_registration:SetPassword setPassword) returns string|error {
     //     user_registration:OtpMappingRequest otpMappingRequest = {
     //         contactNumber: setPassword.contactNumber,
