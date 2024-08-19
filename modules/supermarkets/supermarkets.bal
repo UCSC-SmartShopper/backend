@@ -22,6 +22,7 @@ public type NewSupermarket record {|
     string role;
     string status;
     string supermarketManagerId;
+    string supermarketManagerName;
 |};
 
 function createSuperMarketNotFound(int id) returns SuperMarketNotFound {
@@ -58,7 +59,7 @@ public function registerSupermarket(NewSupermarket supermarket) returns db:User|
 
     // Insert user information
     db:UserInsert userInsert = {
-        name: supermarket.name,
+        name: supermarket.supermarketManagerName,
         email: supermarket.email,
         password: supermarket.password,
         number: supermarket.contactNo,
