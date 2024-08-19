@@ -12,6 +12,7 @@ import ballerinax/postgresql.driver as _;
 
 const USER = "users";
 const NON_VERIFY_USER = "nonverifyusers";
+const NON_VERIFIED_DRIVER = "nonverifieddrivers";
 const ADDRESS = "addresses";
 const SUPERMARKET = "supermarkets";
 const PRODUCT = "products";
@@ -74,6 +75,26 @@ public isolated client class Client {
                 contactNo: {columnName: "contactNo"},
                 OTP: {columnName: "OTP"},
                 password: {columnName: "password"}
+            },
+            keyFields: ["id"]
+        },
+        [NON_VERIFIED_DRIVER]: {
+            entityName: "NonVerifiedDriver",
+            tableName: "NonVerifiedDriver",
+            fieldMetadata: {
+                id: {columnName: "id", dbGenerated: true},
+                name: {columnName: "name"},
+                nic: {columnName: "nic"},
+                email: {columnName: "email"},
+                contactNo: {columnName: "contactNo"},
+                OTP: {columnName: "OTP"},
+                courierCompany: {columnName: "courierCompany"},
+                vehicleType: {columnName: "vehicleType"},
+                vehicleColor: {columnName: "vehicleColor"},
+                vehicleName: {columnName: "vehicleName"},
+                vehicleNumber: {columnName: "vehicleNumber"},
+                password: {columnName: "password"},
+                otpStatus: {columnName: "otpStatus"}
             },
             keyFields: ["id"]
         },
@@ -416,6 +437,7 @@ public isolated client class Client {
         self.persistClients = {
             [USER]: check new (dbClient, self.metadata.get(USER), psql:POSTGRESQL_SPECIFICS),
             [NON_VERIFY_USER]: check new (dbClient, self.metadata.get(NON_VERIFY_USER), psql:POSTGRESQL_SPECIFICS),
+            [NON_VERIFIED_DRIVER]: check new (dbClient, self.metadata.get(NON_VERIFIED_DRIVER), psql:POSTGRESQL_SPECIFICS),
             [ADDRESS]: check new (dbClient, self.metadata.get(ADDRESS), psql:POSTGRESQL_SPECIFICS),
             [SUPERMARKET]: check new (dbClient, self.metadata.get(SUPERMARKET), psql:POSTGRESQL_SPECIFICS),
             [PRODUCT]: check new (dbClient, self.metadata.get(PRODUCT), psql:POSTGRESQL_SPECIFICS),
@@ -506,6 +528,46 @@ public isolated client class Client {
         psql:SQLClient sqlClient;
         lock {
             sqlClient = self.persistClients.get(NON_VERIFY_USER);
+        }
+        _ = check sqlClient.runDeleteQuery(id);
+        return result;
+    }
+
+    isolated resource function get nonverifieddrivers(NonVerifiedDriverTargetType targetType = <>, sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``) returns stream<targetType, persist:Error?> = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.PostgreSQLProcessor",
+        name: "query"
+    } external;
+
+    isolated resource function get nonverifieddrivers/[int id](NonVerifiedDriverTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.PostgreSQLProcessor",
+        name: "queryOne"
+    } external;
+
+    isolated resource function post nonverifieddrivers(NonVerifiedDriverInsert[] data) returns int[]|persist:Error {
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(NON_VERIFIED_DRIVER);
+        }
+        sql:ExecutionResult[] result = check sqlClient.runBatchInsertQuery(data);
+        return from sql:ExecutionResult inserted in result
+            where inserted.lastInsertId != ()
+            select <int>inserted.lastInsertId;
+    }
+
+    isolated resource function put nonverifieddrivers/[int id](NonVerifiedDriverUpdate value) returns NonVerifiedDriver|persist:Error {
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(NON_VERIFIED_DRIVER);
+        }
+        _ = check sqlClient.runUpdateQuery(id, value);
+        return self->/nonverifieddrivers/[id].get();
+    }
+
+    isolated resource function delete nonverifieddrivers/[int id]() returns NonVerifiedDriver|persist:Error {
+        NonVerifiedDriver result = check self->/nonverifieddrivers/[id].get();
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(NON_VERIFIED_DRIVER);
         }
         _ = check sqlClient.runDeleteQuery(id);
         return result;

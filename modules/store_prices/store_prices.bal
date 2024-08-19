@@ -32,12 +32,11 @@ function createSupermarketItemNotFound(int id) returns SupermarketItemNotFound {
 
 // -------------------------------------------------- Resource Functions --------------------------------------------------
 
-db:Client connection = connection:getConnection();
-
 public function getSupermarketItemByProductId(auth:User user, int productId) returns SupermarketItemResponse|SupermarketItemNotFound|error {
 
     // if user is supermarket manager then return all items belongs to the supermarket
     // if user is consumer then return supermarket item for the given product id
+    db:Client connection = connection:getConnection();
 
     stream<db:SupermarketItem, persist:Error?> prices = connection->/supermarketitems();
     db:SupermarketItem[] supermarketItem = check from db:SupermarketItem price in prices
@@ -49,6 +48,8 @@ public function getSupermarketItemByProductId(auth:User user, int productId) ret
 }
 
 public function getSupermarketItemById(int id) returns db:SupermarketItem|SupermarketItemNotFound {
+    db:Client connection = connection:getConnection();
+
     db:SupermarketItem|persist:Error supermarketItem = connection->/supermarketitems/[id].get(db:SupermarketItem);
 
     if (supermarketItem is persist:Error) {
@@ -68,6 +69,7 @@ public function editSupermarketItem(auth:User user, db:SupermarketItem supermark
         discount: supermarketItem.discount,
         availableQuantity: supermarketItem.availableQuantity
     };
+    db:Client connection = connection:getConnection();
 
     db:SupermarketItem|persist:Error UpdatedSupermarketItem = connection->/supermarketitems/[supermarketItemId].put(supermarketItemUpdate);
 
