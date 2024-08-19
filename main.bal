@@ -5,7 +5,7 @@ import backend.db;
 import backend.opportunities;
 import backend.orders;
 import backend.products;
-import backend.store_prices;
+import backend.supermarket_items;
 import backend.supermarkets;
 import backend.user;
 import backend.user_registration;
@@ -127,19 +127,19 @@ service / on new http:Listener(9090) {
     }
 
     // ---------------------------------------------- Supermarket Items Resource Functions ----------------------------------------------
-    resource function get supermarketitems(http:Request req, @http:Query int productId) returns store_prices:SupermarketItemResponse|store_prices:SupermarketItemNotFound|error {
+    resource function get supermarketitems(http:Request req, @http:Query int productId) returns supermarket_items:SupermarketItemResponse|supermarket_items:SupermarketItemNotFound|error {
         auth:User user = check auth:getUser(req);
         // if user is supermarket manager then return all items belongs to the supermarket
-        return store_prices:get_supermarket_items(user, productId);
+        return supermarket_items:get_supermarket_items(user, productId);
     }
 
-    resource function get supermarketitems/[int id]() returns db:SupermarketItem|store_prices:SupermarketItemNotFound {
-        return store_prices:get_supermarket_item_by_id(id);
+    resource function get supermarketitems/[int id]() returns db:SupermarketItem|supermarket_items:SupermarketItemNotFound {
+        return supermarket_items:get_supermarket_item_by_id(id);
     }
 
-    resource function patch supermarketitems(http:Request req, @http:Payload db:SupermarketItem supermarketItem) returns error|db:SupermarketItem|store_prices:SupermarketItemNotFound {
+    resource function patch supermarketitems(http:Request req, @http:Payload db:SupermarketItem supermarketItem) returns error|db:SupermarketItem|supermarket_items:SupermarketItemNotFound {
         auth:User user = check auth:getUser(req);
-        return store_prices:editSupermarketItem(user, supermarketItem);
+        return supermarket_items:editSupermarketItem(user, supermarketItem);
     }
 
     // ---------------------------------------------- Cart Resource Functions ----------------------------------------------
