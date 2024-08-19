@@ -3,24 +3,19 @@ import backend.auth;
 import backend.cart;
 import backend.connection;
 import backend.db;
-import backend.email_service;
 import backend.opportunities;
 import backend.orders;
 import backend.products;
-import backend.sms_service;
 import backend.store_prices;
 import backend.supermarkets;
 import backend.user;
 import backend.user_registration;
 
 import ballerina/http;
-import ballerina/io;
 import ballerina/persist;
 import ballerina/time;
 
 // import backend.user;
-
-
 
 @http:ServiceConfig {
     cors: {
@@ -142,17 +137,17 @@ service / on new http:Listener(9090) {
         return supermarkets:getSupermarketById(id);
     }
 
-    resource function get sendsms() returns error? {
-        io:println("Sending sms");
-        error? sendmail = sms_service:sendsms();
-        return sendmail;
-    }
+    // resource function get sendsms() returns error? {
+    //     io:println("Sending sms");
+    //     error? sendmail = sms_service:sendsms();
+    //     return sendmail;
+    // }
 
-    resource function get sendmail() returns error? {
-        io:println("Sending email");
-        error? sendmail = email_service:sendmail();
-        return sendmail;
-    }
+    // resource function get sendmail() returns error? {
+    //     io:println("Sending email");
+    //     error? sendmail = email_service:sendmail();
+    //     return sendmail;
+    // }
 
     resource function post checkOtpMatching(@http:Payload user_registration:OtpMappingRequest otpMappingRequest) returns string|error|user_registration:NonVerifyUserNotFound {
         // io:println("OTP Matching");
@@ -223,8 +218,9 @@ service / on new http:Listener(9090) {
 
     // ---------------------------------------------- User Resource Functions ----------------------------------------------
 
-    resource function post supermarket(@http:Payload supermarkets:NewSupermarket newSupermarket) returns db:User|persist:Error|error? {
-        return check supermarkets:registerSupermarket(newSupermarket);
+    resource function post supermarket(http:Request req, @http:Payload supermarkets:NewSupermarket supermartInsert) returns db:Supermarket|http:Unauthorized|persist:Error|error? {
+        auth:User user = check auth:getUser(req);
+        return check supermarkets:registerSupermarket(user, supermartInsert);
     }
 
 }

@@ -1,3 +1,4 @@
+import backend.auth;
 import backend.connection;
 import backend.db;
 import backend.errors;
@@ -34,7 +35,6 @@ function createSuperMarketNotFound(int id) returns SuperMarketNotFound {
     };
 }
 
-
 db:Client connection = connection:getConnection();
 
 public function getSupermarkets() returns db:Supermarket[]|error? {
@@ -55,7 +55,11 @@ public function getSupermarketById(int id) returns db:Supermarket|SuperMarketNot
 
 // create supermarket
 
-public function registerSupermarket(NewSupermarket supermarket) returns db:User|persist:Error|error? {
+public function registerSupermarket(auth:User user1, NewSupermarket supermarket) returns db:Supermarket|http:Unauthorized|persist:Error|error? {
+
+    if user1.role != "Admin" {
+        return http:UNAUTHORIZED;
+    }
 
     // Insert user information
     db:UserInsert userInsert = {
@@ -64,7 +68,7 @@ public function registerSupermarket(NewSupermarket supermarket) returns db:User|
         password: supermarket.password,
         number: supermarket.contactNo,
         profilePic: supermarket.logo,
-        role: "supermarket",
+        role: "Supermarket Manager",
         status: "Active",
         createdAt: time:utcToCivil(time:utcNow()),
         updatedAt: time:utcToCivil(time:utcNow()),
@@ -80,9 +84,6 @@ public function registerSupermarket(NewSupermarket supermarket) returns db:User|
         return userResult;
     }
 
-    // Create user object to return
-    db:User user = {...userInsert, id: userResult[0]};
-
     // Insert supermarket information
     db:SupermarketInsert supermarketInsert = {
         name: supermarket.name,
@@ -90,14 +91,10 @@ public function registerSupermarket(NewSupermarket supermarket) returns db:User|
         logo: supermarket.logo,
         location: supermarket.location,
         address: supermarket.address,
-        supermarketmanagerId: user.id
+        supermarketmanagerId: userResult[0]
     };
 
     int[]|persist:Error supermarketResult = connection->/supermarkets.post([supermarketInsert]);
-
-    // if supermarketResult is persist:Error {
-    //     return supermarketResult;
-    // }
 
     if supermarketResult is persist:Error {
         if supermarketResult is persist:AlreadyExistsError {
@@ -107,5 +104,8 @@ public function registerSupermarket(NewSupermarket supermarket) returns db:User|
     }
 
     // Return the created user
-    return user;
+    return {
+        ...supermarketInsert,
+        id: supermarketResult[0]
+    };
 }
