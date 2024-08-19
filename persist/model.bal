@@ -18,6 +18,7 @@ type User record {|
     time:Civil? deletedAt;
     Consumer? consumer;
     Supermarket? supermarket;
+    Driver? driver;
 |};
 
 type NonVerifyUser record {|
@@ -69,7 +70,7 @@ type Supermarket record {|
     User supermarketManager;
     SupermarketItem[] storeprice;
     OpportunitySupermarket[] opportunitysupermarket;
-	SupermarketOrder[] supermarketorder;
+    SupermarketOrder[] supermarketorder;
 |};
 
 type Product record {|
@@ -177,4 +178,16 @@ type Advertisement record {|
     string startDate;
     string endDate;
     string priority;
+|};
+
+type Driver record {|
+    @sql:Generated
+    readonly int id;
+    User user;
+    string nic;
+    string courierCompany;
+    string vehicleType;
+    string vehicleColor;
+    string vehicleName;
+    string vehicleNumber;
 |};
