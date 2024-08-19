@@ -6,7 +6,6 @@ import backend.errors;
 
 import ballerina/http;
 import ballerina/persist;
-import ballerina/io;
 
 
 
@@ -32,7 +31,7 @@ function createSupermarketItemNotFound(int id) returns SupermarketItemNotFound {
 
 // -------------------------------------------------- Resource Functions --------------------------------------------------
 
-public function getSupermarketItemByProductId(auth:User user, int productId) returns SupermarketItemResponse|SupermarketItemNotFound|error {
+public function get_supermarket_items(auth:User user, int productId) returns SupermarketItemResponse|SupermarketItemNotFound|error {
 
     // if user is supermarket manager then return all items belongs to the supermarket
     // if user is consumer then return supermarket item for the given product id
@@ -47,7 +46,7 @@ public function getSupermarketItemByProductId(auth:User user, int productId) ret
     return {count: supermarketItem.length(), next: "null", results: supermarketItem};
 }
 
-public function getSupermarketItemById(int id) returns db:SupermarketItem|SupermarketItemNotFound {
+public function get_supermarket_item_by_id(int id) returns db:SupermarketItem|SupermarketItemNotFound {
     db:Client connection = connection:getConnection();
 
     db:SupermarketItem|persist:Error supermarketItem = connection->/supermarketitems/[id].get(db:SupermarketItem);
@@ -79,21 +78,6 @@ public function editSupermarketItem(auth:User user, db:SupermarketItem supermark
     return UpdatedSupermarketItem;
 }
 
-
-public function getSupermarketItemsBySupermarketId(int SupermarketId) returns SupermarketItemResponse|SupermarketItemNotFound|error {
-    io:println("SupermarketId: ", SupermarketId);
-
-    stream<db:SupermarketItem, persist:Error?> supermarketItemStream = connection->/supermarketitems(whereClause = `"SupermarketItem"."supermarketId"= ${SupermarketId}`);
-    db:SupermarketItem[] supermarketitems = check from db:SupermarketItem item in supermarketItemStream
-        select item;
-    io:println("SupermarketItems: ", supermarketitems);
-
-    return {
-        count: supermarketitems.length(),
-        next: "null",
-        results: supermarketitems
-    };
-}
 
 
 

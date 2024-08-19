@@ -130,14 +130,14 @@ service / on new http:Listener(9090) {
     resource function get supermarketitems(http:Request req, @http:Query int productId) returns store_prices:SupermarketItemResponse|store_prices:SupermarketItemNotFound|error {
         auth:User user = check auth:getUser(req);
         // if user is supermarket manager then return all items belongs to the supermarket
-        return store_prices:getSupermarketItemByProductId(user, productId);
+        return store_prices:get_supermarket_items(user, productId);
     }
 
     resource function get supermarketitems/[int id]() returns db:SupermarketItem|store_prices:SupermarketItemNotFound {
-        return store_prices:getSupermarketItemById(id);
+        return store_prices:get_supermarket_item_by_id(id);
     }
 
-    resource function post supermarketitems(http:Request req, @http:Payload db:SupermarketItem supermarketItem) returns error|db:SupermarketItem|store_prices:SupermarketItemNotFound {
+    resource function patch supermarketitems(http:Request req, @http:Payload db:SupermarketItem supermarketItem) returns error|db:SupermarketItem|store_prices:SupermarketItemNotFound {
         auth:User user = check auth:getUser(req);
         return store_prices:editSupermarketItem(user, supermarketItem);
     }
@@ -165,11 +165,11 @@ service / on new http:Listener(9090) {
 
     // ---------------------------------------------- Supermarket Resource Functions ----------------------------------------------
     resource function get supermarkets() returns db:Supermarket[]|error? {
-        return supermarkets:getSupermarkets();
+        return supermarkets:get_supermarkets();
     }
 
     resource function get supermarkets/[int id]() returns db:Supermarket|supermarkets:SuperMarketNotFound|error? {
-        return supermarkets:getSupermarketById(id);
+        return supermarkets:get_supermarket_by_id(id);
     }
 
     // resource function get sendsms() returns error? {
@@ -261,7 +261,7 @@ service / on new http:Listener(9090) {
 
     resource function post supermarket(http:Request req, @http:Payload supermarkets:NewSupermarket supermartInsert) returns db:Supermarket|http:Unauthorized|persist:Error|error? {
         auth:User user = check auth:getUser(req);
-        return check supermarkets:registerSupermarket(user, supermartInsert);
+        return check supermarkets:register_supermarket(user, supermartInsert);
     }
 
 }

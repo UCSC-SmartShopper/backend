@@ -35,10 +35,7 @@ function createSuperMarketNotFound(int id) returns SuperMarketNotFound {
     };
 }
 
-
-db:Client connection = connection:getConnection();
-
-public function getSupermarkets() returns db:Supermarket[]|error? {
+public function get_supermarkets() returns db:Supermarket[]|error? {
     db:Client connection = connection:getConnection();
     stream<db:Supermarket, persist:Error?> supermarketStream = connection->/supermarkets.get();
     db:Supermarket[] supermarkets = check from db:Supermarket supermarket in supermarketStream
@@ -47,7 +44,7 @@ public function getSupermarkets() returns db:Supermarket[]|error? {
     return supermarkets;
 }
 
-public function getSupermarketById(int id) returns db:Supermarket|SuperMarketNotFound|error? {
+public function get_supermarket_by_id(int id) returns db:Supermarket|SuperMarketNotFound|error? {
     db:Client connection = connection:getConnection();
     db:Supermarket|persist:Error? supermarket = connection->/supermarkets/[id](db:Supermarket);
     if (supermarket is ()) {
@@ -58,9 +55,9 @@ public function getSupermarketById(int id) returns db:Supermarket|SuperMarketNot
 
 // create supermarket
 
-public function registerSupermarket(auth:User user1, NewSupermarket supermarket) returns db:Supermarket|http:Unauthorized|persist:Error|error? {
+public function register_supermarket(auth:User user, NewSupermarket supermarket) returns db:Supermarket|http:Unauthorized|persist:Error|error? {
 
-    if user1.role != "Admin" {
+    if user.role != "Admin" {
         return http:UNAUTHORIZED;
     }
 
@@ -77,7 +74,7 @@ public function registerSupermarket(auth:User user1, NewSupermarket supermarket)
         updatedAt: time:utcToCivil(time:utcNow()),
         deletedAt: ()
     };
-
+    db:Client connection = connection:getConnection();
     int[]|persist:Error userResult = connection->/users.post([userInsert]);
 
     if userResult is persist:Error {
