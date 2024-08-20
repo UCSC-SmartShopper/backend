@@ -55,6 +55,12 @@ service / on new http:Listener(9090) {
         return user_registration:update_driver_signup(driverUpdate, id);
     }
 
+    // Accept driver request by courier company manager
+    resource function post accept_driver_request(http:Request req, @http:Payload int driverRequestId) returns (http:Unauthorized & readonly)|error|int|error {
+        auth:User user = check auth:getUser(req);
+        return user_registration:accept_driver_request(user, driverRequestId);
+    }
+
     resource function get driver_requests(http:Request req) returns user_registration:DriverRequestsResponse|http:Unauthorized|persist:Error?|error {
         auth:User user = check auth:getUser(req);
         return user_registration:get_all_driver_requests(user);
@@ -109,9 +115,9 @@ service / on new http:Listener(9090) {
         return supermarket_items:get_supermarket_item_by_id(id);
     }
 
-    resource function patch supermarketitems(http:Request req, @http:Payload db:SupermarketItem supermarketItem) returns error|db:SupermarketItem|supermarket_items:SupermarketItemNotFound {
+    resource function patch supermarketitems/[int id](http:Request req, @http:Payload db:SupermarketItemUpdate supermarketItem) returns error|db:SupermarketItem|supermarket_items:SupermarketItemNotFound {
         auth:User user = check auth:getUser(req);
-        return supermarket_items:editSupermarketItem(user, supermarketItem);
+        return supermarket_items:editSupermarketItem(user, id, supermarketItem);
     }
 
     // ---------------------------------------------- Cart Resource Functions ----------------------------------------------

@@ -2,12 +2,11 @@ import backend.auth;
 import backend.connection;
 import backend.db;
 import backend.errors;
+
 // import backend.products;
 
 import ballerina/http;
 import ballerina/persist;
-
-
 
 public type SupermarketItemResponse record {|
     int count;
@@ -57,27 +56,15 @@ public function get_supermarket_item_by_id(int id) returns db:SupermarketItem|Su
     return supermarketItem;
 }
 
-public function editSupermarketItem(auth:User user, db:SupermarketItem supermarketItem) returns db:SupermarketItem|SupermarketItemNotFound {
+public function editSupermarketItem(auth:User user, int id, db:SupermarketItemUpdate supermarketItemUpdate) returns db:SupermarketItem|SupermarketItemNotFound {
 
-    int supermarketItemId = supermarketItem.id;
-
-    db:SupermarketItemUpdate supermarketItemUpdate = {
-        price: supermarketItem.price,
-        productId: supermarketItem.productId,
-        supermarketId: supermarketItem.supermarketId,
-        discount: supermarketItem.discount,
-        availableQuantity: supermarketItem.availableQuantity
-    };
     db:Client connection = connection:getConnection();
 
-    db:SupermarketItem|persist:Error UpdatedSupermarketItem = connection->/supermarketitems/[supermarketItemId].put(supermarketItemUpdate);
+    db:SupermarketItem|persist:Error UpdatedSupermarketItem = connection->/supermarketitems/[id].put(supermarketItemUpdate);
 
     if (UpdatedSupermarketItem is persist:Error) {
-        return createSupermarketItemNotFound(supermarketItemId);
+        return createSupermarketItemNotFound(id);
     }
     return UpdatedSupermarketItem;
 }
-
-
-
 

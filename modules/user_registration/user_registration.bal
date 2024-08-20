@@ -284,6 +284,32 @@ public function update_driver_signup(db:NonVerifiedDriverOptionalized driverUpda
     return updatedDriver;
 }
 
+public function accept_driver_request(auth:User user, int driverRequestId) returns http:Unauthorized & readonly|error|int {
+
+    if user.role != "Courier Company Manager" {
+        return http:UNAUTHORIZED;
+    }
+
+    db:Client connection = connection:getConnection();
+    db:NonVerifiedDriver|persist:Error result = connection->/nonverifieddrivers/[driverRequestId](db:NonVerifiedDriver);
+
+    if result is persist:Error {
+        return error("Driver not found.");
+    }
+
+    // db:NonVerifiedDriverUpdate nonVerifiedDriverUpdate = {
+    //     courierCompany: driverUpdate.courierCompany,
+    //     vehicleType: driverUpdate.vehicleType,
+    //     vehicleColor: driverUpdate.vehicleColor,
+    //     vehicleName: driverUpdate.vehicleName,
+    //     vehicleNumber: driverUpdate.vehicleNumber,
+    //     password: driverUpdate.password
+    // };
+
+    // db:NonVerifiedDriver|persist:Error updatedDriver = connection->/nonverifieddrivers/[id].put(nonVerifiedDriverUpdate);
+    return driverRequestId;
+}
+
 public function get_all_driver_requests(auth:User user) returns DriverRequestsResponse|http:Unauthorized|persist:Error? {
     if user.role != "Courier Company Manager" {
         return http:UNAUTHORIZED;
