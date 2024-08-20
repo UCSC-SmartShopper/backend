@@ -189,7 +189,7 @@ service / on new http:Listener(9090) {
         return advertisements:addAdvertisement(advertisement);
     }
 
-    resource function patch advertisement/[int id](http:Request req, @http:Payload db:AdvertisementUpdate advertisement) returns db:Advertisement|advertisements:AdvertisementNotFound|error? {
+    resource function patch advertisements/[int id](http:Request req, @http:Payload db:AdvertisementUpdate advertisement) returns db:Advertisement|advertisements:AdvertisementNotFound|error? {
         return advertisements:updateAdvertisement(id, advertisement);
     }
 
