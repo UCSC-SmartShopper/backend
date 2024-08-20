@@ -2,18 +2,15 @@ import backend.advertisements;
 import backend.auth;
 import backend.cart;
 import backend.db;
-import backend.email_service;
 import backend.opportunities;
 import backend.orders;
 import backend.products;
-import backend.sms_service;
-import backend.store_prices;
+import backend.supermarket_items;
 import backend.supermarkets;
 import backend.user;
 import backend.user_registration;
 
 import ballerina/http;
-import ballerina/io;
 import ballerina/persist;
 
 // import backend.user;
@@ -27,8 +24,6 @@ import ballerina/persist;
     }
 }
 service / on new http:Listener(9090) {
-
-    // db:Client connection = connection:getConnection();
 
     // ---------------------------------------------- User Login and Signup Resource Functions ----------------------------------------------
     resource function post login(@http:Payload auth:Credentials credentials) returns auth:UserwithToken|error {
@@ -55,22 +50,23 @@ service / on new http:Listener(9090) {
         return user_registration:match_driver_otp(driverOtp);
     }
 
-    // resource function post set_password(@http:Payload user_registration:SetPassword setPassword) returns string|error {
-    //     user_registration:OtpMappingRequest otpMappingRequest = {
-    //         contactNumber: setPassword.contactNumber,
-    //         OTP: setPassword.OTP
-    //     };
+    // finalizing the driver signup
+    resource function post update_driver_signup/[int id](@http:Payload db:NonVerifiedDriverOptionalized driverUpdate) returns db:NonVerifiedDriver|error {
+        return user_registration:update_driver_signup(driverUpdate, id);
+    }
 
-    //     string|user_registration:NonVerifyUserNotFound checkOtpMatching = check user_registration:checkOtpMatching(otpMappingRequest);
+    // Accept driver request by courier company manager
+    resource function post accept_driver_request(http:Request req, @http:Payload int driverRequestId) returns (http:Unauthorized & readonly)|error|int|error {
+        auth:User user = check auth:getUser(req);
+        return user_registration:accept_driver_request(user, driverRequestId);
+    }
 
-    //     if checkOtpMatching is string && checkOtpMatching == "OTP matched" {
-    //         string result = check user_registration:setPassword(setPassword);
-    //         return result;
-    //     }
+    resource function get driver_requests(http:Request req) returns user_registration:DriverRequestsResponse|http:Unauthorized|persist:Error?|error {
+        auth:User user = check auth:getUser(req);
+        return user_registration:get_all_driver_requests(user);
+    }
 
-    //     return "OTP not matched";
-    // }
-
+    // ---------------------------------------------- User Resource Functions ----------------------------------------------
     resource function get users() returns user:UserResponse|http:Unauthorized|error {
         return user:get_all_user();
     }
@@ -79,30 +75,6 @@ service / on new http:Listener(9090) {
         auth:User user = check auth:getUser(req);
         return user:get_user(user, id);
     }
-
-    // resource function post consumer(NewUser newUser) returns db:User|persist:Error|http:Conflict & readonly {
-    //     db:UserInsert userInsert = {
-    //         ...newUser,
-    //         role: "Consumer",
-    //         status: "Active",
-    //         createdAt: time:utcToCivil(time:utcNow()),
-    //         updatedAt: time:utcToCivil(time:utcNow()),
-    //         deletedAt: ()
-    //     };
-
-    //     int[]|persist:Error result = self.connection->/users.post([userInsert]);
-
-    //     if result is persist:Error {
-    //         if result is persist:AlreadyExistsError {
-    //             return http:CONFLICT;
-    //         }
-    //         return result;
-    //     }
-
-    //     db:User user = {...userInsert, id: result[0]};
-
-    //     return user;
-    // }
 
     resource function patch users/[int id](http:Request req, @http:Payload db:UserUpdate userUpdate) returns db:User|DataNotFound|error {
         auth:User user = check auth:getUser(req);
@@ -118,20 +90,34 @@ service / on new http:Listener(9090) {
         return products:getProductsById(id);
     }
 
+    // ---------------------------------------------- Supermarket Resource Functions ----------------------------------------------
+    resource function get supermarkets() returns db:Supermarket[]|error? {
+        return supermarkets:get_supermarkets();
+    }
+
+    resource function get supermarkets/[int id]() returns db:Supermarket|supermarkets:SuperMarketNotFound|error? {
+        return supermarkets:get_supermarket_by_id(id);
+    }
+
+    resource function post supermarket(http:Request req, @http:Payload supermarkets:NewSupermarket supermartInsert) returns db:Supermarket|http:Unauthorized|persist:Error|error? {
+        auth:User user = check auth:getUser(req);
+        return check supermarkets:register_supermarket(user, supermartInsert);
+    }
+
     // ---------------------------------------------- Supermarket Items Resource Functions ----------------------------------------------
-    resource function get supermarketitems(http:Request req, @http:Query int productId) returns store_prices:SupermarketItemResponse|store_prices:SupermarketItemNotFound|error {
+    resource function get supermarketitems(http:Request req, @http:Query int productId) returns supermarket_items:SupermarketItemResponse|supermarket_items:SupermarketItemNotFound|error {
         auth:User user = check auth:getUser(req);
         // if user is supermarket manager then return all items belongs to the supermarket
-        return store_prices:getSupermarketItemByProductId(user, productId);
+        return supermarket_items:get_supermarket_items(user, productId);
     }
 
-    resource function get supermarketitems/[int id]() returns db:SupermarketItem|store_prices:SupermarketItemNotFound {
-        return store_prices:getSupermarketItemById(id);
+    resource function get supermarketitems/[int id]() returns db:SupermarketItem|supermarket_items:SupermarketItemNotFound {
+        return supermarket_items:get_supermarket_item_by_id(id);
     }
 
-    resource function post supermarketitems(http:Request req, @http:Payload db:SupermarketItem supermarketItem) returns error|db:SupermarketItem|store_prices:SupermarketItemNotFound {
+    resource function patch supermarketitems/[int id](http:Request req, @http:Payload db:SupermarketItemUpdate supermarketItem) returns error|db:SupermarketItem|supermarket_items:SupermarketItemNotFound {
         auth:User user = check auth:getUser(req);
-        return store_prices:editSupermarketItem(user, supermarketItem);
+        return supermarket_items:editSupermarketItem(user, id, supermarketItem);
     }
 
     // ---------------------------------------------- Cart Resource Functions ----------------------------------------------
@@ -153,32 +139,6 @@ service / on new http:Listener(9090) {
     resource function delete carts(http:Request req, int id) returns db:CartItem|error {
         auth:User user = check auth:getUser(req);
         return cart:removeCartItem(user.consumerId ?: -1, id);
-    }
-
-    // ---------------------------------------------- Supermarket Resource Functions ----------------------------------------------
-    resource function get supermarkets() returns db:Supermarket[]|error? {
-        return supermarkets:getSupermarkets();
-    }
-
-    resource function get supermarkets/[int id]() returns db:Supermarket|supermarkets:SuperMarketNotFound|error? {
-        return supermarkets:getSupermarketById(id);
-    }
-
-    resource function get sendsms() returns error? {
-        io:println("Sending sms");
-        error? sendmail = sms_service:sendsms();
-        return sendmail;
-    }
-
-    resource function get sendmail() returns error? {
-        io:println("Sending email");
-        error? sendmail = email_service:sendmail();
-        return sendmail;
-    }
-
-    resource function post checkOtpMatching(@http:Payload user_registration:OtpMappingRequest otpMappingRequest) returns string|error|user_registration:NonVerifyUserNotFound {
-        // io:println("OTP Matching");
-        return user_registration:checkOtpMatching(otpMappingRequest);
     }
 
     // ---------------------------------------------- Opportunities Resource Functions ----------------------------------------------
@@ -220,12 +180,6 @@ service / on new http:Listener(9090) {
         auth:User user = check auth:getUser(req);
         return orders:supermarket_order_ready(user, orderReadyRequest);
     }
-
-    // ---------------------------------------------- NonVerifyUser Resource Functions ----------------------------------------------
-
-    // resource function get nonVerifyUser() returns  {
-    //     return user:registerNonVerifyUser("contactNo" ,"username");
-    // }
 
     //---------------------------------Advertisement Resource Functions----------------------------------------------
 

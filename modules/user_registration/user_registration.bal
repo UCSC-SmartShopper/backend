@@ -1,3 +1,4 @@
+import backend.auth;
 import backend.connection;
 import backend.db;
 import backend.errors;
@@ -15,6 +16,19 @@ public type NonVerifyUser record {|
     string contactNo;
     string name;
     string OTP;
+|};
+
+public type NonVerifiedDriver record {|
+    readonly int id;
+    string name;
+    string nic;
+    string email;
+    string contactNo;
+    string courierCompany;
+    string vehicleType;
+    string vehicleColor;
+    string vehicleName;
+    string vehicleNumber;
 |};
 
 public type OtpMappingRequest record {|
@@ -50,6 +64,12 @@ public type DriverPersonalDetails record {|
 public type NonVerifyUserNotFound record {|
     *http:NotFound;
     errors:ErrorDetails body;
+|};
+
+public type DriverRequestsResponse record {|
+    int count;
+    string next;
+    NonVerifiedDriver[] results;
 |};
 
 function createNonVerifyUserNotFound(string otp) returns NonVerifyUserNotFound {
@@ -235,5 +255,83 @@ public function match_driver_otp(DriverOtp driverOtp) returns db:NonVerifiedDriv
 
     db:NonVerifiedDriver|persist:Error updatedDriver = connection->/nonverifieddrivers/[driverOtp.id].put(nonVerifiedDriverUpdate);
     return updatedDriver;
+}
 
+public function update_driver_signup(db:NonVerifiedDriverOptionalized driverUpdate, int id) returns db:NonVerifiedDriver|error {
+
+    db:Client connection = connection:getConnection();
+
+    db:NonVerifiedDriver|persist:Error result = connection->/nonverifieddrivers/[id](db:NonVerifiedDriver);
+
+    if result is persist:Error {
+        return error("Driver not found.");
+    }
+
+    if (driverUpdate.OTP != result.OTP) {
+        return error("Otp does not matched.");
+    }
+
+    db:NonVerifiedDriverUpdate nonVerifiedDriverUpdate = {
+        courierCompany: driverUpdate.courierCompany,
+        vehicleType: driverUpdate.vehicleType,
+        vehicleColor: driverUpdate.vehicleColor,
+        vehicleName: driverUpdate.vehicleName,
+        vehicleNumber: driverUpdate.vehicleNumber,
+        password: driverUpdate.password
+    };
+
+    db:NonVerifiedDriver|persist:Error updatedDriver = connection->/nonverifieddrivers/[id].put(nonVerifiedDriverUpdate);
+    return updatedDriver;
+}
+
+public function accept_driver_request(auth:User user, int driverRequestId) returns http:Unauthorized & readonly|error|int {
+
+    if user.role != "Courier Company Manager" {
+        return http:UNAUTHORIZED;
+    }
+
+    db:Client connection = connection:getConnection();
+    db:NonVerifiedDriver|persist:Error result = connection->/nonverifieddrivers/[driverRequestId](db:NonVerifiedDriver);
+
+    if result is persist:Error {
+        return error("Driver not found.");
+    }
+
+    // db:NonVerifiedDriverUpdate nonVerifiedDriverUpdate = {
+    //     courierCompany: driverUpdate.courierCompany,
+    //     vehicleType: driverUpdate.vehicleType,
+    //     vehicleColor: driverUpdate.vehicleColor,
+    //     vehicleName: driverUpdate.vehicleName,
+    //     vehicleNumber: driverUpdate.vehicleNumber,
+    //     password: driverUpdate.password
+    // };
+
+    // db:NonVerifiedDriver|persist:Error updatedDriver = connection->/nonverifieddrivers/[id].put(nonVerifiedDriverUpdate);
+    return driverRequestId;
+}
+
+public function get_all_driver_requests(auth:User user) returns DriverRequestsResponse|http:Unauthorized|persist:Error? {
+    if user.role != "Courier Company Manager" {
+        return http:UNAUTHORIZED;
+    }
+
+    db:Client connection = connection:getConnection();
+    stream<db:NonVerifiedDriver, persist:Error?> driverRequests = connection->/nonverifieddrivers();
+    NonVerifiedDriver[] driverRequestList = check from db:NonVerifiedDriver driverRequest in driverRequests
+        where driverRequest.otpStatus == "Verified"
+        order by driverRequest.id descending
+        select {
+            id: driverRequest.id,
+            name: driverRequest.name,
+            nic: driverRequest.nic,
+            email: driverRequest.email,
+            contactNo: driverRequest.contactNo,
+            courierCompany: driverRequest.courierCompany,
+            vehicleType: driverRequest.vehicleType,
+            vehicleColor: driverRequest.vehicleColor,
+            vehicleName: driverRequest.vehicleName,
+            vehicleNumber: driverRequest.vehicleNumber
+        };
+
+    return {count: driverRequestList.length(), next: "null", results: driverRequestList};
 }

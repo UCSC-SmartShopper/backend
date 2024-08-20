@@ -425,6 +425,7 @@ modules = [
 	{org = "djaya", packageName = "backend", moduleName = "backend.auth"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.cart"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.connection"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.consumer"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.db"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.email_service"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.errors"},
@@ -433,7 +434,7 @@ modules = [
 	{org = "djaya", packageName = "backend", moduleName = "backend.orders"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.products"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.sms_service"},
-	{org = "djaya", packageName = "backend", moduleName = "backend.store_prices"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.supermarket_items"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.supermarkets"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.user"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.user_registration"}
