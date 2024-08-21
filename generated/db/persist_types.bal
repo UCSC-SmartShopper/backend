@@ -38,6 +38,7 @@ public type UserWithRelations record {|
     *UserOptionalized;
     ConsumerOptionalized consumer?;
     SupermarketOptionalized supermarket?;
+    DriverOptionalized driver?;
 |};
 
 public type UserTargetType typedesc<UserWithRelations>;
@@ -117,7 +118,7 @@ public type NonVerifiedDriver record {|
     string vehicleName;
     string vehicleNumber;
     string password;
-    string otpStatus;
+    string status;
 |};
 
 public type NonVerifiedDriverOptionalized record {|
@@ -133,7 +134,7 @@ public type NonVerifiedDriverOptionalized record {|
     string vehicleName?;
     string vehicleNumber?;
     string password?;
-    string otpStatus?;
+    string status?;
 |};
 
 public type NonVerifiedDriverTargetType typedesc<NonVerifiedDriverOptionalized>;
@@ -150,7 +151,7 @@ public type NonVerifiedDriverInsert record {|
     string vehicleName;
     string vehicleNumber;
     string password;
-    string otpStatus;
+    string status;
 |};
 
 public type NonVerifiedDriverUpdate record {|
@@ -165,7 +166,7 @@ public type NonVerifiedDriverUpdate record {|
     string vehicleName?;
     string vehicleNumber?;
     string password?;
-    string otpStatus?;
+    string status?;
 |};
 
 public type Address record {|
@@ -659,5 +660,54 @@ public type AdvertisementUpdate record {|
     string startDate?;
     string endDate?;
     string priority?;
+|};
+
+public type Driver record {|
+    readonly int id;
+    int userId;
+    string nic;
+    string courierCompany;
+    string vehicleType;
+    string vehicleColor;
+    string vehicleName;
+    string vehicleNumber;
+|};
+
+public type DriverOptionalized record {|
+    int id?;
+    int userId?;
+    string nic?;
+    string courierCompany?;
+    string vehicleType?;
+    string vehicleColor?;
+    string vehicleName?;
+    string vehicleNumber?;
+|};
+
+public type DriverWithRelations record {|
+    *DriverOptionalized;
+    UserOptionalized user?;
+|};
+
+public type DriverTargetType typedesc<DriverWithRelations>;
+
+public type DriverInsert record {|
+    int userId;
+    string nic;
+    string courierCompany;
+    string vehicleType;
+    string vehicleColor;
+    string vehicleName;
+    string vehicleNumber;
+|};
+
+public type DriverUpdate record {|
+    int userId?;
+    string nic?;
+    string courierCompany?;
+    string vehicleType?;
+    string vehicleColor?;
+    string vehicleName?;
+    string vehicleNumber?;
 |};
 

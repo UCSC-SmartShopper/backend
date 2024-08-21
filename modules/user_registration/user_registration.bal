@@ -226,7 +226,7 @@ public function driver_otp_genaration(DriverPersonalDetails driverPersonalDetail
         vehicleName: "",
         vehicleNumber: "",
         password: "",
-        otpStatus: ""
+        status: ""
     };
 
     db:Client connection = connection:getConnection();
@@ -251,7 +251,7 @@ public function match_driver_otp(DriverOtp driverOtp) returns db:NonVerifiedDriv
     if (driverOtp.OTP != result.OTP) {
         return error("Otp does not matched.");
     }
-    db:NonVerifiedDriverUpdate nonVerifiedDriverUpdate = {otpStatus: "Verified"};
+    db:NonVerifiedDriverUpdate nonVerifiedDriverUpdate = {status: "Verified"};
 
     db:NonVerifiedDriver|persist:Error updatedDriver = connection->/nonverifieddrivers/[driverOtp.id].put(nonVerifiedDriverUpdate);
     return updatedDriver;
@@ -284,7 +284,7 @@ public function update_driver_signup(db:NonVerifiedDriverOptionalized driverUpda
     return updatedDriver;
 }
 
-public function accept_driver_request(auth:User user, int driverRequestId) returns http:Unauthorized & readonly|error|int {
+public function accept_driver_request(auth:User user, int driverRequestId) returns db:Driver|http:Unauthorized|error|int {
 
     if user.role != "Courier Company Manager" {
         return http:UNAUTHORIZED;
@@ -297,17 +297,46 @@ public function accept_driver_request(auth:User user, int driverRequestId) retur
         return error("Driver not found.");
     }
 
-    // db:NonVerifiedDriverUpdate nonVerifiedDriverUpdate = {
-    //     courierCompany: driverUpdate.courierCompany,
-    //     vehicleType: driverUpdate.vehicleType,
-    //     vehicleColor: driverUpdate.vehicleColor,
-    //     vehicleName: driverUpdate.vehicleName,
-    //     vehicleNumber: driverUpdate.vehicleNumber,
-    //     password: driverUpdate.password
-    // };
+    // create a user
+    db:UserInsert userInsert = {
+        email: result.email,
+        number: result.contactNo,
+        name: result.name,
+        password: result.password,
+        role: "Driver",
+        status: "Active",
+        profilePic: "",
+        createdAt: time:utcToCivil(time:utcNow()),
+        updatedAt: time:utcToCivil(time:utcNow()),
+        deletedAt: ()
+    };
 
-    // db:NonVerifiedDriver|persist:Error updatedDriver = connection->/nonverifieddrivers/[id].put(nonVerifiedDriverUpdate);
-    return driverRequestId;
+    int[]|persist:Error userResult = connection->/users.post([userInsert]);
+    if (userResult is persist:Error) {
+        return error("Error while creating User");
+    }
+
+    // create a driver
+    db:DriverInsert driverInsert = {
+        userId: userResult[0],
+        nic: result.nic,
+        courierCompany: result.courierCompany,
+        vehicleType: result.vehicleType,
+        vehicleColor: result.vehicleColor,
+        vehicleName: result.vehicleName,
+        vehicleNumber: result.vehicleNumber
+    };
+
+    int[]|persist:Error driverResult = connection->/drivers.post([driverInsert]);
+    if (driverResult is persist:Error) {
+        return error("Error while creating Driver");
+    }
+
+    // update NonVerifiedDriver status
+    db:NonVerifiedDriverUpdate nonVerifiedDriverUpdate = {status: "Accepted"};
+    _ = check connection->/nonverifieddrivers/[driverRequestId].put(nonVerifiedDriverUpdate);
+
+    return {id: driverResult[0], ...driverInsert};
 }
 
 public function get_all_driver_requests(auth:User user) returns DriverRequestsResponse|http:Unauthorized|persist:Error? {
@@ -318,7 +347,7 @@ public function get_all_driver_requests(auth:User user) returns DriverRequestsRe
     db:Client connection = connection:getConnection();
     stream<db:NonVerifiedDriver, persist:Error?> driverRequests = connection->/nonverifieddrivers();
     NonVerifiedDriver[] driverRequestList = check from db:NonVerifiedDriver driverRequest in driverRequests
-        where driverRequest.otpStatus == "Verified"
+        where driverRequest.status == "Verified"
         order by driverRequest.id descending
         select {
             id: driverRequest.id,

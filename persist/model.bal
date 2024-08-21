@@ -45,7 +45,7 @@ type NonVerifiedDriver record {|
     string vehicleName;
     string vehicleNumber;
     string password;
-    string otpStatus;
+    string status;
 |};
 
 type Address record {|
