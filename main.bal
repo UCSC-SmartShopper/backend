@@ -50,6 +50,10 @@ service / on new http:Listener(9090) {
         return user_registration:driver_otp_genaration(driverPersonalDetails);
     }
 
+    resource function post driver_otp_resend(@http:Payload record {|int id;|} payload) returns http:Created|error {
+        return user_registration:driver_otp_resend(payload.id);
+    }
+
     // match the otp and create a driver request
     resource function post match_driver_otp(@http:Payload user_registration:DriverOtp driverOtp) returns db:NonVerifiedDriver|error {
         return user_registration:match_driver_otp(driverOtp);

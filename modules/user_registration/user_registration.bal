@@ -206,7 +206,7 @@ public function driver_otp_genaration(DriverPersonalDetails driverPersonalDetail
         vehicleName: "",
         vehicleNumber: "",
         password: "",
-        otpStatus: ""
+        otpStatus: "Pending"
     };
 
     db:Client connection = connection:getConnection();
@@ -217,6 +217,37 @@ public function driver_otp_genaration(DriverPersonalDetails driverPersonalDetail
     }
 
     return result[0];
+}
+
+public function driver_otp_resend(int id) returns http:Created|error {
+
+    db:Client connection = connection:getConnection();
+    db:NonVerifiedDriver|persist:Error driverResult = connection->/nonverifieddrivers/[id](db:NonVerifiedDriver);
+
+    if (driverResult is persist:Error) {
+        return error("Driver not found.");
+    }
+
+    if (driverResult.otpStatus != "Pending") {
+        return error("Driver already verified.");
+    }
+
+    int|error otp = generateOtp();
+    string otp_string = (check otp).toString();
+    io:println("Generated OTP: " + otp_string);
+
+    // send otp to  non-verify driver's mobile
+    check sendOtp(otp_string, driverResult.contactNo, driverResult.name);
+
+    db:NonVerifiedDriverUpdate nonVerifiedDriverUpdate = {OTP: otp_string};
+
+    db:NonVerifiedDriver|persist:Error updatedDriver = connection->/nonverifieddrivers/[id].put(nonVerifiedDriverUpdate);
+
+    if (updatedDriver is persist:Error) {
+        return error("Error while updating Non-Verify Driver");
+    }
+
+    return http:CREATED;
 }
 
 public function match_driver_otp(DriverOtp driverOtp) returns db:NonVerifiedDriver|error {
