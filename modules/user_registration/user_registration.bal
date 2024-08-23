@@ -248,7 +248,7 @@ public function driver_otp_resend(int id) returns http:Created|error {
         return error("Driver not found.");
     }
 
-    if (driverResult.otpStatus != "Pending") {
+    if (driverResult.status != "Pending") {
         return error("Driver already verified.");
     }
 
