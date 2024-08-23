@@ -56,7 +56,7 @@ public function getOpportunities(auth:User user, string status) returns Opportun
             // Show all opportunities belonging to the driver
             // Show all pending opportunities
             opportunities = opportunities.filter(
-                (opportunity) => opportunity.driverId == user.id || status == "Pending"
+                (opportunity) => opportunity.driverId == user.driverId || status == "Pending"
                 );
         }
 
