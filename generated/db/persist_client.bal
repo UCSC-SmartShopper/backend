@@ -104,7 +104,7 @@ public isolated client class Client {
                 vehicleName: {columnName: "vehicleName"},
                 vehicleNumber: {columnName: "vehicleNumber"},
                 password: {columnName: "password"},
-                otpStatus: {columnName: "otpStatus"}
+                status: {columnName: "status"}
             },
             keyFields: ["id"]
         },

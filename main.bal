@@ -60,9 +60,9 @@ service / on new http:Listener(9090) {
     }
 
     // Accept driver request by courier company manager
-    resource function post accept_driver_request(http:Request req, @http:Payload int driverRequestId) returns (http:Unauthorized & readonly)|error|int|error {
+    resource function post accept_driver_request(http:Request req, @http:Payload record {int id;} payload) returns db:Driver|http:Unauthorized|error|int {
         auth:User user = check auth:getUser(req);
-        return user_registration:accept_driver_request(user, driverRequestId);
+        return user_registration:accept_driver_request(user, payload.id);
     }
 
     resource function get driver_requests(http:Request req) returns user_registration:DriverRequestsResponse|http:Unauthorized|persist:Error?|error {

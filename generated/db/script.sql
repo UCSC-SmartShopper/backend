@@ -33,7 +33,7 @@ CREATE TABLE "NonVerifiedDriver" (
 	"vehicleName" VARCHAR(191) NOT NULL,
 	"vehicleNumber" VARCHAR(191) NOT NULL,
 	"password" VARCHAR(191) NOT NULL,
-	"otpStatus" VARCHAR(191) NOT NULL,
+	"status" VARCHAR(191) NOT NULL,
 	PRIMARY KEY("id")
 );
 

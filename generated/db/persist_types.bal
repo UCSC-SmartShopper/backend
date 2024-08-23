@@ -118,7 +118,7 @@ public type NonVerifiedDriver record {|
     string vehicleName;
     string vehicleNumber;
     string password;
-    string otpStatus;
+    string status;
 |};
 
 public type NonVerifiedDriverOptionalized record {|
@@ -134,7 +134,7 @@ public type NonVerifiedDriverOptionalized record {|
     string vehicleName?;
     string vehicleNumber?;
     string password?;
-    string otpStatus?;
+    string status?;
 |};
 
 public type NonVerifiedDriverTargetType typedesc<NonVerifiedDriverOptionalized>;
@@ -151,7 +151,7 @@ public type NonVerifiedDriverInsert record {|
     string vehicleName;
     string vehicleNumber;
     string password;
-    string otpStatus;
+    string status;
 |};
 
 public type NonVerifiedDriverUpdate record {|
@@ -166,7 +166,7 @@ public type NonVerifiedDriverUpdate record {|
     string vehicleName?;
     string vehicleNumber?;
     string password?;
-    string otpStatus?;
+    string status?;
 |};
 
 public type Address record {|
