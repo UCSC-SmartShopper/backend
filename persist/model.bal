@@ -137,6 +137,7 @@ type SupermarketOrder record {|
     Supermarket supermarket;
 |};
 
+// keep track of the supermarket ids in a perticular opportunity
 type OpportunitySupermarket record {|
     @sql:Generated
     readonly int id;
@@ -150,7 +151,6 @@ type Opportunity record {|
     readonly int id;
     float totalDistance;
     float tripCost;
-    string orderPlacedOn;
     Consumer consumer;
     float deliveryCost;
     string startLocation;
@@ -160,6 +160,8 @@ type Opportunity record {|
 
     int orderId;
     int driverId;
+    
+    string orderPlacedOn;
 |};
 
 type Consumer record {|
