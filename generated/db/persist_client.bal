@@ -338,14 +338,14 @@ public isolated client class Client {
                 "opportunity.id": {relation: {entityName: "opportunity", refField: "id"}},
                 "opportunity.totalDistance": {relation: {entityName: "opportunity", refField: "totalDistance"}},
                 "opportunity.tripCost": {relation: {entityName: "opportunity", refField: "tripCost"}},
-                "opportunity.orderPlacedOn": {relation: {entityName: "opportunity", refField: "orderPlacedOn"}},
                 "opportunity.consumerId": {relation: {entityName: "opportunity", refField: "consumerId"}},
                 "opportunity.deliveryCost": {relation: {entityName: "opportunity", refField: "deliveryCost"}},
                 "opportunity.startLocation": {relation: {entityName: "opportunity", refField: "startLocation"}},
                 "opportunity.deliveryLocation": {relation: {entityName: "opportunity", refField: "deliveryLocation"}},
                 "opportunity.status": {relation: {entityName: "opportunity", refField: "status"}},
                 "opportunity.orderId": {relation: {entityName: "opportunity", refField: "orderId"}},
-                "opportunity.driverId": {relation: {entityName: "opportunity", refField: "driverId"}}
+                "opportunity.driverId": {relation: {entityName: "opportunity", refField: "driverId"}},
+                "opportunity.orderPlacedOn": {relation: {entityName: "opportunity", refField: "orderPlacedOn"}}
             },
             keyFields: ["id"],
             joinMetadata: {
@@ -360,7 +360,6 @@ public isolated client class Client {
                 id: {columnName: "id", dbGenerated: true},
                 totalDistance: {columnName: "totalDistance"},
                 tripCost: {columnName: "tripCost"},
-                orderPlacedOn: {columnName: "orderPlacedOn"},
                 consumerId: {columnName: "consumerId"},
                 deliveryCost: {columnName: "deliveryCost"},
                 startLocation: {columnName: "startLocation"},
@@ -368,6 +367,7 @@ public isolated client class Client {
                 status: {columnName: "status"},
                 orderId: {columnName: "orderId"},
                 driverId: {columnName: "driverId"},
+                orderPlacedOn: {columnName: "orderPlacedOn"},
                 "consumer.id": {relation: {entityName: "consumer", refField: "id"}},
                 "consumer.userId": {relation: {entityName: "consumer", refField: "userId"}},
                 "opportunitysupermarket[].id": {relation: {entityName: "opportunitysupermarket", refField: "id"}},
@@ -407,14 +407,14 @@ public isolated client class Client {
                 "opportunity[].id": {relation: {entityName: "opportunity", refField: "id"}},
                 "opportunity[].totalDistance": {relation: {entityName: "opportunity", refField: "totalDistance"}},
                 "opportunity[].tripCost": {relation: {entityName: "opportunity", refField: "tripCost"}},
-                "opportunity[].orderPlacedOn": {relation: {entityName: "opportunity", refField: "orderPlacedOn"}},
                 "opportunity[].consumerId": {relation: {entityName: "opportunity", refField: "consumerId"}},
                 "opportunity[].deliveryCost": {relation: {entityName: "opportunity", refField: "deliveryCost"}},
                 "opportunity[].startLocation": {relation: {entityName: "opportunity", refField: "startLocation"}},
                 "opportunity[].deliveryLocation": {relation: {entityName: "opportunity", refField: "deliveryLocation"}},
                 "opportunity[].status": {relation: {entityName: "opportunity", refField: "status"}},
                 "opportunity[].orderId": {relation: {entityName: "opportunity", refField: "orderId"}},
-                "opportunity[].driverId": {relation: {entityName: "opportunity", refField: "driverId"}}
+                "opportunity[].driverId": {relation: {entityName: "opportunity", refField: "driverId"}},
+                "opportunity[].orderPlacedOn": {relation: {entityName: "opportunity", refField: "orderPlacedOn"}}
             },
             keyFields: ["id"],
             joinMetadata: {

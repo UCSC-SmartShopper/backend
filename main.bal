@@ -2,6 +2,7 @@ import backend.advertisements;
 import backend.auth;
 import backend.cart;
 import backend.db;
+import backend.driver;
 import backend.opportunities;
 import backend.orders;
 import backend.products;
@@ -85,6 +86,16 @@ service / on new http:Listener(9090) {
         return user:update_user(user, userUpdate);
     }
 
+    // ---------------------------------------------- Driver Resource Functions ----------------------------------------------
+    resource function get drivers() returns driver:DriverResponse|http:Unauthorized|error {
+        return driver:get_all_drivers();
+    }
+
+    resource function get drivers/[int id](http:Request req) returns db:DriverWithRelations|http:Unauthorized|error {
+        auth:User user = check auth:getUser(req);
+        return driver:get_driver(user, id);
+    }
+
     // ---------------------------------------------- Products Resource Functions ----------------------------------------------
     resource function get products(http:Request req) returns products:ProductResponse|persist:Error? {
         return products:getProducts();
@@ -146,7 +157,7 @@ service / on new http:Listener(9090) {
     }
 
     // ---------------------------------------------- Opportunities Resource Functions ----------------------------------------------
-    resource function get opportunities(http:Request req, @http:Query string status) returns opportunities:OpportunityResponse|http:Unauthorized|error?|error {
+    resource function get opportunities(http:Request req, @http:Query string status) returns opportunities:OpportunityResponse|http:Unauthorized|error {
         auth:User user = check auth:getUser(req);
         return opportunities:getOpportunities(user, status);
     }

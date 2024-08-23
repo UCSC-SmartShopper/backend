@@ -539,7 +539,6 @@ public type Opportunity record {|
     readonly int id;
     float totalDistance;
     float tripCost;
-    string orderPlacedOn;
     int consumerId;
     float deliveryCost;
     string startLocation;
@@ -548,13 +547,13 @@ public type Opportunity record {|
     string status;
     int orderId;
     int driverId;
+    string orderPlacedOn;
 |};
 
 public type OpportunityOptionalized record {|
     int id?;
     float totalDistance?;
     float tripCost?;
-    string orderPlacedOn?;
     int consumerId?;
     float deliveryCost?;
     string startLocation?;
@@ -562,6 +561,7 @@ public type OpportunityOptionalized record {|
     string status?;
     int orderId?;
     int driverId?;
+    string orderPlacedOn?;
 |};
 
 public type OpportunityWithRelations record {|
@@ -575,7 +575,6 @@ public type OpportunityTargetType typedesc<OpportunityWithRelations>;
 public type OpportunityInsert record {|
     float totalDistance;
     float tripCost;
-    string orderPlacedOn;
     int consumerId;
     float deliveryCost;
     string startLocation;
@@ -583,12 +582,12 @@ public type OpportunityInsert record {|
     string status;
     int orderId;
     int driverId;
+    string orderPlacedOn;
 |};
 
 public type OpportunityUpdate record {|
     float totalDistance?;
     float tripCost?;
-    string orderPlacedOn?;
     int consumerId?;
     float deliveryCost?;
     string startLocation?;
@@ -596,6 +595,7 @@ public type OpportunityUpdate record {|
     string status?;
     int orderId?;
     int driverId?;
+    string orderPlacedOn?;
 |};
 
 public type Consumer record {|
