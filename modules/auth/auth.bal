@@ -152,19 +152,19 @@ function getSupermarketId(int userId) returns int {
 }
 
 function getDriverId(int userId) returns int {
-    return 3;
-    // int driverId = -1;
-    // do {
-    //     stream<db:Consumer, persist:Error?> driverStream = connection->/drivers();
-    //     db:Consumer[] driverArray = check from db:Consumer u in driverStream
-    //         where u.userId == userId
-    //         order by u.id descending
-    //         select u;
-    //     if (driverArray.length() > 0) {
-    //         driverId = driverArray[0].id;
-    //     }
-    // } on fail {
-    //     driverId = -1;
-    // }
-    // return driverId;
+    int driverId = -1;
+    do {
+        db:Client connection = connection:getConnection();
+        stream<db:Driver, persist:Error?> driverStream = connection->/drivers();
+        db:Driver[] driverArray = check from db:Driver u in driverStream
+            where u.userId == userId
+            order by u.id descending
+            select u;
+        if (driverArray.length() > 0) {
+            driverId = driverArray[0].id;
+        }
+    } on fail {
+        driverId = -1;
+    }
+    return driverId;
 }

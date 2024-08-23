@@ -30,7 +30,7 @@ function createOpportunityNotFound(int id) returns OpportunityNotFound {
     };
 }
 
-public function getOpportunities(auth:User user, string status) returns OpportunityResponse|http:Unauthorized|error {
+public function getOpportunities(auth:User user, string status,int _limit) returns OpportunityResponse|http:Unauthorized|error {
 
     string[] authorizedRoles = ["Driver", "Courier Company Manager"];
 
@@ -56,7 +56,7 @@ public function getOpportunities(auth:User user, string status) returns Opportun
             // Show all opportunities belonging to the driver
             // Show all pending opportunities
             opportunities = opportunities.filter(
-                (opportunity) => opportunity.driverId == user.driverId|| status == "Pending"
+                (opportunity) => opportunity.driverId == user.driverId || status == "Pending"
                 );
         }
 
@@ -65,6 +65,9 @@ public function getOpportunities(auth:User user, string status) returns Opportun
         //     opportunities = opportunities.filter((opportunity) => status == "Pending");
         // }
     }
+
+    // Limit the number of opportunities to be returned
+    opportunities = opportunities.length() > _limit ? opportunities.slice(0, _limit) : opportunities;
 
     return {count: opportunities.length(), next: "", results: opportunities};
 }
