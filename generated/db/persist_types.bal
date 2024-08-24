@@ -14,6 +14,7 @@ public type User record {|
     string profilePic;
     string role;
     string status;
+    time:Civil? lastLogin;
     time:Civil createdAt;
     time:Civil updatedAt;
     time:Civil? deletedAt;
@@ -29,6 +30,7 @@ public type UserOptionalized record {|
     string profilePic?;
     string role?;
     string status?;
+    time:Civil? lastLogin?;
     time:Civil createdAt?;
     time:Civil updatedAt?;
     time:Civil? deletedAt?;
@@ -51,6 +53,7 @@ public type UserInsert record {|
     string profilePic;
     string role;
     string status;
+    time:Civil? lastLogin;
     time:Civil createdAt;
     time:Civil updatedAt;
     time:Civil? deletedAt;
@@ -64,6 +67,7 @@ public type UserUpdate record {|
     string profilePic?;
     string role?;
     string status?;
+    time:Civil? lastLogin?;
     time:Civil createdAt?;
     time:Civil updatedAt?;
     time:Civil? deletedAt?;

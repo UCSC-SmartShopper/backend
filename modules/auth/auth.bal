@@ -4,8 +4,10 @@ import backend.db;
 // import backend.user;
 
 import ballerina/http;
+import ballerina/io;
 import ballerina/jwt;
 import ballerina/persist;
+import ballerina/time;
 
 public type Credentials record {|
     string email_or_number;
@@ -83,6 +85,10 @@ public function login(Credentials credentials) returns UserwithToken|error {
                 jwtUser.driverId = driverId;
             }
         }
+
+        // update last login
+        updateUserLastLogin(user.id);
+        io:println(2);
 
         string jwtToken = check jwt:issue(getConfig(jwtUser));
         return {user: jwtUser, jwtToken: jwtToken};
@@ -167,4 +173,15 @@ function getDriverId(int userId) returns int {
         driverId = -1;
     }
     return driverId;
+}
+
+isolated function updateUserLastLogin(int userId) {
+    do {
+        db:Client connection = connection:getConnection();
+        _ = check connection->/users/[userId].put({lastLogin: time:utcToCivil(time:utcNow())});
+        io:println(1);
+    } on fail {
+        io:println("Error updating last login");
+
+    }
 }

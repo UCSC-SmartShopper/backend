@@ -1,6 +1,7 @@
 import backend.advertisements;
 import backend.auth;
 import backend.cart;
+import backend.consumer;
 import backend.db;
 import backend.driver;
 import backend.opportunities;
@@ -13,8 +14,6 @@ import backend.user_registration;
 
 import ballerina/http;
 import ballerina/persist;
-
-// import backend.user;
 
 @http:ServiceConfig {
     cors: {
@@ -96,6 +95,16 @@ service / on new http:Listener(9090) {
         return driver:get_driver(user, id);
     }
 
+    // ---------------------------------------------- Consumer Resource Functions ----------------------------------------------
+    resource function get consumers(@http:Query string searchText, int month, int page, int _limit) returns consumer:ConsumerResponse|http:Unauthorized|error {
+        return consumer:get_all_consumers(searchText, month, page, _limit);
+    }
+
+    resource function get consumers/[int id](http:Request req) returns consumer:Consumer|http:Unauthorized|error {
+        auth:User user = check auth:getUser(req);
+        return consumer:get_consumer(user, id);
+    }
+
     // ---------------------------------------------- Products Resource Functions ----------------------------------------------
     resource function get products(http:Request req) returns products:ProductResponse|persist:Error? {
         return products:getProducts();
@@ -159,7 +168,7 @@ service / on new http:Listener(9090) {
     // ---------------------------------------------- Opportunities Resource Functions ----------------------------------------------
     resource function get opportunities(http:Request req, @http:Query string status, @http:Query int _limit) returns opportunities:OpportunityResponse|http:Unauthorized|error {
         auth:User user = check auth:getUser(req);
-        return opportunities:getOpportunities(user, status,_limit);
+        return opportunities:getOpportunities(user, status, _limit);
     }
 
     resource function get opportunities/[int id]() returns opportunities:OpportunityNotFound|db:OpportunityWithRelations {

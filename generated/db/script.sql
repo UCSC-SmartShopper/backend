@@ -75,6 +75,7 @@ CREATE TABLE "User" (
 	"profilePic" VARCHAR(191) NOT NULL,
 	"role" VARCHAR(191) NOT NULL,
 	"status" VARCHAR(191) NOT NULL,
+	"lastLogin" TIMESTAMP,
 	"createdAt" TIMESTAMP NOT NULL,
 	"updatedAt" TIMESTAMP NOT NULL,
 	"deletedAt" TIMESTAMP,

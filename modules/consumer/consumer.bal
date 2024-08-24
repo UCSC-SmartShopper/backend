@@ -1,54 +1,62 @@
-// import backend.db;
-// import backend.errors;
+import backend.auth;
+import backend.connection;
+import backend.db;
+import backend.user;
+import backend.utils;
 
-// import ballerina/http;
-// import ballerina/persist;
-// import ballerina/time;
+import ballerina/http;
+import ballerina/persist;
 
-// public type Consumer record {|
-//     readonly int id;
-//     string name;
-//     string description;
-//     float price;
-//     string imageUrl;
-// |};
+public type ConsumerResponse record {|
+    int count;
+    string next;
+    Consumer[] results;
+|};
 
-// public type ProductResponse record {|
-//     int count;
-//     string next;
-//     Product[] results;
-// |};
+// created a new type Consumer to remove the password field from the User type
+public type Consumer record {|
+    *db:ConsumerOptionalized;
+    user:User user;
+    db:AddressOptionalized[] addresses?;
+    db:OpportunityOptionalized[] opportunity?;
+|};
 
-// type ProductNotFound record {|
-//     *http:NotFound;
-//     errors:ErrorDetails body;
-// |};
+public function get_all_consumers(string searchText, int month, int page, int _limit) returns ConsumerResponse|http:Unauthorized|error {
 
-// function createProductNotFound(int id) returns ProductNotFound {
-//     return {
-//         body: {
-//             message: "Product not found",
-//             details: string `Product not found for the given id: ${id}`,
-//             timestamp: time:utcNow()
-//         }
-//     };
-// }
+    // string[] authorizedRoles = ["Admin", "SupermarketManager", "Consumer"];
 
-// public final db:Client dbClient = check new ();
+    // if !authorizedRoles.some((role) => role == user.role) {
+    //     return http:UNAUTHORIZED;
+    // }
 
-// public function getProducts() returns ProductResponse|persist:Error? {
-//     stream<Consumer, persist:Error?> products = dbClient->/products.get();
-//     Consumer[] productList = check from Product product in products
-//         select product;
+    db:Client connection = connection:getConnection();
+    stream<Consumer, persist:Error?> consumers = connection->/consumers.get();
+    Consumer[] consumerList = check from Consumer consumer in consumers
+        where
+            (searchText == "" || consumer.user.name.toLowerAscii().includes(searchText.toLowerAscii())) &&
+            (month == 0 || consumer.user.createdAt.month == month)
+        order by consumer.id descending
+        select consumer;
 
-//     return {count: productList.length(), next: "null", results: productList};
-// }
+    // pagination
+    do {
+        int[] pagination_values = utils:pagination_values(consumerList.length(), page, _limit);
+        consumerList = consumerList.slice(pagination_values[0], pagination_values[1]);
+    } on fail {
+        return error("Pagination failed");
+    }
 
-// public function getConsumerById(int id) returns ProductNotFound|typedesc<Consumer> {
-//     Consumer|persist:Error? product = dbClient->/users/[id](Consumer);
-//     if Consumer is persist:Error {
-//         return createProductNotFound(id);
-//     }
-//     return Consumer;
-// }
+    return {count: consumerList.length(), next: "null", results: consumerList};
+}
 
+public function get_consumer(auth:User user, int id) returns Consumer|http:Unauthorized|error {
+    db:Client connection = connection:getConnection();
+
+    Consumer|persist:Error result = connection->/consumers/[id](Consumer);
+
+    if result is persist:Error {
+        return error("Consumer not found");
+    }
+
+    return result;
+}

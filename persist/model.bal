@@ -13,9 +13,12 @@ type User record {|
     string role;
     string status;
 
+    time:Civil? lastLogin;
+
     time:Civil createdAt;
     time:Civil updatedAt;
     time:Civil? deletedAt;
+
     Consumer? consumer;
     Supermarket? supermarket;
     Driver? driver;
@@ -149,6 +152,7 @@ type OpportunitySupermarket record {|
 type Opportunity record {|
     @sql:Generated
     readonly int id;
+    
     float totalDistance;
     float tripCost;
     Consumer consumer;
