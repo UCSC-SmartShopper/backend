@@ -35,10 +35,10 @@ function createSuperMarketNotFound(int id) returns SuperMarketNotFound {
     };
 }
 
-public function get_supermarkets() returns db:Supermarket[]|error? {
+public function get_supermarkets() returns db:SupermarketWithRelations[]|error? {
     db:Client connection = connection:getConnection();
-    stream<db:Supermarket, persist:Error?> supermarketStream = connection->/supermarkets.get();
-    db:Supermarket[] supermarkets = check from db:Supermarket supermarket in supermarketStream
+    stream<db:SupermarketWithRelations, persist:Error?> supermarketStream = connection->/supermarkets.get();
+    db:SupermarketWithRelations[] supermarkets = check from db:SupermarketWithRelations supermarket in supermarketStream
         select supermarket;
 
     return supermarkets;
