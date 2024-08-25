@@ -22,6 +22,7 @@ type User record {|
     Consumer? consumer;
     Supermarket? supermarket;
     Driver? driver;
+	Review[] review;
 |};
 
 type NonVerifyUser record {|
@@ -197,3 +198,16 @@ type Driver record {|
     string vehicleName;
     string vehicleNumber;
 |};
+
+type Review record {|
+    @sql:Generated
+    readonly int id;
+    string reviewType;
+    User user;
+    int targetId;
+    string title;
+    string content;
+    float rating;
+    time:Civil createdAt;
+|};
+

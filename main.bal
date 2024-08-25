@@ -15,6 +15,7 @@ import backend.user_registration;
 import ballerina/http;
 import ballerina/persist;
 import backend.stats;
+import backend.reviews;
 
 @http:ServiceConfig {
     cors: {
@@ -130,17 +131,17 @@ service / on new http:Listener(9090) {
     }
 
     // ---------------------------------------------- Supermarket Items Resource Functions ----------------------------------------------
-    resource function get supermarketitems(http:Request req, @http:Query int productId) returns supermarket_items:SupermarketItemResponse|supermarket_items:SupermarketItemNotFound|error {
+    resource function get supermarketitems(http:Request req, @http:Query int productId) returns supermarket_items:SupermarketItemResponse|error {
         auth:User user = check auth:getUser(req);
         // if user is supermarket manager then return all items belongs to the supermarket
         return supermarket_items:get_supermarket_items(user, productId);
     }
 
-    resource function get supermarketitems/[int id]() returns db:SupermarketItem|supermarket_items:SupermarketItemNotFound {
+    resource function get supermarketitems/[int id]() returns db:SupermarketItemWithRelations|error {
         return supermarket_items:get_supermarket_item_by_id(id);
     }
 
-    resource function patch supermarketitems/[int id](http:Request req, @http:Payload db:SupermarketItemUpdate supermarketItem) returns error|db:SupermarketItem|supermarket_items:SupermarketItemNotFound {
+    resource function patch supermarketitems/[int id](http:Request req, @http:Payload db:SupermarketItemUpdate supermarketItem) returns db:SupermarketItem|error {
         auth:User user = check auth:getUser(req);
         return supermarket_items:editSupermarketItem(user, id, supermarketItem);
     }
@@ -237,4 +238,20 @@ service / on new http:Listener(9090) {
         return stats:get_earnings(supermarketId);
     }
 
+    //--------------------------------- Review Resource Functions----------------------------------------------
+    resource function get reviews(string reviewType, int targetId) returns reviews:ReviewResponse|error? {
+        return reviews:get_reviews(reviewType, targetId);
+    }
+
+    resource function get reviews/[int id]() returns db:Review|error? {
+        return reviews:get_review_by_id(id);
+    }
+
+    resource function post reviews(http:Request req, @http:Payload reviews:ReviewInsert review) returns int|error? {
+        auth:User user = check auth:getUser(req);
+        return reviews:create_review(user, review);
+    }
+
+
+    
 }

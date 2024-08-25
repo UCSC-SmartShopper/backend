@@ -434,6 +434,7 @@ modules = [
 	{org = "djaya", packageName = "backend", moduleName = "backend.opportunities"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.orders"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.products"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.reviews"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.sms_service"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.stats"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.supermarket_items"},

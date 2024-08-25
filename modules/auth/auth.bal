@@ -179,7 +179,6 @@ isolated function updateUserLastLogin(int userId) {
     do {
         db:Client connection = connection:getConnection();
         _ = check connection->/users/[userId].put({lastLogin: time:utcToCivil(time:utcNow())});
-        io:println(1);
     } on fail {
         io:println("Error updating last login");
 
