@@ -70,6 +70,8 @@ public function register_supermarket(auth:User user, NewSupermarket supermarket)
         profilePic: supermarket.logo,
         role: "Supermarket Manager",
         status: "Active",
+        
+        lastLogin: time:utcToCivil(time:utcNow()),
         createdAt: time:utcToCivil(time:utcNow()),
         updatedAt: time:utcToCivil(time:utcNow()),
         deletedAt: ()

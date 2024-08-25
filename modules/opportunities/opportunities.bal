@@ -30,17 +30,44 @@ function createOpportunityNotFound(int id) returns OpportunityNotFound {
     };
 }
 
-public function getOpportunities(auth:User user, string status) returns OpportunityResponse|http:Unauthorized|error? {
-    if (user.role != "Driver") {
+public function getOpportunities(auth:User user, string status,int _limit) returns OpportunityResponse|http:Unauthorized|error {
+
+    string[] authorizedRoles = ["Driver", "Courier Company Manager"];
+
+    if (!authorizedRoles.some((role) => role == user.role)) {
         return http:UNAUTHORIZED;
     }
 
     db:Client connection = connection:getConnection();
 
     stream<db:OpportunityWithRelations, persist:Error?> opportunityStream = connection->/opportunities.get();
+
+    // Filter opportunities based on params
     db:OpportunityWithRelations[] opportunities = check from db:OpportunityWithRelations opportunity in opportunityStream
-        where (opportunity.status == status) && (status == "Pending" || opportunity.driverId == user.driverId)
+        where
+            (opportunity.status == status || status == "")
+
+        order by opportunity.id descending
         select opportunity;
+
+    // Filter opportunities based on user role
+    match user.role {
+        "Driver" => {
+            // Show all opportunities belonging to the driver
+            // Show all pending opportunities
+            opportunities = opportunities.filter(
+                (opportunity) => opportunity.driverId == user.driverId || status == "Pending"
+                );
+        }
+
+        // Show all opportunities that belong to the courier company
+        // "Courier Company Manager" => {
+        //     opportunities = opportunities.filter((opportunity) => status == "Pending");
+        // }
+    }
+
+    // Limit the number of opportunities to be returned
+    opportunities = opportunities.length() > _limit ? opportunities.slice(0, _limit) : opportunities;
 
     return {count: opportunities.length(), next: "", results: opportunities};
 }

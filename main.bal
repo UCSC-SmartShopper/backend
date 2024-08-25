@@ -1,7 +1,9 @@
 import backend.advertisements;
 import backend.auth;
 import backend.cart;
+import backend.consumer;
 import backend.db;
+import backend.driver;
 import backend.opportunities;
 import backend.orders;
 import backend.products;
@@ -13,8 +15,6 @@ import backend.user_registration;
 
 import ballerina/http;
 import ballerina/persist;
-
-// import backend.user;
 
 @http:ServiceConfig {
     cors: {
@@ -46,6 +46,10 @@ service / on new http:Listener(9090) {
         return user_registration:driver_otp_genaration(driverPersonalDetails);
     }
 
+    resource function post driver_otp_resend(@http:Payload record {|int id;|} payload) returns http:Created|error {
+        return user_registration:driver_otp_resend(payload.id);
+    }
+
     // match the otp and create a driver request
     resource function post match_driver_otp(@http:Payload user_registration:DriverOtp driverOtp) returns db:NonVerifiedDriver|error {
         return user_registration:match_driver_otp(driverOtp);
@@ -54,6 +58,12 @@ service / on new http:Listener(9090) {
     // finalizing the driver signup
     resource function post update_driver_signup/[int id](@http:Payload db:NonVerifiedDriverOptionalized driverUpdate) returns db:NonVerifiedDriver|error {
         return user_registration:update_driver_signup(driverUpdate, id);
+    }
+
+    // Accept driver request by courier company manager
+    resource function post accept_driver_request(http:Request req, @http:Payload record {int id;} payload) returns db:Driver|http:Unauthorized|error|int {
+        auth:User user = check auth:getUser(req);
+        return user_registration:accept_driver_request(user, payload.id);
     }
 
     resource function get driver_requests(http:Request req) returns user_registration:DriverRequestsResponse|http:Unauthorized|persist:Error?|error {
@@ -74,6 +84,26 @@ service / on new http:Listener(9090) {
     resource function patch users/[int id](http:Request req, @http:Payload db:UserUpdate userUpdate) returns db:User|DataNotFound|error {
         auth:User user = check auth:getUser(req);
         return user:update_user(user, userUpdate);
+    }
+
+    // ---------------------------------------------- Driver Resource Functions ----------------------------------------------
+    resource function get drivers() returns driver:DriverResponse|http:Unauthorized|error {
+        return driver:get_all_drivers();
+    }
+
+    resource function get drivers/[int id](http:Request req) returns db:DriverWithRelations|http:Unauthorized|error {
+        auth:User user = check auth:getUser(req);
+        return driver:get_driver(user, id);
+    }
+
+    // ---------------------------------------------- Consumer Resource Functions ----------------------------------------------
+    resource function get consumers(@http:Query string searchText, int month, int page, int _limit) returns consumer:ConsumerResponse|http:Unauthorized|error {
+        return consumer:get_all_consumers(searchText, month, page, _limit);
+    }
+
+    resource function get consumers/[int id](http:Request req) returns consumer:Consumer|http:Unauthorized|error {
+        auth:User user = check auth:getUser(req);
+        return consumer:get_consumer(user, id);
     }
 
     // ---------------------------------------------- Products Resource Functions ----------------------------------------------
@@ -110,9 +140,9 @@ service / on new http:Listener(9090) {
         return supermarket_items:get_supermarket_item_by_id(id);
     }
 
-    resource function patch supermarketitems(http:Request req, @http:Payload db:SupermarketItem supermarketItem) returns error|db:SupermarketItem|supermarket_items:SupermarketItemNotFound {
+    resource function patch supermarketitems/[int id](http:Request req, @http:Payload db:SupermarketItemUpdate supermarketItem) returns error|db:SupermarketItem|supermarket_items:SupermarketItemNotFound {
         auth:User user = check auth:getUser(req);
-        return supermarket_items:editSupermarketItem(user, supermarketItem);
+        return supermarket_items:editSupermarketItem(user, id, supermarketItem);
     }
 
     // ---------------------------------------------- Cart Resource Functions ----------------------------------------------
@@ -137,9 +167,9 @@ service / on new http:Listener(9090) {
     }
 
     // ---------------------------------------------- Opportunities Resource Functions ----------------------------------------------
-    resource function get opportunities(http:Request req, @http:Query string status) returns opportunities:OpportunityResponse|http:Unauthorized|error?|error {
+    resource function get opportunities(http:Request req, @http:Query string status, @http:Query int _limit) returns opportunities:OpportunityResponse|http:Unauthorized|error {
         auth:User user = check auth:getUser(req);
-        return opportunities:getOpportunities(user, status);
+        return opportunities:getOpportunities(user, status, _limit);
     }
 
     resource function get opportunities/[int id]() returns opportunities:OpportunityNotFound|db:OpportunityWithRelations {

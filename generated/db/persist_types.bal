@@ -14,6 +14,7 @@ public type User record {|
     string profilePic;
     string role;
     string status;
+    time:Civil? lastLogin;
     time:Civil createdAt;
     time:Civil updatedAt;
     time:Civil? deletedAt;
@@ -29,6 +30,7 @@ public type UserOptionalized record {|
     string profilePic?;
     string role?;
     string status?;
+    time:Civil? lastLogin?;
     time:Civil createdAt?;
     time:Civil updatedAt?;
     time:Civil? deletedAt?;
@@ -38,6 +40,7 @@ public type UserWithRelations record {|
     *UserOptionalized;
     ConsumerOptionalized consumer?;
     SupermarketOptionalized supermarket?;
+    DriverOptionalized driver?;
 |};
 
 public type UserTargetType typedesc<UserWithRelations>;
@@ -50,6 +53,7 @@ public type UserInsert record {|
     string profilePic;
     string role;
     string status;
+    time:Civil? lastLogin;
     time:Civil createdAt;
     time:Civil updatedAt;
     time:Civil? deletedAt;
@@ -63,6 +67,7 @@ public type UserUpdate record {|
     string profilePic?;
     string role?;
     string status?;
+    time:Civil? lastLogin?;
     time:Civil createdAt?;
     time:Civil updatedAt?;
     time:Civil? deletedAt?;
@@ -117,7 +122,7 @@ public type NonVerifiedDriver record {|
     string vehicleName;
     string vehicleNumber;
     string password;
-    string otpStatus;
+    string status;
 |};
 
 public type NonVerifiedDriverOptionalized record {|
@@ -133,7 +138,7 @@ public type NonVerifiedDriverOptionalized record {|
     string vehicleName?;
     string vehicleNumber?;
     string password?;
-    string otpStatus?;
+    string status?;
 |};
 
 public type NonVerifiedDriverTargetType typedesc<NonVerifiedDriverOptionalized>;
@@ -150,7 +155,7 @@ public type NonVerifiedDriverInsert record {|
     string vehicleName;
     string vehicleNumber;
     string password;
-    string otpStatus;
+    string status;
 |};
 
 public type NonVerifiedDriverUpdate record {|
@@ -165,7 +170,7 @@ public type NonVerifiedDriverUpdate record {|
     string vehicleName?;
     string vehicleNumber?;
     string password?;
-    string otpStatus?;
+    string status?;
 |};
 
 public type Address record {|
@@ -538,7 +543,6 @@ public type Opportunity record {|
     readonly int id;
     float totalDistance;
     float tripCost;
-    string orderPlacedOn;
     int consumerId;
     float deliveryCost;
     string startLocation;
@@ -547,13 +551,13 @@ public type Opportunity record {|
     string status;
     int orderId;
     int driverId;
+    string orderPlacedOn;
 |};
 
 public type OpportunityOptionalized record {|
     int id?;
     float totalDistance?;
     float tripCost?;
-    string orderPlacedOn?;
     int consumerId?;
     float deliveryCost?;
     string startLocation?;
@@ -561,6 +565,7 @@ public type OpportunityOptionalized record {|
     string status?;
     int orderId?;
     int driverId?;
+    string orderPlacedOn?;
 |};
 
 public type OpportunityWithRelations record {|
@@ -574,7 +579,6 @@ public type OpportunityTargetType typedesc<OpportunityWithRelations>;
 public type OpportunityInsert record {|
     float totalDistance;
     float tripCost;
-    string orderPlacedOn;
     int consumerId;
     float deliveryCost;
     string startLocation;
@@ -582,12 +586,12 @@ public type OpportunityInsert record {|
     string status;
     int orderId;
     int driverId;
+    string orderPlacedOn;
 |};
 
 public type OpportunityUpdate record {|
     float totalDistance?;
     float tripCost?;
-    string orderPlacedOn?;
     int consumerId?;
     float deliveryCost?;
     string startLocation?;
@@ -595,6 +599,7 @@ public type OpportunityUpdate record {|
     string status?;
     int orderId?;
     int driverId?;
+    string orderPlacedOn?;
 |};
 
 public type Consumer record {|
@@ -659,5 +664,54 @@ public type AdvertisementUpdate record {|
     string startDate?;
     string endDate?;
     string priority?;
+|};
+
+public type Driver record {|
+    readonly int id;
+    int userId;
+    string nic;
+    string courierCompany;
+    string vehicleType;
+    string vehicleColor;
+    string vehicleName;
+    string vehicleNumber;
+|};
+
+public type DriverOptionalized record {|
+    int id?;
+    int userId?;
+    string nic?;
+    string courierCompany?;
+    string vehicleType?;
+    string vehicleColor?;
+    string vehicleName?;
+    string vehicleNumber?;
+|};
+
+public type DriverWithRelations record {|
+    *DriverOptionalized;
+    UserOptionalized user?;
+|};
+
+public type DriverTargetType typedesc<DriverWithRelations>;
+
+public type DriverInsert record {|
+    int userId;
+    string nic;
+    string courierCompany;
+    string vehicleType;
+    string vehicleColor;
+    string vehicleName;
+    string vehicleNumber;
+|};
+
+public type DriverUpdate record {|
+    int userId?;
+    string nic?;
+    string courierCompany?;
+    string vehicleType?;
+    string vehicleColor?;
+    string vehicleName?;
+    string vehicleNumber?;
 |};
 
