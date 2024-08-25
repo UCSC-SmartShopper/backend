@@ -14,6 +14,7 @@ import backend.user_registration;
 
 import ballerina/http;
 import ballerina/persist;
+import backend.stats;
 
 @http:ServiceConfig {
     cors: {
@@ -225,6 +226,15 @@ service / on new http:Listener(9090) {
 
     resource function patch deactivate_advertisements/[int id]() returns error? {
         return advertisements:deactivateAdvertisement(id);
+    }
+
+    //--------------------------------- Stats Resource Functions----------------------------------------------
+    resource function get stats/earnings() returns stats:Earning[]|error {
+        return stats:get_all_earnings();
+    }
+
+    resource function get stats/earnings/[int supermarketId]() returns float|error {
+        return stats:get_earnings(supermarketId);
     }
 
 }
