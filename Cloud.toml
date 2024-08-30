@@ -1,4 +1,0 @@
-[container.image]
-repository="chathushkaayash"
-name="backend"
-tag="0.1.0"
