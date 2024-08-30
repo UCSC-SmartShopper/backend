@@ -12,6 +12,22 @@ public type UserNotFound record {|
     errors:ErrorDetails body;
 |};
 
+// without password
+public type User record {|
+    readonly int id;
+    string name;
+    string email;
+    string number;
+    string profilePic;
+    string role;
+    string status;
+
+    time:Civil? lastLogin;
+    time:Civil createdAt;
+    time:Civil updatedAt;
+    time:Civil? deletedAt;
+|};
+
 public type UserResponse record {|
     int count;
     string next;

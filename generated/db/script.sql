@@ -11,7 +11,9 @@ DROP TABLE IF EXISTS "Consumer";
 DROP TABLE IF EXISTS "SupermarketItem";
 DROP TABLE IF EXISTS "SupermarketOrder";
 DROP TABLE IF EXISTS "Supermarket";
+DROP TABLE IF EXISTS "Driver";
 DROP TABLE IF EXISTS "CartItem";
+DROP TABLE IF EXISTS "Review";
 DROP TABLE IF EXISTS "Order";
 DROP TABLE IF EXISTS "User";
 DROP TABLE IF EXISTS "NonVerifyUser";
@@ -32,7 +34,7 @@ CREATE TABLE "NonVerifiedDriver" (
 	"vehicleName" VARCHAR(191) NOT NULL,
 	"vehicleNumber" VARCHAR(191) NOT NULL,
 	"password" VARCHAR(191) NOT NULL,
-	"otpStatus" VARCHAR(191) NOT NULL,
+	"status" VARCHAR(191) NOT NULL,
 	PRIMARY KEY("id")
 );
 
@@ -74,6 +76,7 @@ CREATE TABLE "User" (
 	"profilePic" VARCHAR(191) NOT NULL,
 	"role" VARCHAR(191) NOT NULL,
 	"status" VARCHAR(191) NOT NULL,
+	"lastLogin" TIMESTAMP,
 	"createdAt" TIMESTAMP NOT NULL,
 	"updatedAt" TIMESTAMP NOT NULL,
 	"deletedAt" TIMESTAMP,
@@ -91,12 +94,38 @@ CREATE TABLE "Order" (
 	PRIMARY KEY("id")
 );
 
+CREATE TABLE "Review" (
+	"id"  SERIAL,
+	"reviewType" VARCHAR(191) NOT NULL,
+	"targetId" INT NOT NULL,
+	"title" VARCHAR(191) NOT NULL,
+	"content" VARCHAR(191) NOT NULL,
+	"rating" FLOAT NOT NULL,
+	"createdAt" TIMESTAMP NOT NULL,
+	"userId" INT NOT NULL,
+	FOREIGN KEY("userId") REFERENCES "User"("id"),
+	PRIMARY KEY("id")
+);
+
 CREATE TABLE "CartItem" (
 	"id"  SERIAL,
 	"quantity" INT NOT NULL,
 	"consumerId" INT NOT NULL,
 	"supermarketitemId" INT NOT NULL,
 	FOREIGN KEY("supermarketitemId") REFERENCES "SupermarketItem"("id"),
+	PRIMARY KEY("id")
+);
+
+CREATE TABLE "Driver" (
+	"id"  SERIAL,
+	"nic" VARCHAR(191) NOT NULL,
+	"courierCompany" VARCHAR(191) NOT NULL,
+	"vehicleType" VARCHAR(191) NOT NULL,
+	"vehicleColor" VARCHAR(191) NOT NULL,
+	"vehicleName" VARCHAR(191) NOT NULL,
+	"vehicleNumber" VARCHAR(191) NOT NULL,
+	"userId" INT UNIQUE NOT NULL,
+	FOREIGN KEY("userId") REFERENCES "User"("id"),
 	PRIMARY KEY("id")
 );
 
@@ -146,13 +175,13 @@ CREATE TABLE "Opportunity" (
 	"id"  SERIAL,
 	"totalDistance" FLOAT NOT NULL,
 	"tripCost" FLOAT NOT NULL,
-	"orderPlacedOn" VARCHAR(191) NOT NULL,
 	"deliveryCost" FLOAT NOT NULL,
 	"startLocation" VARCHAR(191) NOT NULL,
 	"deliveryLocation" VARCHAR(191) NOT NULL,
 	"status" VARCHAR(191) NOT NULL,
 	"orderId" INT NOT NULL,
 	"driverId" INT NOT NULL,
+	"orderPlacedOn" VARCHAR(191) NOT NULL,
 	"consumerId" INT NOT NULL,
 	FOREIGN KEY("consumerId") REFERENCES "Consumer"("id"),
 	PRIMARY KEY("id")

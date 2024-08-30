@@ -13,11 +13,16 @@ type User record {|
     string role;
     string status;
 
+    time:Civil? lastLogin;
+
     time:Civil createdAt;
     time:Civil updatedAt;
     time:Civil? deletedAt;
+
     Consumer? consumer;
     Supermarket? supermarket;
+    Driver? driver;
+	Review[] review;
 |};
 
 type NonVerifyUser record {|
@@ -44,7 +49,7 @@ type NonVerifiedDriver record {|
     string vehicleName;
     string vehicleNumber;
     string password;
-    string otpStatus;
+    string status;
 |};
 
 type Address record {|
@@ -69,7 +74,7 @@ type Supermarket record {|
     User supermarketManager;
     SupermarketItem[] storeprice;
     OpportunitySupermarket[] opportunitysupermarket;
-	SupermarketOrder[] supermarketorder;
+    SupermarketOrder[] supermarketorder;
 |};
 
 type Product record {|
@@ -136,6 +141,7 @@ type SupermarketOrder record {|
     Supermarket supermarket;
 |};
 
+// keep track of the supermarket ids in a perticular opportunity
 type OpportunitySupermarket record {|
     @sql:Generated
     readonly int id;
@@ -147,9 +153,9 @@ type OpportunitySupermarket record {|
 type Opportunity record {|
     @sql:Generated
     readonly int id;
+    
     float totalDistance;
     float tripCost;
-    string orderPlacedOn;
     Consumer consumer;
     float deliveryCost;
     string startLocation;
@@ -159,6 +165,8 @@ type Opportunity record {|
 
     int orderId;
     int driverId;
+    
+    string orderPlacedOn;
 |};
 
 type Consumer record {|
@@ -178,3 +186,28 @@ type Advertisement record {|
     string endDate;
     string priority;
 |};
+
+type Driver record {|
+    @sql:Generated
+    readonly int id;
+    User user;
+    string nic;
+    string courierCompany;
+    string vehicleType;
+    string vehicleColor;
+    string vehicleName;
+    string vehicleNumber;
+|};
+
+type Review record {|
+    @sql:Generated
+    readonly int id;
+    string reviewType;
+    User user;
+    int targetId;
+    string title;
+    string content;
+    float rating;
+    time:Civil createdAt;
+|};
+

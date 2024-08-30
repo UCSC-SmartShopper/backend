@@ -1,7 +1,9 @@
 import backend.advertisements;
 import backend.auth;
 import backend.cart;
+import backend.consumer;
 import backend.db;
+import backend.driver;
 import backend.opportunities;
 import backend.orders;
 import backend.products;
@@ -12,8 +14,8 @@ import backend.user_registration;
 
 import ballerina/http;
 import ballerina/persist;
-
-// import backend.user;
+import backend.stats;
+import backend.reviews;
 
 @http:ServiceConfig {
     cors: {
@@ -45,6 +47,10 @@ service / on new http:Listener(9090) {
         return user_registration:driver_otp_genaration(driverPersonalDetails);
     }
 
+    resource function post driver_otp_resend(@http:Payload record {|int id;|} payload) returns http:Created|error {
+        return user_registration:driver_otp_resend(payload.id);
+    }
+
     // match the otp and create a driver request
     resource function post match_driver_otp(@http:Payload user_registration:DriverOtp driverOtp) returns db:NonVerifiedDriver|error {
         return user_registration:match_driver_otp(driverOtp);
@@ -56,9 +62,9 @@ service / on new http:Listener(9090) {
     }
 
     // Accept driver request by courier company manager
-    resource function post accept_driver_request(http:Request req, @http:Payload int driverRequestId) returns (http:Unauthorized & readonly)|error|int|error {
+    resource function post accept_driver_request(http:Request req, @http:Payload record {int id;} payload) returns db:Driver|http:Unauthorized|error|int {
         auth:User user = check auth:getUser(req);
-        return user_registration:accept_driver_request(user, driverRequestId);
+        return user_registration:accept_driver_request(user, payload.id);
     }
 
     resource function get driver_requests(http:Request req) returns user_registration:DriverRequestsResponse|http:Unauthorized|persist:Error?|error {
@@ -79,6 +85,26 @@ service / on new http:Listener(9090) {
     resource function patch users/[int id](http:Request req, @http:Payload db:UserUpdate userUpdate) returns db:User|DataNotFound|error {
         auth:User user = check auth:getUser(req);
         return user:update_user(user, userUpdate);
+    }
+
+    // ---------------------------------------------- Driver Resource Functions ----------------------------------------------
+    resource function get drivers() returns driver:DriverResponse|http:Unauthorized|error {
+        return driver:get_all_drivers();
+    }
+
+    resource function get drivers/[int id](http:Request req) returns db:DriverWithRelations|http:Unauthorized|error {
+        auth:User user = check auth:getUser(req);
+        return driver:get_driver(user, id);
+    }
+
+    // ---------------------------------------------- Consumer Resource Functions ----------------------------------------------
+    resource function get consumers(@http:Query string searchText, int month, int page, int _limit) returns consumer:ConsumerResponse|http:Unauthorized|error {
+        return consumer:get_all_consumers(searchText, month, page, _limit);
+    }
+
+    resource function get consumers/[int id](http:Request req) returns consumer:Consumer|http:Unauthorized|error {
+        auth:User user = check auth:getUser(req);
+        return consumer:get_consumer(user, id);
     }
 
     // ---------------------------------------------- Products Resource Functions ----------------------------------------------
@@ -105,17 +131,17 @@ service / on new http:Listener(9090) {
     }
 
     // ---------------------------------------------- Supermarket Items Resource Functions ----------------------------------------------
-    resource function get supermarketitems(http:Request req, @http:Query int productId) returns supermarket_items:SupermarketItemResponse|supermarket_items:SupermarketItemNotFound|error {
+    resource function get supermarketitems(http:Request req, @http:Query int productId) returns supermarket_items:SupermarketItemResponse|error {
         auth:User user = check auth:getUser(req);
         // if user is supermarket manager then return all items belongs to the supermarket
         return supermarket_items:get_supermarket_items(user, productId);
     }
 
-    resource function get supermarketitems/[int id]() returns db:SupermarketItem|supermarket_items:SupermarketItemNotFound {
+    resource function get supermarketitems/[int id]() returns db:SupermarketItemWithRelations|error {
         return supermarket_items:get_supermarket_item_by_id(id);
     }
 
-    resource function patch supermarketitems/[int id](http:Request req, @http:Payload db:SupermarketItemUpdate supermarketItem) returns error|db:SupermarketItem|supermarket_items:SupermarketItemNotFound {
+    resource function patch supermarketitems/[int id](http:Request req, @http:Payload db:SupermarketItemUpdate supermarketItem) returns db:SupermarketItem|error {
         auth:User user = check auth:getUser(req);
         return supermarket_items:editSupermarketItem(user, id, supermarketItem);
     }
@@ -142,9 +168,9 @@ service / on new http:Listener(9090) {
     }
 
     // ---------------------------------------------- Opportunities Resource Functions ----------------------------------------------
-    resource function get opportunities(http:Request req, @http:Query string status) returns opportunities:OpportunityResponse|http:Unauthorized|error?|error {
+    resource function get opportunities(http:Request req, @http:Query string status, @http:Query int _limit) returns opportunities:OpportunityResponse|http:Unauthorized|error {
         auth:User user = check auth:getUser(req);
-        return opportunities:getOpportunities(user, status);
+        return opportunities:getOpportunities(user, status, _limit);
     }
 
     resource function get opportunities/[int id]() returns opportunities:OpportunityNotFound|db:OpportunityWithRelations {
@@ -203,4 +229,29 @@ service / on new http:Listener(9090) {
         return advertisements:deactivateAdvertisement(id);
     }
 
+    //--------------------------------- Stats Resource Functions----------------------------------------------
+    resource function get stats/earnings() returns stats:Earning[]|error {
+        return stats:get_all_earnings();
+    }
+
+    resource function get stats/earnings/[int supermarketId]() returns float|error {
+        return stats:get_earnings(supermarketId);
+    }
+
+    //--------------------------------- Review Resource Functions----------------------------------------------
+    resource function get reviews(string reviewType, int targetId) returns reviews:ReviewResponse|error? {
+        return reviews:get_reviews(reviewType, targetId);
+    }
+
+    resource function get reviews/[int id]() returns db:Review|error? {
+        return reviews:get_review_by_id(id);
+    }
+
+    resource function post reviews(http:Request req, @http:Payload reviews:ReviewInsert review) returns int|error? {
+        auth:User user = check auth:getUser(req);
+        return reviews:create_review(user, review);
+    }
+
+
+    
 }
