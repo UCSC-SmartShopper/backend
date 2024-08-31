@@ -13,7 +13,7 @@ public type Earning record {|
     float earnings;
 |};
 
-public function get_all_earnings() returns Earning[]|error {
+public function get_all_supermarket_earnings() returns Earning[]|error {
 
     do {
         db:Client connection = connection:getConnection();
@@ -60,7 +60,7 @@ public function get_all_earnings() returns Earning[]|error {
     }
 }
 
-public function get_earnings(int supermarketId) returns float|error {
+public function get_supermarket_earnings(int supermarketId) returns float|error {
 
     do {
         db:Client connection = connection:getConnection();

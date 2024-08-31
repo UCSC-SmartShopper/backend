@@ -230,12 +230,12 @@ service / on new http:Listener(9090) {
     }
 
     //--------------------------------- Stats Resource Functions----------------------------------------------
-    resource function get stats/earnings() returns stats:Earning[]|error {
-        return stats:get_all_earnings();
+    resource function get stats/supermarket_earnings() returns stats:Earning[]|error {
+        return stats:get_all_supermarket_earnings();
     }
 
-    resource function get stats/earnings/[int supermarketId]() returns float|error {
-        return stats:get_earnings(supermarketId);
+    resource function get stats/supermarket_earnings/[int supermarketId]() returns float|error {
+        return stats:get_supermarket_earnings(supermarketId);
     }
 
     //--------------------------------- Review Resource Functions----------------------------------------------
