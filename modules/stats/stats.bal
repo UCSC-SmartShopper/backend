@@ -1,5 +1,6 @@
 import backend.connection;
 import backend.db;
+import backend.reviews;
 
 import ballerina/persist;
 
@@ -89,4 +90,22 @@ public function get_supermarket_earnings(int supermarketId) returns float|error 
     } on fail {
         return error("Failed to get earnings");
     }
+}
+
+public function get_feedbacks_by_supermarket_id(int supermarketId) returns reviews:ReviewResponse|error {
+
+    db:Client connection = connection:getConnection();
+
+    stream<db:SupermarketItemWithRelations, persist:Error?> supermarketItemStream = connection->/supermarketitems();
+    int[] supermarketItemIdList = check from db:SupermarketItemWithRelations supermarketItem in supermarketItemStream
+        where supermarketItem.supermarketId == supermarketId
+        select supermarketItem.id ?: 0;
+
+    // stream<db:Review, persist:Error?> reviewStream = connection->/reviews.get();
+    // db:Review[] reviews = check from db:Review review in reviewStream
+    //     where review.reviewType == "supermarketItem" && for
+    //     select review;
+
+    return {count: 0, next: "", results: []};
+
 }

@@ -118,7 +118,7 @@ service / on new http:Listener(9090) {
     }
 
     // ---------------------------------------------- Supermarket Resource Functions ----------------------------------------------
-    resource function get supermarkets() returns db:SupermarketWithRelations[]|error? {
+    resource function get supermarkets() returns supermarkets:SupermarketResponse|error? {
         return supermarkets:get_supermarkets();
     }
 
@@ -237,6 +237,10 @@ service / on new http:Listener(9090) {
 
     resource function get stats/supermarket_earnings/[int supermarketId]() returns float|error {
         return stats:get_supermarket_earnings(supermarketId);
+    }
+
+    resource function get stats/feedbacks_by_supermarket_id(int supermarketId) returns reviews:ReviewResponse|error {
+        return stats:get_feedbacks_by_supermarket_id(supermarketId);
     }
 
     //--------------------------------- Review Resource Functions----------------------------------------------
