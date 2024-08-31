@@ -41,6 +41,7 @@ public type UserWithRelations record {|
     ConsumerOptionalized consumer?;
     SupermarketOptionalized supermarket?;
     DriverOptionalized driver?;
+    ReviewOptionalized[] review?;
 |};
 
 public type UserTargetType typedesc<UserWithRelations>;
@@ -713,5 +714,54 @@ public type DriverUpdate record {|
     string vehicleColor?;
     string vehicleName?;
     string vehicleNumber?;
+|};
+
+public type Review record {|
+    readonly int id;
+    string reviewType;
+    int userId;
+    int targetId;
+    string title;
+    string content;
+    float rating;
+    time:Civil createdAt;
+|};
+
+public type ReviewOptionalized record {|
+    int id?;
+    string reviewType?;
+    int userId?;
+    int targetId?;
+    string title?;
+    string content?;
+    float rating?;
+    time:Civil createdAt?;
+|};
+
+public type ReviewWithRelations record {|
+    *ReviewOptionalized;
+    UserOptionalized user?;
+|};
+
+public type ReviewTargetType typedesc<ReviewWithRelations>;
+
+public type ReviewInsert record {|
+    string reviewType;
+    int userId;
+    int targetId;
+    string title;
+    string content;
+    float rating;
+    time:Civil createdAt;
+|};
+
+public type ReviewUpdate record {|
+    string reviewType?;
+    int userId?;
+    int targetId?;
+    string title?;
+    string content?;
+    float rating?;
+    time:Civil createdAt?;
 |};
 

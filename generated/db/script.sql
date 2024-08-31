@@ -13,6 +13,7 @@ DROP TABLE IF EXISTS "SupermarketOrder";
 DROP TABLE IF EXISTS "Supermarket";
 DROP TABLE IF EXISTS "Driver";
 DROP TABLE IF EXISTS "CartItem";
+DROP TABLE IF EXISTS "Review";
 DROP TABLE IF EXISTS "Order";
 DROP TABLE IF EXISTS "User";
 DROP TABLE IF EXISTS "NonVerifyUser";
@@ -90,6 +91,19 @@ CREATE TABLE "Order" (
 	"shippingMethod" VARCHAR(191) NOT NULL,
 	"location" VARCHAR(191) NOT NULL,
 	"orderPlacedOn" TIMESTAMP NOT NULL,
+	PRIMARY KEY("id")
+);
+
+CREATE TABLE "Review" (
+	"id"  SERIAL,
+	"reviewType" VARCHAR(191) NOT NULL,
+	"targetId" INT NOT NULL,
+	"title" VARCHAR(191) NOT NULL,
+	"content" VARCHAR(191) NOT NULL,
+	"rating" FLOAT NOT NULL,
+	"createdAt" TIMESTAMP NOT NULL,
+	"userId" INT NOT NULL,
+	FOREIGN KEY("userId") REFERENCES "User"("id"),
 	PRIMARY KEY("id")
 );
 

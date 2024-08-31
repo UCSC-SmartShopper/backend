@@ -5,7 +5,6 @@ import backend.db;
 import backend.errors;
 
 import ballerina/http;
-import ballerina/io;
 import ballerina/persist;
 import ballerina/time;
 
@@ -43,7 +42,6 @@ function createOrderNotFound(int id) returns OrderNotFound {
 public function getOrders(auth:User user, int supermarketId) returns OrderResponse|error {
     db:Client connection = connection:getConnection();
     db:OrderWithRelations[] orders = [];
-    io:println(supermarketId);
 
     stream<db:OrderWithRelations, persist:Error?> orderStream = connection->/orders.get();
     db:OrderWithRelations[] orderList = check from db:OrderWithRelations _order in orderStream
@@ -66,16 +64,10 @@ public function getOrders(auth:User user, int supermarketId) returns OrderRespon
 
         orders = userOrders;
     } else if (user.role == "Admin") {
-        if(supermarketId==-1){
-            orders= orderList;
-        }else{
-            db:OrderWithRelations[] filteredOrders = from db:OrderWithRelations _order in orderList
+        orders = from db:OrderWithRelations _order in orderList
             let db:SupermarketOrderOptionalized[] supermarketOrders = _order.supermarketOrders ?: []
             where supermarketOrders.some((i) => i.supermarketId == supermarketId)
             select _order;
-
-        orders = filteredOrders;
-        }
     }
 
     return {count: orders.length(), next: "null", results: orders};

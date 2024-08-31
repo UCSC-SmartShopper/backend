@@ -26,6 +26,7 @@ const OPPORTUNITY = "opportunities";
 const CONSUMER = "consumers";
 const ADVERTISEMENT = "advertisements";
 const DRIVER = "drivers";
+const REVIEW = "reviews";
 
 public isolated client class Client {
     *persist:AbstractPersistClient;
@@ -67,13 +68,22 @@ public isolated client class Client {
                 "driver.vehicleType": {relation: {entityName: "driver", refField: "vehicleType"}},
                 "driver.vehicleColor": {relation: {entityName: "driver", refField: "vehicleColor"}},
                 "driver.vehicleName": {relation: {entityName: "driver", refField: "vehicleName"}},
-                "driver.vehicleNumber": {relation: {entityName: "driver", refField: "vehicleNumber"}}
+                "driver.vehicleNumber": {relation: {entityName: "driver", refField: "vehicleNumber"}},
+                "review[].id": {relation: {entityName: "review", refField: "id"}},
+                "review[].reviewType": {relation: {entityName: "review", refField: "reviewType"}},
+                "review[].userId": {relation: {entityName: "review", refField: "userId"}},
+                "review[].targetId": {relation: {entityName: "review", refField: "targetId"}},
+                "review[].title": {relation: {entityName: "review", refField: "title"}},
+                "review[].content": {relation: {entityName: "review", refField: "content"}},
+                "review[].rating": {relation: {entityName: "review", refField: "rating"}},
+                "review[].createdAt": {relation: {entityName: "review", refField: "createdAt"}}
             },
             keyFields: ["id"],
             joinMetadata: {
                 consumer: {entity: Consumer, fieldName: "consumer", refTable: "Consumer", refColumns: ["userId"], joinColumns: ["id"], 'type: psql:ONE_TO_ONE},
                 supermarket: {entity: Supermarket, fieldName: "supermarket", refTable: "Supermarket", refColumns: ["supermarketmanagerId"], joinColumns: ["id"], 'type: psql:ONE_TO_ONE},
-                driver: {entity: Driver, fieldName: "driver", refTable: "Driver", refColumns: ["userId"], joinColumns: ["id"], 'type: psql:ONE_TO_ONE}
+                driver: {entity: Driver, fieldName: "driver", refTable: "Driver", refColumns: ["userId"], joinColumns: ["id"], 'type: psql:ONE_TO_ONE},
+                review: {entity: Review, fieldName: "review", refTable: "Review", refColumns: ["userId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}
             }
         },
         [NON_VERIFY_USER]: {
@@ -466,6 +476,34 @@ public isolated client class Client {
             },
             keyFields: ["id"],
             joinMetadata: {user: {entity: User, fieldName: "user", refTable: "User", refColumns: ["id"], joinColumns: ["userId"], 'type: psql:ONE_TO_ONE}}
+        },
+        [REVIEW]: {
+            entityName: "Review",
+            tableName: "Review",
+            fieldMetadata: {
+                id: {columnName: "id", dbGenerated: true},
+                reviewType: {columnName: "reviewType"},
+                userId: {columnName: "userId"},
+                targetId: {columnName: "targetId"},
+                title: {columnName: "title"},
+                content: {columnName: "content"},
+                rating: {columnName: "rating"},
+                createdAt: {columnName: "createdAt"},
+                "user.id": {relation: {entityName: "user", refField: "id"}},
+                "user.name": {relation: {entityName: "user", refField: "name"}},
+                "user.email": {relation: {entityName: "user", refField: "email"}},
+                "user.password": {relation: {entityName: "user", refField: "password"}},
+                "user.number": {relation: {entityName: "user", refField: "number"}},
+                "user.profilePic": {relation: {entityName: "user", refField: "profilePic"}},
+                "user.role": {relation: {entityName: "user", refField: "role"}},
+                "user.status": {relation: {entityName: "user", refField: "status"}},
+                "user.lastLogin": {relation: {entityName: "user", refField: "lastLogin"}},
+                "user.createdAt": {relation: {entityName: "user", refField: "createdAt"}},
+                "user.updatedAt": {relation: {entityName: "user", refField: "updatedAt"}},
+                "user.deletedAt": {relation: {entityName: "user", refField: "deletedAt"}}
+            },
+            keyFields: ["id"],
+            joinMetadata: {user: {entity: User, fieldName: "user", refTable: "User", refColumns: ["id"], joinColumns: ["userId"], 'type: psql:ONE_TO_MANY}}
         }
     };
 
@@ -491,7 +529,8 @@ public isolated client class Client {
             [OPPORTUNITY]: check new (dbClient, self.metadata.get(OPPORTUNITY), psql:POSTGRESQL_SPECIFICS),
             [CONSUMER]: check new (dbClient, self.metadata.get(CONSUMER), psql:POSTGRESQL_SPECIFICS),
             [ADVERTISEMENT]: check new (dbClient, self.metadata.get(ADVERTISEMENT), psql:POSTGRESQL_SPECIFICS),
-            [DRIVER]: check new (dbClient, self.metadata.get(DRIVER), psql:POSTGRESQL_SPECIFICS)
+            [DRIVER]: check new (dbClient, self.metadata.get(DRIVER), psql:POSTGRESQL_SPECIFICS),
+            [REVIEW]: check new (dbClient, self.metadata.get(REVIEW), psql:POSTGRESQL_SPECIFICS)
         };
     }
 
@@ -1130,6 +1169,46 @@ public isolated client class Client {
         psql:SQLClient sqlClient;
         lock {
             sqlClient = self.persistClients.get(DRIVER);
+        }
+        _ = check sqlClient.runDeleteQuery(id);
+        return result;
+    }
+
+    isolated resource function get reviews(ReviewTargetType targetType = <>, sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``) returns stream<targetType, persist:Error?> = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.PostgreSQLProcessor",
+        name: "query"
+    } external;
+
+    isolated resource function get reviews/[int id](ReviewTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.PostgreSQLProcessor",
+        name: "queryOne"
+    } external;
+
+    isolated resource function post reviews(ReviewInsert[] data) returns int[]|persist:Error {
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(REVIEW);
+        }
+        sql:ExecutionResult[] result = check sqlClient.runBatchInsertQuery(data);
+        return from sql:ExecutionResult inserted in result
+            where inserted.lastInsertId != ()
+            select <int>inserted.lastInsertId;
+    }
+
+    isolated resource function put reviews/[int id](ReviewUpdate value) returns Review|persist:Error {
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(REVIEW);
+        }
+        _ = check sqlClient.runUpdateQuery(id, value);
+        return self->/reviews/[id].get();
+    }
+
+    isolated resource function delete reviews/[int id]() returns Review|persist:Error {
+        Review result = check self->/reviews/[id].get();
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(REVIEW);
         }
         _ = check sqlClient.runDeleteQuery(id);
         return result;
