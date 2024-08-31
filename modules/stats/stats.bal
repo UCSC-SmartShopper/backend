@@ -101,11 +101,18 @@ public function get_feedbacks_by_supermarket_id(int supermarketId) returns revie
         where supermarketItem.supermarketId == supermarketId
         select supermarketItem.id ?: 0;
 
-    // stream<db:Review, persist:Error?> reviewStream = connection->/reviews.get();
-    // db:Review[] reviews = check from db:Review review in reviewStream
-    //     where review.reviewType == "supermarketItem" && for
-    //     select review;
+    stream<db:Review, persist:Error?> reviewStream = connection->/reviews.get();
+    db:Review[] reviews = check from db:Review review in reviewStream
+        where review.reviewType == "supermarketItem"
+        select review;
 
-    return {count: 0, next: "", results: []};
+    db:ReviewWithRelations[] reviewsWithRelations = [];
+    foreach db:Review review in reviews {
+        if (supermarketItemIdList.some((i) => i == review.targetId)) {
+            reviewsWithRelations.push(review);
+        }
+    }
+
+    return {count: reviewsWithRelations.length(), next: "", results: reviewsWithRelations};
 
 }
