@@ -126,9 +126,12 @@ type Order record {|
     string location;
     OrderItems[] orderItems;
 
+    float deliveryFee;
+
     time:Civil orderPlacedOn;
 
     SupermarketOrder[] supermarketOrders;
+	Opportunity[] opportunity;
 |};
 
 type SupermarketOrder record {|
@@ -163,10 +166,10 @@ type Opportunity record {|
     OpportunitySupermarket[] opportunitysupermarket;
     string status;
 
-    int orderId;
+    Order _order;
     int driverId;
     
-    string orderPlacedOn;
+    time:Civil orderPlacedOn;
 |};
 
 type Consumer record {|

@@ -432,6 +432,7 @@ public type Order record {|
     string shippingMethod;
     string location;
 
+    float deliveryFee;
     time:Civil orderPlacedOn;
 
 |};
@@ -443,6 +444,7 @@ public type OrderOptionalized record {|
     string shippingAddress?;
     string shippingMethod?;
     string location?;
+    float deliveryFee?;
     time:Civil orderPlacedOn?;
 |};
 
@@ -450,6 +452,7 @@ public type OrderWithRelations record {|
     *OrderOptionalized;
     OrderItemsOptionalized[] orderItems?;
     SupermarketOrderOptionalized[] supermarketOrders?;
+    OpportunityOptionalized[] opportunity?;
 |};
 
 public type OrderTargetType typedesc<OrderWithRelations>;
@@ -460,6 +463,7 @@ public type OrderInsert record {|
     string shippingAddress;
     string shippingMethod;
     string location;
+    float deliveryFee;
     time:Civil orderPlacedOn;
 |};
 
@@ -469,6 +473,7 @@ public type OrderUpdate record {|
     string shippingAddress?;
     string shippingMethod?;
     string location?;
+    float deliveryFee?;
     time:Civil orderPlacedOn?;
 |};
 
@@ -550,9 +555,9 @@ public type Opportunity record {|
     string deliveryLocation;
 
     string status;
-    int orderId;
+    int _orderId;
     int driverId;
-    string orderPlacedOn;
+    time:Civil orderPlacedOn;
 |};
 
 public type OpportunityOptionalized record {|
@@ -564,15 +569,16 @@ public type OpportunityOptionalized record {|
     string startLocation?;
     string deliveryLocation?;
     string status?;
-    int orderId?;
+    int _orderId?;
     int driverId?;
-    string orderPlacedOn?;
+    time:Civil orderPlacedOn?;
 |};
 
 public type OpportunityWithRelations record {|
     *OpportunityOptionalized;
     ConsumerOptionalized consumer?;
     OpportunitySupermarketOptionalized[] opportunitysupermarket?;
+    OrderOptionalized _order?;
 |};
 
 public type OpportunityTargetType typedesc<OpportunityWithRelations>;
@@ -585,9 +591,9 @@ public type OpportunityInsert record {|
     string startLocation;
     string deliveryLocation;
     string status;
-    int orderId;
+    int _orderId;
     int driverId;
-    string orderPlacedOn;
+    time:Civil orderPlacedOn;
 |};
 
 public type OpportunityUpdate record {|
@@ -598,9 +604,9 @@ public type OpportunityUpdate record {|
     string startLocation?;
     string deliveryLocation?;
     string status?;
-    int orderId?;
+    int _orderId?;
     int driverId?;
-    string orderPlacedOn?;
+    time:Civil orderPlacedOn?;
 |};
 
 public type Consumer record {|

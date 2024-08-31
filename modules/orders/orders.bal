@@ -5,6 +5,7 @@ import backend.db;
 import backend.errors;
 
 import ballerina/http;
+import ballerina/io;
 import ballerina/persist;
 import ballerina/time;
 
@@ -106,6 +107,7 @@ public function cartToOrder(CartToOrderRequest cartToOrderRequest) returns db:Or
         status: "ToPay",
         shippingAddress: shippingAddress,
         shippingMethod: shippingMethod,
+        deliveryFee: 250.00,
         location: "6.8657635,79.8571086",
         orderPlacedOn: time:utcToCivil(time:utcNow())
     };
@@ -177,5 +179,47 @@ public function supermarket_order_ready(auth:User user, OrderReadyRequest orderR
     if updatedSupermarketOrder is persist:Error {
         return error("Error updating the supermarket order");
     }
+
+    update_order_status_to_prepared(updatedSupermarketOrder._orderId ?: -1);
+
     return updatedSupermarketOrder;
+}
+
+function update_order_status_to_prepared(int orderId) {
+    do {
+        if (orderId != -1) {
+
+            db:Client connection = connection:getConnection();
+            db:OrderWithRelations _order = check connection->/orders/[orderId]();
+
+            db:SupermarketOrderOptionalized[] superMarketOrders = _order.supermarketOrders ?: [];
+
+            if superMarketOrders.every((i) => i.status == "Ready") && _order.status == "Processing" {
+                db:OrderUpdate orderUpdate = {
+                    status: "Prepared"
+                };
+
+                // Update the order status to Prepared
+                _ = check connection->/orders/[orderId].put(orderUpdate);
+
+                // Create an opportunity
+                db:OpportunityInsert opportunityInsert = {
+                    totalDistance: 0.0,
+                    tripCost: 0.0,
+                    consumerId: _order.consumerId ?: -1,
+                    deliveryCost: _order.deliveryFee ?: 0.0,
+                    startLocation: "6.8657635,79.8571086",
+                    deliveryLocation: _order.shippingAddress ?: "",
+                    status: "Pending",
+                    _orderId: orderId,
+                    orderPlacedOn: _order.orderPlacedOn ?: time:utcToCivil(time:utcNow()),
+                    driverId: -1
+                };
+
+                _ = check connection->/opportunities.post([opportunityInsert]);
+            }
+        }
+    } on fail var e {
+        io:println(e);
+    }
 }
