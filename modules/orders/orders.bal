@@ -5,6 +5,7 @@ import backend.db;
 import backend.errors;
 
 import ballerina/http;
+import ballerina/io;
 import ballerina/persist;
 import ballerina/time;
 
@@ -39,9 +40,10 @@ function createOrderNotFound(int id) returns OrderNotFound {
     };
 }
 
-public function getOrders(auth:User user) returns OrderResponse|error {
+public function getOrders(auth:User user, int id) returns OrderResponse|error {
     db:Client connection = connection:getConnection();
     db:OrderWithRelations[] orders = [];
+    io:println(id);
 
     stream<db:OrderWithRelations, persist:Error?> orderStream = connection->/orders.get();
     db:OrderWithRelations[] orderList = check from db:OrderWithRelations _order in orderStream
@@ -63,6 +65,8 @@ public function getOrders(auth:User user) returns OrderResponse|error {
             select _order;
 
         orders = userOrders;
+    } else if (user.role == "Admin") {
+        orders = orderList;
     }
 
     return {count: orders.length(), next: "null", results: orders};
@@ -129,12 +133,12 @@ public function cartToOrder(CartToOrderRequest cartToOrderRequest) returns db:Or
     // -------------------------- Create the Order Items --------------------------
     db:OrderItemsInsert[] orderItemInserts = from cart:CartItem cartItem in cartItems
         select {
-                supermarketId: cartItem.supermarketItem.supermarketId,
-                productId: cartItem.supermarketItem.productId,
-                quantity: cartItem.quantity,
-                price: cartItem.supermarketItem.price,
-                _orderId: orderId
-            };
+            supermarketId: cartItem.supermarketItem.supermarketId,
+            productId: cartItem.supermarketItem.productId,
+            quantity: cartItem.quantity,
+            price: cartItem.supermarketItem.price,
+            _orderId: orderId
+        };
 
     int[]|persist:Error orderItemResult = connection->/orderitems.post(orderItemInserts);
 

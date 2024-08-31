@@ -11,6 +11,7 @@ import backend.supermarket_items;
 import backend.supermarkets;
 import backend.user;
 import backend.user_registration;
+//import backend.adminOverview;
 
 import ballerina/http;
 import ballerina/persist;
@@ -117,7 +118,7 @@ service / on new http:Listener(9090) {
     }
 
     // ---------------------------------------------- Supermarket Resource Functions ----------------------------------------------
-    resource function get supermarkets() returns db:Supermarket[]|error? {
+    resource function get supermarkets() returns db:SupermarketWithRelations[]|error? {
         return supermarkets:get_supermarkets();
     }
 
@@ -189,9 +190,9 @@ service / on new http:Listener(9090) {
 
     // ---------------------------------------------- Order Resource Functions ----------------------------------------------
 
-    resource function get orders(http:Request req) returns orders:OrderResponse|error {
+    resource function get orders(http:Request req,int id) returns orders:OrderResponse|error {
         auth:User user = check auth:getUser(req);
-        return orders:getOrders(user);
+        return orders:getOrders(user , id);
     }
 
     resource function get orders/[int id]() returns db:OrderWithRelations|orders:OrderNotFound|error? {
@@ -221,7 +222,7 @@ service / on new http:Listener(9090) {
         return advertisements:addAdvertisement(advertisement);
     }
 
-    resource function patch advertisement/[int id](http:Request req, @http:Payload db:AdvertisementUpdate advertisement) returns db:Advertisement|advertisements:AdvertisementNotFound|error? {
+    resource function patch advertisements/[int id](http:Request req, @http:Payload db:AdvertisementUpdate advertisement) returns db:Advertisement|advertisements:AdvertisementNotFound|error? {
         return advertisements:updateAdvertisement(id, advertisement);
     }
 
