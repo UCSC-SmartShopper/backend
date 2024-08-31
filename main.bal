@@ -232,7 +232,7 @@ service / on new http:Listener(9090) {
     }
 
     //--------------------------------- Stats Resource Functions----------------------------------------------
-    resource function get stats/supermarket_earnings() returns stats:Earning[]|error {
+    resource function get stats/supermarket_earnings() returns stats:EarningResponse|error {
         return stats:get_all_supermarket_earnings();
     }
 
