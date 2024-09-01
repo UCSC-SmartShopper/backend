@@ -1,5 +1,6 @@
 import backend.connection;
 import backend.db;
+import backend.reviews;
 
 import ballerina/persist;
 
@@ -13,7 +14,13 @@ public type Earning record {|
     float earnings;
 |};
 
-public function get_all_supermarket_earnings() returns Earning[]|error {
+public type EarningResponse record {|
+    int count;
+    string next;
+    Earning[] results;
+|}; 
+
+public function get_all_supermarket_earnings() returns EarningResponse|error {
 
     do {
         db:Client connection = connection:getConnection();
@@ -53,7 +60,7 @@ public function get_all_supermarket_earnings() returns Earning[]|error {
             earnings.push({name: supermarket.name, earnings: supermarketEarnings});
         }
 
-        return earnings;
+        return {count:earnings.length(), next:"", results:earnings};
 
     } on fail {
         return error("Failed to get earnings");
@@ -89,4 +96,29 @@ public function get_supermarket_earnings(int supermarketId) returns float|error 
     } on fail {
         return error("Failed to get earnings");
     }
+}
+
+public function get_feedbacks_by_supermarket_id(int supermarketId) returns reviews:ReviewResponse|error {
+
+    db:Client connection = connection:getConnection();
+
+    stream<db:SupermarketItemWithRelations, persist:Error?> supermarketItemStream = connection->/supermarketitems();
+    int[] supermarketItemIdList = check from db:SupermarketItemWithRelations supermarketItem in supermarketItemStream
+        where supermarketItem.supermarketId == supermarketId
+        select supermarketItem.id ?: 0;
+
+    stream<db:Review, persist:Error?> reviewStream = connection->/reviews.get();
+    db:Review[] reviews = check from db:Review review in reviewStream
+        where review.reviewType == "supermarketItem"
+        select review;
+
+    db:ReviewWithRelations[] reviewsWithRelations = [];
+    foreach db:Review review in reviews {
+        if (supermarketItemIdList.some((i) => i == review.targetId)) {
+            reviewsWithRelations.push(review);
+        }
+    }
+
+    return {count: reviewsWithRelations.length(), next: "", results: reviewsWithRelations};
+
 }

@@ -7,16 +7,17 @@ import backend.driver;
 import backend.opportunities;
 import backend.orders;
 import backend.products;
+import backend.reviews;
+import backend.stats;
 import backend.supermarket_items;
 import backend.supermarkets;
 import backend.user;
 import backend.user_registration;
+
 //import backend.adminOverview;
 
 import ballerina/http;
 import ballerina/persist;
-import backend.stats;
-import backend.reviews;
 
 @http:ServiceConfig {
     cors: {
@@ -118,7 +119,7 @@ service / on new http:Listener(9090) {
     }
 
     // ---------------------------------------------- Supermarket Resource Functions ----------------------------------------------
-    resource function get supermarkets() returns db:SupermarketWithRelations[]|error? {
+    resource function get supermarkets() returns supermarkets:SupermarketResponse|error? {
         return supermarkets:get_supermarkets();
     }
 
@@ -158,7 +159,7 @@ service / on new http:Listener(9090) {
         return cart:addCartItem(user.consumerId ?: -1, cartItem);
     }
 
-    resource function patch carts(http:Request req, cart:CartItem cartItem) returns db:CartItem|int|error {
+    resource function patch carts/[int id](http:Request req, cart:CartItem cartItem) returns db:CartItem|int|error {
         auth:User user = check auth:getUser(req);
         return cart:updateCartItem(user.consumerId ?: -1, cartItem);
     }
@@ -190,9 +191,9 @@ service / on new http:Listener(9090) {
 
     // ---------------------------------------------- Order Resource Functions ----------------------------------------------
 
-    resource function get orders(http:Request req,int id) returns orders:OrderResponse|error {
+    resource function get orders(http:Request req, int supermarketId) returns orders:OrderResponse|error {
         auth:User user = check auth:getUser(req);
-        return orders:getOrders(user , id);
+        return orders:getOrders(user, supermarketId);
     }
 
     resource function get orders/[int id]() returns db:OrderWithRelations|orders:OrderNotFound|error? {
@@ -231,12 +232,16 @@ service / on new http:Listener(9090) {
     }
 
     //--------------------------------- Stats Resource Functions----------------------------------------------
-    resource function get stats/supermarket_earnings() returns stats:Earning[]|error {
+    resource function get stats/supermarket_earnings() returns stats:EarningResponse|error {
         return stats:get_all_supermarket_earnings();
     }
 
     resource function get stats/supermarket_earnings/[int supermarketId]() returns float|error {
         return stats:get_supermarket_earnings(supermarketId);
+    }
+
+    resource function get stats/feedbacks_by_supermarket_id(int supermarketId) returns reviews:ReviewResponse|error {
+        return stats:get_feedbacks_by_supermarket_id(supermarketId);
     }
 
     //--------------------------------- Review Resource Functions----------------------------------------------
@@ -253,6 +258,4 @@ service / on new http:Listener(9090) {
         return reviews:create_review(user, review);
     }
 
-
-    
 }

@@ -40,10 +40,9 @@ function createOrderNotFound(int id) returns OrderNotFound {
     };
 }
 
-public function getOrders(auth:User user, int id) returns OrderResponse|error {
+public function getOrders(auth:User user, int supermarketId) returns OrderResponse|error {
     db:Client connection = connection:getConnection();
     db:OrderWithRelations[] orders = [];
-    io:println(id);
 
     stream<db:OrderWithRelations, persist:Error?> orderStream = connection->/orders.get();
     db:OrderWithRelations[] orderList = check from db:OrderWithRelations _order in orderStream
@@ -66,7 +65,10 @@ public function getOrders(auth:User user, int id) returns OrderResponse|error {
 
         orders = userOrders;
     } else if (user.role == "Admin") {
-        orders = orderList;
+        orders = from db:OrderWithRelations _order in orderList
+            let db:SupermarketOrderOptionalized[] supermarketOrders = _order.supermarketOrders ?: []
+            where supermarketOrders.some((i) => i.supermarketId == supermarketId)
+            select _order;
     }
 
     return {count: orders.length(), next: "null", results: orders};
@@ -105,6 +107,7 @@ public function cartToOrder(CartToOrderRequest cartToOrderRequest) returns db:Or
         status: "ToPay",
         shippingAddress: shippingAddress,
         shippingMethod: shippingMethod,
+        deliveryFee: 250.00,
         location: "6.8657635,79.8571086",
         orderPlacedOn: time:utcToCivil(time:utcNow())
     };
@@ -176,5 +179,47 @@ public function supermarket_order_ready(auth:User user, OrderReadyRequest orderR
     if updatedSupermarketOrder is persist:Error {
         return error("Error updating the supermarket order");
     }
+
+    update_order_status_to_prepared(updatedSupermarketOrder._orderId ?: -1);
+
     return updatedSupermarketOrder;
+}
+
+function update_order_status_to_prepared(int orderId) {
+    do {
+        if (orderId != -1) {
+
+            db:Client connection = connection:getConnection();
+            db:OrderWithRelations _order = check connection->/orders/[orderId]();
+
+            db:SupermarketOrderOptionalized[] superMarketOrders = _order.supermarketOrders ?: [];
+
+            if superMarketOrders.every((i) => i.status == "Ready") && _order.status == "Processing" {
+                db:OrderUpdate orderUpdate = {
+                    status: "Prepared"
+                };
+
+                // Update the order status to Prepared
+                _ = check connection->/orders/[orderId].put(orderUpdate);
+
+                // Create an opportunity
+                db:OpportunityInsert opportunityInsert = {
+                    totalDistance: 0.0,
+                    tripCost: 0.0,
+                    consumerId: _order.consumerId ?: -1,
+                    deliveryCost: _order.deliveryFee ?: 0.0,
+                    startLocation: "6.8657635,79.8571086",
+                    deliveryLocation: _order.shippingAddress ?: "",
+                    status: "Pending",
+                    _orderId: orderId,
+                    orderPlacedOn: _order.orderPlacedOn ?: time:utcToCivil(time:utcNow()),
+                    driverId: -1
+                };
+
+                _ = check connection->/opportunities.post([opportunityInsert]);
+            }
+        }
+    } on fail var e {
+        io:println(e);
+    }
 }
