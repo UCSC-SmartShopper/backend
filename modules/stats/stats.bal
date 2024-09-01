@@ -126,17 +126,13 @@ public function get_feedbacks_by_supermarket_id(int supermarketId) returns revie
 
 //get_driver_earnings
 public function get_driver_earnings(int driverId) returns float|error {
-    io:println("driverId: ", 1);
     do {
         db:Client connection = connection:getConnection();
-        io:println("connection: ", 2);
 
         stream<db:OpportunityWithRelations, persist:Error?> opportunityStream = connection->/opportunities.get();
         db:OpportunityWithRelations[] opportunities = check from db:OpportunityWithRelations accept_opportunity in opportunityStream
              where accept_opportunity.status == "Delivered" && accept_opportunity.driverId == driverId
             select accept_opportunity;
-
-        io:println("opportunities: ", 3);
 
         float driverEarnings = 0.0;
 
