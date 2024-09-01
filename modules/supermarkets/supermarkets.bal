@@ -12,6 +12,12 @@ public type SuperMarketNotFound record {|
     errors:ErrorDetails body;
 |};
 
+public type SupermarketResponse record {|
+    int count;
+    string next;
+    db:SupermarketWithRelations[] results;
+|};
+
 public type NewSupermarket record {|
     string name;
     string contactNo;
@@ -35,13 +41,13 @@ function createSuperMarketNotFound(int id) returns SuperMarketNotFound {
     };
 }
 
-public function get_supermarkets() returns db:Supermarket[]|error? {
+public function get_supermarkets() returns SupermarketResponse|error? {
     db:Client connection = connection:getConnection();
-    stream<db:Supermarket, persist:Error?> supermarketStream = connection->/supermarkets.get();
-    db:Supermarket[] supermarkets = check from db:Supermarket supermarket in supermarketStream
+    stream<db:SupermarketWithRelations, persist:Error?> supermarketStream = connection->/supermarkets.get();
+    db:SupermarketWithRelations[] supermarkets = check from db:SupermarketWithRelations supermarket in supermarketStream
         select supermarket;
 
-    return supermarkets;
+    return {count: supermarkets.length(), next: "", results: supermarkets};
 }
 
 public function get_supermarket_by_id(int id) returns db:Supermarket|SuperMarketNotFound|error? {
@@ -70,6 +76,8 @@ public function register_supermarket(auth:User user, NewSupermarket supermarket)
         profilePic: supermarket.logo,
         role: "Supermarket Manager",
         status: "Active",
+        
+        lastLogin: time:utcToCivil(time:utcNow()),
         createdAt: time:utcToCivil(time:utcNow()),
         updatedAt: time:utcToCivil(time:utcNow()),
         deletedAt: ()

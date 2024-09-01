@@ -13,12 +13,16 @@ type User record {|
     string role;
     string status;
 
+    time:Civil? lastLogin;
+
     time:Civil createdAt;
     time:Civil updatedAt;
     time:Civil? deletedAt;
+
     Consumer? consumer;
     Supermarket? supermarket;
     Driver? driver;
+	Review[] review;
 |};
 
 type NonVerifyUser record {|
@@ -122,9 +126,12 @@ type Order record {|
     string location;
     OrderItems[] orderItems;
 
+    float deliveryFee;
+
     time:Civil orderPlacedOn;
 
     SupermarketOrder[] supermarketOrders;
+	Opportunity[] opportunity;
 |};
 
 type SupermarketOrder record {|
@@ -149,6 +156,7 @@ type OpportunitySupermarket record {|
 type Opportunity record {|
     @sql:Generated
     readonly int id;
+    
     float totalDistance;
     float tripCost;
     Consumer consumer;
@@ -158,10 +166,10 @@ type Opportunity record {|
     OpportunitySupermarket[] opportunitysupermarket;
     string status;
 
-    int orderId;
+    Order _order;
     int driverId;
     
-    string orderPlacedOn;
+    time:Civil orderPlacedOn;
 |};
 
 type Consumer record {|
@@ -193,3 +201,16 @@ type Driver record {|
     string vehicleName;
     string vehicleNumber;
 |};
+
+type Review record {|
+    @sql:Generated
+    readonly int id;
+    string reviewType;
+    User user;
+    int targetId;
+    string title;
+    string content;
+    float rating;
+    time:Civil createdAt;
+|};
+

@@ -421,6 +421,7 @@ dependencies = [
 ]
 modules = [
 	{org = "djaya", packageName = "backend", moduleName = "backend"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.adminOverview"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.advertisements"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.auth"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.cart"},
@@ -434,11 +435,14 @@ modules = [
 	{org = "djaya", packageName = "backend", moduleName = "backend.opportunities"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.orders"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.products"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.reviews"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.sms_service"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.stats"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.supermarket_items"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.supermarkets"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.user"},
-	{org = "djaya", packageName = "backend", moduleName = "backend.user_registration"}
+	{org = "djaya", packageName = "backend", moduleName = "backend.user_registration"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.utils"}
 ]
 
 [[tool]]

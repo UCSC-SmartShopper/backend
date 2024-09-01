@@ -179,6 +179,7 @@ public function checkOtpMatching(OtpMappingRequest otpMappingRequest) returns st
         role: "Consumer",
         status: "Active",
         profilePic: "",
+        lastLogin: (),
         createdAt: time:utcToCivil(time:utcNow()),
         updatedAt: time:utcToCivil(time:utcNow()),
         deletedAt: ()
@@ -337,6 +338,8 @@ public function accept_driver_request(auth:User user, int driverRequestId) retur
         role: "Driver",
         status: "Active",
         profilePic: "",
+
+        lastLogin: (),
         createdAt: time:utcToCivil(time:utcNow()),
         updatedAt: time:utcToCivil(time:utcNow()),
         deletedAt: ()

@@ -14,6 +14,7 @@ public type User record {|
     string profilePic;
     string role;
     string status;
+    time:Civil? lastLogin;
     time:Civil createdAt;
     time:Civil updatedAt;
     time:Civil? deletedAt;
@@ -29,6 +30,7 @@ public type UserOptionalized record {|
     string profilePic?;
     string role?;
     string status?;
+    time:Civil? lastLogin?;
     time:Civil createdAt?;
     time:Civil updatedAt?;
     time:Civil? deletedAt?;
@@ -39,6 +41,7 @@ public type UserWithRelations record {|
     ConsumerOptionalized consumer?;
     SupermarketOptionalized supermarket?;
     DriverOptionalized driver?;
+    ReviewOptionalized[] review?;
 |};
 
 public type UserTargetType typedesc<UserWithRelations>;
@@ -51,6 +54,7 @@ public type UserInsert record {|
     string profilePic;
     string role;
     string status;
+    time:Civil? lastLogin;
     time:Civil createdAt;
     time:Civil updatedAt;
     time:Civil? deletedAt;
@@ -64,6 +68,7 @@ public type UserUpdate record {|
     string profilePic?;
     string role?;
     string status?;
+    time:Civil? lastLogin?;
     time:Civil createdAt?;
     time:Civil updatedAt?;
     time:Civil? deletedAt?;
@@ -427,6 +432,7 @@ public type Order record {|
     string shippingMethod;
     string location;
 
+    float deliveryFee;
     time:Civil orderPlacedOn;
 
 |};
@@ -438,6 +444,7 @@ public type OrderOptionalized record {|
     string shippingAddress?;
     string shippingMethod?;
     string location?;
+    float deliveryFee?;
     time:Civil orderPlacedOn?;
 |};
 
@@ -445,6 +452,7 @@ public type OrderWithRelations record {|
     *OrderOptionalized;
     OrderItemsOptionalized[] orderItems?;
     SupermarketOrderOptionalized[] supermarketOrders?;
+    OpportunityOptionalized[] opportunity?;
 |};
 
 public type OrderTargetType typedesc<OrderWithRelations>;
@@ -455,6 +463,7 @@ public type OrderInsert record {|
     string shippingAddress;
     string shippingMethod;
     string location;
+    float deliveryFee;
     time:Civil orderPlacedOn;
 |};
 
@@ -464,6 +473,7 @@ public type OrderUpdate record {|
     string shippingAddress?;
     string shippingMethod?;
     string location?;
+    float deliveryFee?;
     time:Civil orderPlacedOn?;
 |};
 
@@ -545,9 +555,9 @@ public type Opportunity record {|
     string deliveryLocation;
 
     string status;
-    int orderId;
+    int _orderId;
     int driverId;
-    string orderPlacedOn;
+    time:Civil orderPlacedOn;
 |};
 
 public type OpportunityOptionalized record {|
@@ -559,15 +569,16 @@ public type OpportunityOptionalized record {|
     string startLocation?;
     string deliveryLocation?;
     string status?;
-    int orderId?;
+    int _orderId?;
     int driverId?;
-    string orderPlacedOn?;
+    time:Civil orderPlacedOn?;
 |};
 
 public type OpportunityWithRelations record {|
     *OpportunityOptionalized;
     ConsumerOptionalized consumer?;
     OpportunitySupermarketOptionalized[] opportunitysupermarket?;
+    OrderOptionalized _order?;
 |};
 
 public type OpportunityTargetType typedesc<OpportunityWithRelations>;
@@ -580,9 +591,9 @@ public type OpportunityInsert record {|
     string startLocation;
     string deliveryLocation;
     string status;
-    int orderId;
+    int _orderId;
     int driverId;
-    string orderPlacedOn;
+    time:Civil orderPlacedOn;
 |};
 
 public type OpportunityUpdate record {|
@@ -593,9 +604,9 @@ public type OpportunityUpdate record {|
     string startLocation?;
     string deliveryLocation?;
     string status?;
-    int orderId?;
+    int _orderId?;
     int driverId?;
-    string orderPlacedOn?;
+    time:Civil orderPlacedOn?;
 |};
 
 public type Consumer record {|
@@ -709,5 +720,54 @@ public type DriverUpdate record {|
     string vehicleColor?;
     string vehicleName?;
     string vehicleNumber?;
+|};
+
+public type Review record {|
+    readonly int id;
+    string reviewType;
+    int userId;
+    int targetId;
+    string title;
+    string content;
+    float rating;
+    time:Civil createdAt;
+|};
+
+public type ReviewOptionalized record {|
+    int id?;
+    string reviewType?;
+    int userId?;
+    int targetId?;
+    string title?;
+    string content?;
+    float rating?;
+    time:Civil createdAt?;
+|};
+
+public type ReviewWithRelations record {|
+    *ReviewOptionalized;
+    UserOptionalized user?;
+|};
+
+public type ReviewTargetType typedesc<ReviewWithRelations>;
+
+public type ReviewInsert record {|
+    string reviewType;
+    int userId;
+    int targetId;
+    string title;
+    string content;
+    float rating;
+    time:Civil createdAt;
+|};
+
+public type ReviewUpdate record {|
+    string reviewType?;
+    int userId?;
+    int targetId?;
+    string title?;
+    string content?;
+    float rating?;
+    time:Civil createdAt?;
 |};
 
