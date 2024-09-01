@@ -14,7 +14,13 @@ public type Earning record {|
     float earnings;
 |};
 
-public function get_all_supermarket_earnings() returns Earning[]|error {
+public type EarningResponse record {|
+    int count;
+    string next;
+    Earning[] results;
+|}; 
+
+public function get_all_supermarket_earnings() returns EarningResponse|error {
 
     do {
         db:Client connection = connection:getConnection();
@@ -54,7 +60,7 @@ public function get_all_supermarket_earnings() returns Earning[]|error {
             earnings.push({name: supermarket.name, earnings: supermarketEarnings});
         }
 
-        return earnings;
+        return {count:earnings.length(), next:"", results:earnings};
 
     } on fail {
         return error("Failed to get earnings");
