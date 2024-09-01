@@ -269,6 +269,7 @@ public isolated client class Client {
                 "_order.shippingAddress": {relation: {entityName: "_order", refField: "shippingAddress"}},
                 "_order.shippingMethod": {relation: {entityName: "_order", refField: "shippingMethod"}},
                 "_order.location": {relation: {entityName: "_order", refField: "location"}},
+                "_order.deliveryFee": {relation: {entityName: "_order", refField: "deliveryFee"}},
                 "_order.orderPlacedOn": {relation: {entityName: "_order", refField: "orderPlacedOn"}}
             },
             keyFields: ["id"],
@@ -284,6 +285,7 @@ public isolated client class Client {
                 shippingAddress: {columnName: "shippingAddress"},
                 shippingMethod: {columnName: "shippingMethod"},
                 location: {columnName: "location"},
+                deliveryFee: {columnName: "deliveryFee"},
                 orderPlacedOn: {columnName: "orderPlacedOn"},
                 "orderItems[].id": {relation: {entityName: "orderItems", refField: "id"}},
                 "orderItems[].supermarketId": {relation: {entityName: "orderItems", refField: "supermarketId"}},
@@ -295,12 +297,24 @@ public isolated client class Client {
                 "supermarketOrders[].status": {relation: {entityName: "supermarketOrders", refField: "status"}},
                 "supermarketOrders[].qrCode": {relation: {entityName: "supermarketOrders", refField: "qrCode"}},
                 "supermarketOrders[]._orderId": {relation: {entityName: "supermarketOrders", refField: "_orderId"}},
-                "supermarketOrders[].supermarketId": {relation: {entityName: "supermarketOrders", refField: "supermarketId"}}
+                "supermarketOrders[].supermarketId": {relation: {entityName: "supermarketOrders", refField: "supermarketId"}},
+                "opportunity[].id": {relation: {entityName: "opportunity", refField: "id"}},
+                "opportunity[].totalDistance": {relation: {entityName: "opportunity", refField: "totalDistance"}},
+                "opportunity[].tripCost": {relation: {entityName: "opportunity", refField: "tripCost"}},
+                "opportunity[].consumerId": {relation: {entityName: "opportunity", refField: "consumerId"}},
+                "opportunity[].deliveryCost": {relation: {entityName: "opportunity", refField: "deliveryCost"}},
+                "opportunity[].startLocation": {relation: {entityName: "opportunity", refField: "startLocation"}},
+                "opportunity[].deliveryLocation": {relation: {entityName: "opportunity", refField: "deliveryLocation"}},
+                "opportunity[].status": {relation: {entityName: "opportunity", refField: "status"}},
+                "opportunity[]._orderId": {relation: {entityName: "opportunity", refField: "_orderId"}},
+                "opportunity[].driverId": {relation: {entityName: "opportunity", refField: "driverId"}},
+                "opportunity[].orderPlacedOn": {relation: {entityName: "opportunity", refField: "orderPlacedOn"}}
             },
             keyFields: ["id"],
             joinMetadata: {
                 orderItems: {entity: OrderItems, fieldName: "orderItems", refTable: "OrderItems", refColumns: ["_orderId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
-                supermarketOrders: {entity: SupermarketOrder, fieldName: "supermarketOrders", refTable: "SupermarketOrder", refColumns: ["_orderId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}
+                supermarketOrders: {entity: SupermarketOrder, fieldName: "supermarketOrders", refTable: "SupermarketOrder", refColumns: ["_orderId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
+                opportunity: {entity: Opportunity, fieldName: "opportunity", refTable: "Opportunity", refColumns: ["_orderId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}
             }
         },
         [SUPERMARKET_ORDER]: {
@@ -318,6 +332,7 @@ public isolated client class Client {
                 "_order.shippingAddress": {relation: {entityName: "_order", refField: "shippingAddress"}},
                 "_order.shippingMethod": {relation: {entityName: "_order", refField: "shippingMethod"}},
                 "_order.location": {relation: {entityName: "_order", refField: "location"}},
+                "_order.deliveryFee": {relation: {entityName: "_order", refField: "deliveryFee"}},
                 "_order.orderPlacedOn": {relation: {entityName: "_order", refField: "orderPlacedOn"}},
                 "supermarket.id": {relation: {entityName: "supermarket", refField: "id"}},
                 "supermarket.name": {relation: {entityName: "supermarket", refField: "name"}},
@@ -355,7 +370,7 @@ public isolated client class Client {
                 "opportunity.startLocation": {relation: {entityName: "opportunity", refField: "startLocation"}},
                 "opportunity.deliveryLocation": {relation: {entityName: "opportunity", refField: "deliveryLocation"}},
                 "opportunity.status": {relation: {entityName: "opportunity", refField: "status"}},
-                "opportunity.orderId": {relation: {entityName: "opportunity", refField: "orderId"}},
+                "opportunity._orderId": {relation: {entityName: "opportunity", refField: "_orderId"}},
                 "opportunity.driverId": {relation: {entityName: "opportunity", refField: "driverId"}},
                 "opportunity.orderPlacedOn": {relation: {entityName: "opportunity", refField: "orderPlacedOn"}}
             },
@@ -377,19 +392,28 @@ public isolated client class Client {
                 startLocation: {columnName: "startLocation"},
                 deliveryLocation: {columnName: "deliveryLocation"},
                 status: {columnName: "status"},
-                orderId: {columnName: "orderId"},
+                _orderId: {columnName: "_orderId"},
                 driverId: {columnName: "driverId"},
                 orderPlacedOn: {columnName: "orderPlacedOn"},
                 "consumer.id": {relation: {entityName: "consumer", refField: "id"}},
                 "consumer.userId": {relation: {entityName: "consumer", refField: "userId"}},
                 "opportunitysupermarket[].id": {relation: {entityName: "opportunitysupermarket", refField: "id"}},
                 "opportunitysupermarket[].supermarketId": {relation: {entityName: "opportunitysupermarket", refField: "supermarketId"}},
-                "opportunitysupermarket[].opportunityId": {relation: {entityName: "opportunitysupermarket", refField: "opportunityId"}}
+                "opportunitysupermarket[].opportunityId": {relation: {entityName: "opportunitysupermarket", refField: "opportunityId"}},
+                "_order.id": {relation: {entityName: "_order", refField: "id"}},
+                "_order.consumerId": {relation: {entityName: "_order", refField: "consumerId"}},
+                "_order.status": {relation: {entityName: "_order", refField: "status"}},
+                "_order.shippingAddress": {relation: {entityName: "_order", refField: "shippingAddress"}},
+                "_order.shippingMethod": {relation: {entityName: "_order", refField: "shippingMethod"}},
+                "_order.location": {relation: {entityName: "_order", refField: "location"}},
+                "_order.deliveryFee": {relation: {entityName: "_order", refField: "deliveryFee"}},
+                "_order.orderPlacedOn": {relation: {entityName: "_order", refField: "orderPlacedOn"}}
             },
             keyFields: ["id"],
             joinMetadata: {
                 consumer: {entity: Consumer, fieldName: "consumer", refTable: "Consumer", refColumns: ["id"], joinColumns: ["consumerId"], 'type: psql:ONE_TO_MANY},
-                opportunitysupermarket: {entity: OpportunitySupermarket, fieldName: "opportunitysupermarket", refTable: "OpportunitySupermarket", refColumns: ["opportunityId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}
+                opportunitysupermarket: {entity: OpportunitySupermarket, fieldName: "opportunitysupermarket", refTable: "OpportunitySupermarket", refColumns: ["opportunityId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
+                _order: {entity: Order, fieldName: "_order", refTable: "Order", refColumns: ["id"], joinColumns: ["_orderId"], 'type: psql:ONE_TO_MANY}
             }
         },
         [CONSUMER]: {
@@ -425,7 +449,7 @@ public isolated client class Client {
                 "opportunity[].startLocation": {relation: {entityName: "opportunity", refField: "startLocation"}},
                 "opportunity[].deliveryLocation": {relation: {entityName: "opportunity", refField: "deliveryLocation"}},
                 "opportunity[].status": {relation: {entityName: "opportunity", refField: "status"}},
-                "opportunity[].orderId": {relation: {entityName: "opportunity", refField: "orderId"}},
+                "opportunity[]._orderId": {relation: {entityName: "opportunity", refField: "_orderId"}},
                 "opportunity[].driverId": {relation: {entityName: "opportunity", refField: "driverId"}},
                 "opportunity[].orderPlacedOn": {relation: {entityName: "opportunity", refField: "orderPlacedOn"}}
             },

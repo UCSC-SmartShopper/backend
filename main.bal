@@ -7,16 +7,17 @@ import backend.driver;
 import backend.opportunities;
 import backend.orders;
 import backend.products;
+import backend.reviews;
+import backend.stats;
 import backend.supermarket_items;
 import backend.supermarkets;
 import backend.user;
 import backend.user_registration;
+
 //import backend.adminOverview;
 
 import ballerina/http;
 import ballerina/persist;
-import backend.stats;
-import backend.reviews;
 
 @http:ServiceConfig {
     cors: {
@@ -158,7 +159,7 @@ service / on new http:Listener(9090) {
         return cart:addCartItem(user.consumerId ?: -1, cartItem);
     }
 
-    resource function patch carts(http:Request req, cart:CartItem cartItem) returns db:CartItem|int|error {
+    resource function patch carts/[int id](http:Request req, cart:CartItem cartItem) returns db:CartItem|int|error {
         auth:User user = check auth:getUser(req);
         return cart:updateCartItem(user.consumerId ?: -1, cartItem);
     }
@@ -190,9 +191,9 @@ service / on new http:Listener(9090) {
 
     // ---------------------------------------------- Order Resource Functions ----------------------------------------------
 
-    resource function get orders(http:Request req,int supermarketId) returns orders:OrderResponse|error {
+    resource function get orders(http:Request req, int supermarketId) returns orders:OrderResponse|error {
         auth:User user = check auth:getUser(req);
-        return orders:getOrders(user , supermarketId);
+        return orders:getOrders(user, supermarketId);
     }
 
     resource function get orders/[int id]() returns db:OrderWithRelations|orders:OrderNotFound|error? {
@@ -262,6 +263,4 @@ service / on new http:Listener(9090) {
         return reviews:create_review(user, review);
     }
 
-
-    
 }
