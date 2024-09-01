@@ -21,6 +21,13 @@ public type EarningResponse record {|
     Earning[] results;
 |};
 
+public type SalesResponse record {|
+    int count;
+    string next;
+    db:OrderWithRelations[] results;
+|};
+
+
 public function get_all_supermarket_earnings() returns EarningResponse|error {
 
     do {
@@ -147,4 +154,24 @@ public function get_driver_earnings(int driverId) returns float|error {
         return error("Failed to get earnings");
     }
 }
+
+//get_all_supermarket_sales
+public function get_all_supermarket_sales() returns SalesResponse|error {
+     do {
+        db:Client connection = connection:getConnection();
+
+        stream<db:OrderWithRelations, persist:Error?> orderStream = connection->/orders.get();
+        db:OrderWithRelations[] orders = check from db:OrderWithRelations _order in orderStream
+            //order by _order.id descending
+            select _order;
+
+            io:println("Orders1",orders);
+
+        return {count: orders.length(), next: "", results: orders};
+
+    } on fail {
+        return error("Failed to get earnings");
+    }
+}
+
 

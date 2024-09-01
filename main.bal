@@ -240,6 +240,7 @@ service / on new http:Listener(9090) {
         return stats:get_supermarket_earnings(supermarketId);
     }
 
+
     resource function get stats/feedbacks_by_supermarket_id(int supermarketId) returns reviews:ReviewResponse|error {
         return stats:get_feedbacks_by_supermarket_id(supermarketId);
     }
@@ -247,6 +248,10 @@ service / on new http:Listener(9090) {
     resource function get stats/drivers_earnings/[int driverId]() returns float|error {
         return stats:get_driver_earnings(driverId);
         
+    }
+    
+    resource function get stats/supermarket_sales() returns stats:SalesResponse|error {
+        return stats:get_all_supermarket_sales();
     }
 
     //--------------------------------- Review Resource Functions----------------------------------------------
