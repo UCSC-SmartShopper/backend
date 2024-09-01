@@ -243,6 +243,11 @@ service / on new http:Listener(9090) {
         return stats:get_feedbacks_by_supermarket_id(supermarketId);
     }
 
+    resource function get stats/drivers_earnings/[int driverId]() returns float|error {
+        return stats:get_driver_earnings(driverId);
+        
+    }
+
     //--------------------------------- Review Resource Functions----------------------------------------------
     resource function get reviews(string reviewType, int targetId) returns reviews:ReviewResponse|error? {
         return reviews:get_reviews(reviewType, targetId);

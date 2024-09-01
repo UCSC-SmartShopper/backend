@@ -3,6 +3,7 @@ import backend.db;
 import backend.reviews;
 
 import ballerina/persist;
+import ballerina/io;
 
 type SupermarketsGroupedByName record {|
     string name;
@@ -18,7 +19,7 @@ public type EarningResponse record {|
     int count;
     string next;
     Earning[] results;
-|}; 
+|};
 
 public function get_all_supermarket_earnings() returns EarningResponse|error {
 
@@ -60,7 +61,7 @@ public function get_all_supermarket_earnings() returns EarningResponse|error {
             earnings.push({name: supermarket.name, earnings: supermarketEarnings});
         }
 
-        return {count:earnings.length(), next:"", results:earnings};
+        return {count: earnings.length(), next: "", results: earnings};
 
     } on fail {
         return error("Failed to get earnings");
@@ -122,3 +123,32 @@ public function get_feedbacks_by_supermarket_id(int supermarketId) returns revie
     return {count: reviewsWithRelations.length(), next: "", results: reviewsWithRelations};
 
 }
+
+//get_driver_earnings
+public function get_driver_earnings(int driverId) returns float|error {
+    io:println("driverId: ", 1);
+    do {
+        db:Client connection = connection:getConnection();
+        io:println("connection: ", 2);
+
+        stream<db:OpportunityWithRelations, persist:Error?> opportunityStream = connection->/opportunities.get();
+        db:OpportunityWithRelations[] opportunities = check from db:OpportunityWithRelations accept_opportunity in opportunityStream
+             where accept_opportunity.status == "Delivered" && accept_opportunity.driverId == driverId
+            select accept_opportunity;
+
+        io:println("opportunities: ", 3);
+
+        float driverEarnings = 0.0;
+
+        foreach db:OpportunityWithRelations accept_opportunity in opportunities {
+                driverEarnings += accept_opportunity.deliveryCost ?: 0.0;
+
+        }
+
+        return driverEarnings;
+
+    } on fail {
+        return error("Failed to get earnings");
+    }
+}
+
