@@ -771,3 +771,27 @@ public type ReviewUpdate record {|
     time:Civil createdAt?;
 |};
 
+public type Activity record {|
+    readonly int id;
+    int userId;
+    string description;
+    time:Civil dateTime;
+|};
+
+public type ActivityOptionalized record {|
+    int id?;
+    int userId?;
+    string description?;
+    time:Civil dateTime?;
+|};
+
+public type ActivityTargetType typedesc<ActivityOptionalized>;
+
+public type ActivityInsert Activity;
+
+public type ActivityUpdate record {|
+    int userId?;
+    string description?;
+    time:Civil dateTime?;
+|};
+

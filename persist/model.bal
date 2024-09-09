@@ -214,3 +214,9 @@ type Review record {|
     time:Civil createdAt;
 |};
 
+type Activity record {|
+    readonly int id;
+    int userId;
+    string description;
+    time:Civil dateTime;
+|};

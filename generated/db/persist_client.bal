@@ -27,6 +27,7 @@ const CONSUMER = "consumers";
 const ADVERTISEMENT = "advertisements";
 const DRIVER = "drivers";
 const REVIEW = "reviews";
+const ACTIVITY = "activities";
 
 public isolated client class Client {
     *persist:AbstractPersistClient;
@@ -528,6 +529,17 @@ public isolated client class Client {
             },
             keyFields: ["id"],
             joinMetadata: {user: {entity: User, fieldName: "user", refTable: "User", refColumns: ["id"], joinColumns: ["userId"], 'type: psql:ONE_TO_MANY}}
+        },
+        [ACTIVITY]: {
+            entityName: "Activity",
+            tableName: "Activity",
+            fieldMetadata: {
+                id: {columnName: "id"},
+                userId: {columnName: "userId"},
+                description: {columnName: "description"},
+                dateTime: {columnName: "dateTime"}
+            },
+            keyFields: ["id"]
         }
     };
 
@@ -554,7 +566,8 @@ public isolated client class Client {
             [CONSUMER]: check new (dbClient, self.metadata.get(CONSUMER), psql:POSTGRESQL_SPECIFICS),
             [ADVERTISEMENT]: check new (dbClient, self.metadata.get(ADVERTISEMENT), psql:POSTGRESQL_SPECIFICS),
             [DRIVER]: check new (dbClient, self.metadata.get(DRIVER), psql:POSTGRESQL_SPECIFICS),
-            [REVIEW]: check new (dbClient, self.metadata.get(REVIEW), psql:POSTGRESQL_SPECIFICS)
+            [REVIEW]: check new (dbClient, self.metadata.get(REVIEW), psql:POSTGRESQL_SPECIFICS),
+            [ACTIVITY]: check new (dbClient, self.metadata.get(ACTIVITY), psql:POSTGRESQL_SPECIFICS)
         };
     }
 
@@ -1233,6 +1246,45 @@ public isolated client class Client {
         psql:SQLClient sqlClient;
         lock {
             sqlClient = self.persistClients.get(REVIEW);
+        }
+        _ = check sqlClient.runDeleteQuery(id);
+        return result;
+    }
+
+    isolated resource function get activities(ActivityTargetType targetType = <>, sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``) returns stream<targetType, persist:Error?> = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.PostgreSQLProcessor",
+        name: "query"
+    } external;
+
+    isolated resource function get activities/[int id](ActivityTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.PostgreSQLProcessor",
+        name: "queryOne"
+    } external;
+
+    isolated resource function post activities(ActivityInsert[] data) returns int[]|persist:Error {
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(ACTIVITY);
+        }
+        _ = check sqlClient.runBatchInsertQuery(data);
+        return from ActivityInsert inserted in data
+            select inserted.id;
+    }
+
+    isolated resource function put activities/[int id](ActivityUpdate value) returns Activity|persist:Error {
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(ACTIVITY);
+        }
+        _ = check sqlClient.runUpdateQuery(id, value);
+        return self->/activities/[id].get();
+    }
+
+    isolated resource function delete activities/[int id]() returns Activity|persist:Error {
+        Activity result = check self->/activities/[id].get();
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(ACTIVITY);
         }
         _ = check sqlClient.runDeleteQuery(id);
         return result;
