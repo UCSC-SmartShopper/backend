@@ -18,6 +18,7 @@ DROP TABLE IF EXISTS "Order";
 DROP TABLE IF EXISTS "User";
 DROP TABLE IF EXISTS "NonVerifyUser";
 DROP TABLE IF EXISTS "Product";
+DROP TABLE IF EXISTS "Activity";
 DROP TABLE IF EXISTS "Advertisement";
 DROP TABLE IF EXISTS "NonVerifiedDriver";
 
@@ -45,6 +46,14 @@ CREATE TABLE "Advertisement" (
 	"startDate" VARCHAR(191) NOT NULL,
 	"endDate" VARCHAR(191) NOT NULL,
 	"priority" VARCHAR(191) NOT NULL,
+	PRIMARY KEY("id")
+);
+
+CREATE TABLE "Activity" (
+	"id" INT NOT NULL,
+	"userId" INT NOT NULL,
+	"description" VARCHAR(191) NOT NULL,
+	"dateTime" TIMESTAMP NOT NULL,
 	PRIMARY KEY("id")
 );
 
