@@ -6,11 +6,18 @@ import backend.utils;
 
 import ballerina/http;
 import ballerina/persist;
+import ballerina/time;
+import ballerina/sql;
 
 public type ConsumerResponse record {|
     int count;
     string next;
     Consumer[] results;
+|};
+
+public type Activity record {|
+    string description;
+    time:Civil dateTime;
 |};
 
 // created a new type Consumer to remove the password field from the User type
@@ -59,4 +66,33 @@ public function get_consumer(auth:User user, int id) returns Consumer|http:Unaut
     }
 
     return result;
+}
+
+// public function get_activities(int userId) returns Activity[]|error {
+//     db:Client connection = connection:getConnection();
+//     // Query activities by userId
+//     Activity|persist:Error activityStream = connection->/activities/[userId](Activity);
+//     // Collect the activities
+//     Activity[] activities = from Activity activity in check activityStream
+//         select activity;
+
+//     return activities;
+// }
+
+
+public function get_activities(int userId) returns Activity[]|error {
+    // Get a database connection
+    db:Client connection = connection:getConnection();
+
+    // Write an SQL query to select activities based on userId
+    sql:ParameterizedQuery query = `SELECT * FROM activities WHERE userId = ${userId}`;
+
+    // Execute the query and collect the activities
+    stream<Activity, error> activityStream = connection->select(query, Activity);
+
+    // Collect the activities from the stream
+    Activity[] activities = check from Activity activity in activityStream
+        select activity;
+
+    return activities;
 }

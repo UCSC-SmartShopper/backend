@@ -114,8 +114,14 @@ service / on new http:Listener(9090) {
         return consumer:get_consumer(user, id);
     }
 
-    resource function get activity/[int id]() returns activity:Activity|http:Unauthorized|error {
-        return check activity:get_activities(id);
+    // resource function get activity/[int id]() returns activity:Activity|http:Unauthorized|error {
+    //     return check activity:get_activities(id);
+    // }
+    resource function get activity/[int id]() returns activity:Activity[]|http:Unauthorized|error {
+        // Fetch activities by userId
+        Activity[] activities = get_activities(id);
+
+        return activities;
     }
 
     // ---------------------------------------------- Products Resource Functions ----------------------------------------------
@@ -267,4 +273,8 @@ service / on new http:Listener(9090) {
         return reviews:create_review(user, review);
     }
 
+}
+
+function get_activities(int i) returns $CompilationError$[] {
+    return [];
 }
