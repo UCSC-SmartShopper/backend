@@ -8,6 +8,7 @@ import ballerina/http;
 import ballerina/persist;
 import ballerina/time;
 import ballerina/sql;
+import ballerina/log;
 
 public type ConsumerResponse record {|
     int count;
@@ -95,4 +96,25 @@ public function get_activities(int userId) returns Activity[]|error {
         select activity;
 
     return activities;
+}
+
+public function add_activity(Activity activity) returns error? {
+    // Get a database connection
+    db:Client connection = connection:getConnection();
+
+    // SQL query to insert a new activity
+    string query = "INSERT INTO activities (userId, actionType, description, timestamp) VALUES (?, ?, ?, ?)";
+
+    // Execute the SQL query with the activity details
+    sql:ExecutionResult result = check connection->execute(query, activity.userId, activity.actionType, 
+                                                           activity.description, activity.timestamp);
+
+    // Check if the query was successful
+    if (result.affectedRowCount > 0) {
+        log:printInfo("Activity added successfully");
+    } else {
+        log:printError("Failed to add activity");
+    }
+
+    return;
 }
