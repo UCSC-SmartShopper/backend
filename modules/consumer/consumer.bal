@@ -37,7 +37,7 @@ public function get_all_consumers(string searchText, int month, int page, int _l
     //     return http:UNAUTHORIZED;
     // }
 
-    db:Client connection = connection:getConnection();
+    sql:Client connection = connection:getConnection();
     stream<Consumer, persist:Error?> consumers = connection->/consumers.get();
     Consumer[] consumerList = check from Consumer consumer in consumers
         where
@@ -89,7 +89,7 @@ public function get_activities(int userId) returns Activity[]|error {
     sql:ParameterizedQuery query = `SELECT * FROM activities WHERE userId = ${userId}`;
 
     // Execute the query and collect the activities
-    stream<Activity, error> activityStream = connection->select(query, Activity);
+    stream<Activity, error> activityStream = connection->query(query, Activity);
 
     // Collect the activities from the stream
     Activity[] activities = check from Activity activity in activityStream
