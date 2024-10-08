@@ -75,7 +75,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "http"
-version = "2.11.3"
+version = "2.11.4"
 dependencies = [
 	{org = "ballerina", name = "auth"},
 	{org = "ballerina", name = "cache"},
@@ -431,6 +431,7 @@ modules = [
 	{org = "djaya", packageName = "backend", moduleName = "backend.email_service"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.errors"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.file_service"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.liked_products"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.opportunities"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.orders"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.products"},

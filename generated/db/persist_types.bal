@@ -5,6 +5,16 @@
 
 import ballerina/time;
 
+public enum OrderStatus {
+    ToPay,
+    Placed,
+    Prepared,
+    Processing,
+    Ready,
+    Delivered,
+    Cancelled
+}
+
 public type User record {|
     readonly int id;
     string name;
@@ -427,7 +437,7 @@ public type OrderItemsUpdate record {|
 public type Order record {|
     readonly int id;
     int consumerId;
-    string status;
+    OrderStatus status;
     string shippingAddress;
     string shippingMethod;
     string location;
@@ -440,7 +450,7 @@ public type Order record {|
 public type OrderOptionalized record {|
     int id?;
     int consumerId?;
-    string status?;
+    OrderStatus status?;
     string shippingAddress?;
     string shippingMethod?;
     string location?;
@@ -459,7 +469,7 @@ public type OrderTargetType typedesc<OrderWithRelations>;
 
 public type OrderInsert record {|
     int consumerId;
-    string status;
+    OrderStatus status;
     string shippingAddress;
     string shippingMethod;
     string location;
@@ -469,7 +479,7 @@ public type OrderInsert record {|
 
 public type OrderUpdate record {|
     int consumerId?;
-    string status?;
+    OrderStatus status?;
     string shippingAddress?;
     string shippingMethod?;
     string location?;
@@ -769,5 +779,29 @@ public type ReviewUpdate record {|
     string content?;
     float rating?;
     time:Civil createdAt?;
+|};
+
+public type LikedProduct record {|
+    readonly int id;
+    int userId;
+    int productId;
+|};
+
+public type LikedProductOptionalized record {|
+    int id?;
+    int userId?;
+    int productId?;
+|};
+
+public type LikedProductTargetType typedesc<LikedProductOptionalized>;
+
+public type LikedProductInsert record {|
+    int userId;
+    int productId;
+|};
+
+public type LikedProductUpdate record {|
+    int userId?;
+    int productId?;
 |};
 

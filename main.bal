@@ -4,6 +4,7 @@ import backend.cart;
 import backend.consumer;
 import backend.db;
 import backend.driver;
+import backend.liked_products;
 import backend.opportunities;
 import backend.orders;
 import backend.products;
@@ -14,22 +15,33 @@ import backend.supermarkets;
 import backend.user;
 import backend.user_registration;
 
-//import backend.adminOverview;
-
 import ballerina/http;
+import ballerina/io;
 import ballerina/persist;
+
+type productQuery record {|
+    int category;
+    float price;
+    string sortOrder;
+    string searchText;
+    int page;
+    int _limit;
+|};
 
 @http:ServiceConfig {
     cors: {
         allowOrigins: ["*"],
         allowCredentials: true,
         maxAge: 84900
-
     }
 }
 service / on new http:Listener(9090) {
 
-    // ---------------------------------------------- User Login and Signup Resource Functions ----------------------------------------------
+    function init() {
+        io:println("Service started on port 9090");
+    }
+
+    // ------------------------------------------- User Login and Signup Resource Functions ---------------------------------------
     resource function post login(@http:Payload auth:Credentials credentials) returns auth:UserwithToken|error {
         return auth:login(credentials);
     }
@@ -42,7 +54,7 @@ service / on new http:Listener(9090) {
         return user_registration:checkOtpMatching(otpMappingRequest);
     }
 
-    // ---------------------------------------------- Driver Signup Resource Functions ----------------------------------------------
+    // ---------------------------------------------- Driver Signup Resource Functions --------------------------------------------
 
     // get the otp 
     resource function post driver_otp(@http:Payload user_registration:DriverPersonalDetails driverPersonalDetails) returns error|int {
@@ -74,7 +86,7 @@ service / on new http:Listener(9090) {
         return user_registration:get_all_driver_requests(user);
     }
 
-    // ---------------------------------------------- User Resource Functions ----------------------------------------------
+    // ---------------------------------------------- User Resource Functions ------------------------------------------------
     resource function get users() returns user:UserResponse|http:Unauthorized|error {
         return user:get_all_user();
     }
@@ -89,7 +101,7 @@ service / on new http:Listener(9090) {
         return user:update_user(user, userUpdate);
     }
 
-    // ---------------------------------------------- Driver Resource Functions ----------------------------------------------
+    // ---------------------------------------------- Driver Resource Functions -------------------------------------------------
     resource function get drivers() returns driver:DriverResponse|http:Unauthorized|error {
         return driver:get_all_drivers();
     }
@@ -99,7 +111,7 @@ service / on new http:Listener(9090) {
         return driver:get_driver(user, id);
     }
 
-    // ---------------------------------------------- Consumer Resource Functions ----------------------------------------------
+    // ---------------------------------------------- Consumer Resource Functions -----------------------------------------------
     resource function get consumers(@http:Query string searchText, int month, int page, int _limit) returns consumer:ConsumerResponse|http:Unauthorized|error {
         return consumer:get_all_consumers(searchText, month, page, _limit);
     }
@@ -109,16 +121,39 @@ service / on new http:Listener(9090) {
         return consumer:get_consumer(user, id);
     }
 
-    // ---------------------------------------------- Products Resource Functions ----------------------------------------------
-    resource function get products(http:Request req) returns products:ProductResponse|persist:Error? {
-        return products:getProducts();
+    // ---------------------------------------------- Products Resource Functions -----------------------------------------------
+    resource function get products(
+            string category,
+            float price,
+            string ordering,
+            string searchText,
+            int page,
+            int _limit
+            ) returns products:ProductResponse|persist:Error? {
+        return products:getProducts(category, price, ordering, searchText, page, _limit);
     }
 
     resource function get products/[int id]() returns products:Product|DataNotFound|error? {
         return products:getProductsById(id);
     }
 
-    // ---------------------------------------------- Supermarket Resource Functions ----------------------------------------------
+    // ---------------------------------------------- Liked Products Resource Functions ------------------------------------------
+    resource function get liked_products(http:Request req) returns liked_products:LikedProductResponse|error? {
+        auth:User user = check auth:getUser(req);
+        return liked_products:get_liked_products(user);
+    }
+
+    resource function post liked_products(http:Request req, @http:Payload record {int productId;} payload) returns int|error {
+        auth:User user = check auth:getUser(req);
+        return liked_products:create_liked_product(user, payload.productId);
+    }
+
+    resource function delete liked_products/[int id](http:Request req) returns string|error {
+        auth:User user = check auth:getUser(req);
+        return liked_products:delete_liked_product(user, id);
+    }
+
+    // ---------------------------------------------- Supermarket Resource Functions ---------------------------------------------
     resource function get supermarkets() returns supermarkets:SupermarketResponse|error? {
         return supermarkets:get_supermarkets();
     }
@@ -132,9 +167,10 @@ service / on new http:Listener(9090) {
         return check supermarkets:register_supermarket(user, supermartInsert);
     }
 
-    // ---------------------------------------------- Supermarket Items Resource Functions ----------------------------------------------
+    // ---------------------------------------------- Supermarket Items Resource Functions --------------------------------------
     resource function get supermarketitems(http:Request req, @http:Query int productId) returns supermarket_items:SupermarketItemResponse|error {
         auth:User user = check auth:getUser(req);
+
         // if user is supermarket manager then return all items belongs to the supermarket
         return supermarket_items:get_supermarket_items(user, productId);
     }
@@ -148,7 +184,7 @@ service / on new http:Listener(9090) {
         return supermarket_items:editSupermarketItem(user, id, supermarketItem);
     }
 
-    // ---------------------------------------------- Cart Resource Functions ----------------------------------------------
+    // ---------------------------------------------- Cart Resource Functions ---------------------------------------------------
     resource function get carts(http:Request req) returns cart:CartItemResponse|error {
         auth:User user = check auth:getUser(req);
         return cart:getCartItems(user.consumerId ?: -1);
@@ -169,7 +205,7 @@ service / on new http:Listener(9090) {
         return cart:removeCartItem(user.consumerId ?: -1, id);
     }
 
-    // ---------------------------------------------- Opportunities Resource Functions ----------------------------------------------
+    // ---------------------------------------------- Opportunities Resource Functions -------------------------------------------
     resource function get opportunities(http:Request req, @http:Query string status, @http:Query int _limit) returns opportunities:OpportunityResponse|http:Unauthorized|error {
         auth:User user = check auth:getUser(req);
         return opportunities:getOpportunities(user, status, _limit);
@@ -189,7 +225,7 @@ service / on new http:Listener(9090) {
         return opportunities:complete_delivery(user, id);
     }
 
-    // ---------------------------------------------- Order Resource Functions ----------------------------------------------
+    // ---------------------------------------------- Order Resource Functions ------------------------------------------------
 
     resource function get orders(http:Request req, int supermarketId) returns orders:OrderResponse|error {
         auth:User user = check auth:getUser(req);
@@ -209,7 +245,7 @@ service / on new http:Listener(9090) {
         return orders:supermarket_order_ready(user, orderReadyRequest);
     }
 
-    //---------------------------------Advertisement Resource Functions----------------------------------------------
+    //---------------------------------Advertisement Resource Functions---------------------------------------------------------
 
     resource function get advertisements() returns db:Advertisement[]|error? {
         return advertisements:getAdvertisements();
@@ -231,7 +267,7 @@ service / on new http:Listener(9090) {
         return advertisements:deactivateAdvertisement(id);
     }
 
-    //--------------------------------- Stats Resource Functions----------------------------------------------
+    //------------------------------------------ Stats Resource Functions ------------------------------------------------------
     resource function get stats/supermarket_earnings() returns stats:EarningResponse|error {
         return stats:get_all_supermarket_earnings();
     }
@@ -244,7 +280,7 @@ service / on new http:Listener(9090) {
         return stats:get_feedbacks_by_supermarket_id(supermarketId);
     }
 
-    //--------------------------------- Review Resource Functions----------------------------------------------
+    //-------------------------------------------- Review Resource Functions----------------------------------------------------
     resource function get reviews(string reviewType, int targetId) returns reviews:ReviewResponse|error? {
         return reviews:get_reviews(reviewType, targetId);
     }
