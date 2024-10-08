@@ -101,7 +101,12 @@ service / on new http:Listener(9090) {
         return user:update_user(user, userUpdate);
     }
 
-    // ---------------------------------------------- Driver Resource Functions -------------------------------------------------
+    resource function patch change_password/[int id](http:Request req, @http:Payload user:UpdatePassword updatePassword) returns db:User|DataNotFound|error {
+        auth:User user = check auth:getUser(req);
+        return user:update_password(user,id, updatePassword);
+    }
+
+    // ---------------------------------------------- Driver Resource Functions ----------------------------------------------
     resource function get drivers() returns driver:DriverResponse|http:Unauthorized|error {
         return driver:get_all_drivers();
     }
