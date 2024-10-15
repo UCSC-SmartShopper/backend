@@ -27,6 +27,7 @@ const CONSUMER = "consumers";
 const ADVERTISEMENT = "advertisements";
 const DRIVER = "drivers";
 const REVIEW = "reviews";
+const LIKED_PRODUCT = "likedproducts";
 
 public isolated client class Client {
     *persist:AbstractPersistClient;
@@ -528,6 +529,16 @@ public isolated client class Client {
             },
             keyFields: ["id"],
             joinMetadata: {user: {entity: User, fieldName: "user", refTable: "User", refColumns: ["id"], joinColumns: ["userId"], 'type: psql:ONE_TO_MANY}}
+        },
+        [LIKED_PRODUCT]: {
+            entityName: "LikedProduct",
+            tableName: "LikedProduct",
+            fieldMetadata: {
+                id: {columnName: "id", dbGenerated: true},
+                userId: {columnName: "userId"},
+                productId: {columnName: "productId"}
+            },
+            keyFields: ["id"]
         }
     };
 
@@ -554,7 +565,8 @@ public isolated client class Client {
             [CONSUMER]: check new (dbClient, self.metadata.get(CONSUMER), psql:POSTGRESQL_SPECIFICS),
             [ADVERTISEMENT]: check new (dbClient, self.metadata.get(ADVERTISEMENT), psql:POSTGRESQL_SPECIFICS),
             [DRIVER]: check new (dbClient, self.metadata.get(DRIVER), psql:POSTGRESQL_SPECIFICS),
-            [REVIEW]: check new (dbClient, self.metadata.get(REVIEW), psql:POSTGRESQL_SPECIFICS)
+            [REVIEW]: check new (dbClient, self.metadata.get(REVIEW), psql:POSTGRESQL_SPECIFICS),
+            [LIKED_PRODUCT]: check new (dbClient, self.metadata.get(LIKED_PRODUCT), psql:POSTGRESQL_SPECIFICS)
         };
     }
 
@@ -1233,6 +1245,46 @@ public isolated client class Client {
         psql:SQLClient sqlClient;
         lock {
             sqlClient = self.persistClients.get(REVIEW);
+        }
+        _ = check sqlClient.runDeleteQuery(id);
+        return result;
+    }
+
+    isolated resource function get likedproducts(LikedProductTargetType targetType = <>, sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``) returns stream<targetType, persist:Error?> = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.PostgreSQLProcessor",
+        name: "query"
+    } external;
+
+    isolated resource function get likedproducts/[int id](LikedProductTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.PostgreSQLProcessor",
+        name: "queryOne"
+    } external;
+
+    isolated resource function post likedproducts(LikedProductInsert[] data) returns int[]|persist:Error {
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(LIKED_PRODUCT);
+        }
+        sql:ExecutionResult[] result = check sqlClient.runBatchInsertQuery(data);
+        return from sql:ExecutionResult inserted in result
+            where inserted.lastInsertId != ()
+            select <int>inserted.lastInsertId;
+    }
+
+    isolated resource function put likedproducts/[int id](LikedProductUpdate value) returns LikedProduct|persist:Error {
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(LIKED_PRODUCT);
+        }
+        _ = check sqlClient.runUpdateQuery(id, value);
+        return self->/likedproducts/[id].get();
+    }
+
+    isolated resource function delete likedproducts/[int id]() returns LikedProduct|persist:Error {
+        LikedProduct result = check self->/likedproducts/[id].get();
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(LIKED_PRODUCT);
         }
         _ = check sqlClient.runDeleteQuery(id);
         return result;
