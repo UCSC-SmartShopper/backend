@@ -120,6 +120,7 @@ CREATE TABLE "CartItem" (
 	"id"  SERIAL,
 	"quantity" INT NOT NULL,
 	"consumerId" INT NOT NULL,
+	"productId" INT NOT NULL,
 	"supermarketitemId" INT NOT NULL,
 	FOREIGN KEY("supermarketitemId") REFERENCES "SupermarketItem"("id"),
 	PRIMARY KEY("id")
@@ -230,4 +231,5 @@ CREATE TABLE "OrderItems" (
 );
 
 
+CREATE UNIQUE INDEX "cart_item_unique_index" ON "CartItem" ("consumerId", "productId");
 CREATE UNIQUE INDEX "liked_product_unique_index" ON "LikedProduct" ("userId", "productId");

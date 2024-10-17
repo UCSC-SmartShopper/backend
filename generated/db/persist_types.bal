@@ -365,6 +365,7 @@ public type CartItem record {|
     int supermarketitemId;
     int quantity;
     int consumerId;
+    int productId;
 |};
 
 public type CartItemOptionalized record {|
@@ -372,6 +373,7 @@ public type CartItemOptionalized record {|
     int supermarketitemId?;
     int quantity?;
     int consumerId?;
+    int productId?;
 |};
 
 public type CartItemWithRelations record {|
@@ -385,12 +387,14 @@ public type CartItemInsert record {|
     int supermarketitemId;
     int quantity;
     int consumerId;
+    int productId;
 |};
 
 public type CartItemUpdate record {|
     int supermarketitemId?;
     int quantity?;
     int consumerId?;
+    int productId?;
 |};
 
 public type OrderItems record {|

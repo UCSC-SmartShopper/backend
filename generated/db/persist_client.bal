@@ -227,7 +227,8 @@ public isolated client class Client {
                 "cartItem[].id": {relation: {entityName: "cartItem", refField: "id"}},
                 "cartItem[].supermarketitemId": {relation: {entityName: "cartItem", refField: "supermarketitemId"}},
                 "cartItem[].quantity": {relation: {entityName: "cartItem", refField: "quantity"}},
-                "cartItem[].consumerId": {relation: {entityName: "cartItem", refField: "consumerId"}}
+                "cartItem[].consumerId": {relation: {entityName: "cartItem", refField: "consumerId"}},
+                "cartItem[].productId": {relation: {entityName: "cartItem", refField: "productId"}}
             },
             keyFields: ["id"],
             joinMetadata: {
@@ -244,6 +245,7 @@ public isolated client class Client {
                 supermarketitemId: {columnName: "supermarketitemId"},
                 quantity: {columnName: "quantity"},
                 consumerId: {columnName: "consumerId"},
+                productId: {columnName: "productId"},
                 "supermarketItem.id": {relation: {entityName: "supermarketItem", refField: "id"}},
                 "supermarketItem.productId": {relation: {entityName: "supermarketItem", refField: "productId"}},
                 "supermarketItem.supermarketId": {relation: {entityName: "supermarketItem", refField: "supermarketId"}},

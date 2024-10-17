@@ -103,7 +103,11 @@ type CartItem record {|
     readonly int id;
     SupermarketItem supermarketItem;
     int quantity;
+
+    @sql:UniqueIndex {name: "cart_item_unique_index"}
     int consumerId;
+    @sql:UniqueIndex {name: "cart_item_unique_index"}
+    int productId;
 |};
 
 type OrderItems record {|
@@ -227,7 +231,7 @@ type Review record {|
 type LikedProduct record {|
     @sql:Generated
     readonly int id;
-    
+
     @sql:UniqueIndex {name: "liked_product_unique_index"}
     int userId;
     @sql:UniqueIndex {name: "liked_product_unique_index"}

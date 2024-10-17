@@ -103,7 +103,7 @@ service / on new http:Listener(9090) {
 
     resource function patch change_password/[int id](http:Request req, @http:Payload user:UpdatePassword updatePassword) returns db:User|DataNotFound|error {
         auth:User user = check auth:getUser(req);
-        return user:update_password(user,id, updatePassword);
+        return user:update_password(user, id, updatePassword);
     }
 
     // ---------------------------------------------- Driver Resource Functions ----------------------------------------------
@@ -189,23 +189,23 @@ service / on new http:Listener(9090) {
         return supermarket_items:editSupermarketItem(user, id, supermarketItem);
     }
 
-    // ---------------------------------------------- Cart Resource Functions ---------------------------------------------------
-    resource function get carts(http:Request req) returns cart:CartItemResponse|error {
+    // ---------------------------------------------- Cart Items Resource Functions ---------------------------------------------------
+    resource function get cart_items(http:Request req) returns cart:CartItemResponse|error {
         auth:User user = check auth:getUser(req);
         return cart:getCartItems(user.consumerId ?: -1);
     }
 
-    resource function post carts(http:Request req, cart:CartItemInsert cartItem) returns db:CartItem|int|error {
+    resource function post cart_items(http:Request req, db:CartItemInsert cartItem) returns db:CartItem|int|error {
         auth:User user = check auth:getUser(req);
         return cart:addCartItem(user.consumerId ?: -1, cartItem);
     }
 
-    resource function patch carts/[int id](http:Request req, cart:CartItem cartItem) returns db:CartItem|int|error {
+    resource function patch cart_items/[int id](http:Request req, db:CartItem cartItem) returns db:CartItem|int|error {
         auth:User user = check auth:getUser(req);
         return cart:updateCartItem(user.consumerId ?: -1, cartItem);
     }
 
-    resource function delete carts(http:Request req, int id) returns db:CartItem|error {
+    resource function delete cart_items/[int id](http:Request req) returns db:CartItem|error {
         auth:User user = check auth:getUser(req);
         return cart:removeCartItem(user.consumerId ?: -1, id);
     }
