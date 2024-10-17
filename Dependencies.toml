@@ -75,7 +75,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "http"
-version = "2.11.3"
+version = "2.11.4"
 dependencies = [
 	{org = "ballerina", name = "auth"},
 	{org = "ballerina", name = "cache"},
@@ -292,7 +292,7 @@ modules = [
 [[package]]
 org = "ballerina"
 name = "sql"
-version = "1.13.2"
+version = "1.13.3"
 dependencies = [
 	{org = "ballerina", name = "io"},
 	{org = "ballerina", name = "jballerina.java"},
@@ -425,17 +425,23 @@ modules = [
 	{org = "djaya", packageName = "backend", moduleName = "backend.auth"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.cart"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.connection"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.consumer"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.db"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.driver"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.email_service"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.errors"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.file_service"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.liked_products"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.opportunities"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.orders"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.products"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.reviews"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.sms_service"},
-	{org = "djaya", packageName = "backend", moduleName = "backend.store_prices"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.stats"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.supermarket_items"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.supermarkets"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.user"},
-	{org = "djaya", packageName = "backend", moduleName = "backend.user_registration"}
+	{org = "djaya", packageName = "backend", moduleName = "backend.user_registration"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.utils"}
 ]
 

@@ -18,7 +18,7 @@ public type CartItemInsert record {|
 public type CartItemResponse record {|
     int count;
     string next;
-    CartItem[] results;
+    db:CartItemWithRelations[] results;
 |};
 
 public function getCartItems(int consumerId) returns CartItemResponse|error {
@@ -27,8 +27,8 @@ public function getCartItems(int consumerId) returns CartItemResponse|error {
     }
 
     db:Client connection = connection:getConnection();
-    stream<CartItem, persist:Error?> CartItemsStream = connection->/cartitems();
-    CartItem[] CartItems = check from CartItem CartItem in CartItemsStream
+    stream<db:CartItemWithRelations, persist:Error?> CartItemsStream = connection->/cartitems();
+    db:CartItemWithRelations[] CartItems = check from db:CartItemWithRelations CartItem in CartItemsStream
         where CartItem.consumerId == consumerId
         order by CartItem.id descending
         select CartItem;
@@ -36,7 +36,7 @@ public function getCartItems(int consumerId) returns CartItemResponse|error {
     return {count: CartItems.length(), next: "null", results: CartItems};
 }
 
-public function addCartItem(int consumerId, CartItemInsert cartItem) returns db:CartItem|int|error {
+public function addCartItem(int consumerId, db:CartItemInsert cartItem) returns db:CartItem|int|error {
     if (consumerId == 0) {
         return error("Consumer not found");
     }
@@ -45,7 +45,8 @@ public function addCartItem(int consumerId, CartItemInsert cartItem) returns db:
     db:CartItemInsert cartItemInsert = {
         supermarketitemId: cartItem.supermarketitemId,
         quantity: cartItem.quantity,
-        consumerId: consumerId
+        consumerId: consumerId,
+        productId: cartItem.productId
     };
     int[]|persist:Error result = connection->/cartitems.post([cartItemInsert]);
 
@@ -55,16 +56,15 @@ public function addCartItem(int consumerId, CartItemInsert cartItem) returns db:
     return result[0];
 }
 
-public function updateCartItem(int consumerId, CartItem cartItem) returns db:CartItem|int|error {
+public function updateCartItem(int consumerId, db:CartItem cartItem) returns db:CartItem|int|error {
     if (consumerId == 0) {
         return error("Consumer not found");
     }
 
     db:CartItemUpdate cartItemUpdate = {
-            supermarketitemId: cartItem.supermarketItem.id,
-            quantity: cartItem.quantity,
-            consumerId: consumerId
-        };
+        supermarketitemId: cartItem.supermarketitemId,
+        quantity: cartItem.quantity
+    };
 
     db:Client connection = connection:getConnection();
     db:CartItem|persist:Error result = connection->/cartitems/[cartItem.id].put(cartItemUpdate);

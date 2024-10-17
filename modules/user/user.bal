@@ -12,6 +12,27 @@ public type UserNotFound record {|
     errors:ErrorDetails body;
 |};
 
+public type UpdatePassword record {|
+    string oldPassword;
+    string newPassword;
+|};
+
+// without password
+public type User record {|
+    readonly int id;
+    string name;
+    string email;
+    string number;
+    string profilePic;
+    string role;
+    string status;
+
+    time:Civil? lastLogin;
+    time:Civil createdAt;
+    time:Civil updatedAt;
+    time:Civil? deletedAt;
+|};
+
 public type UserResponse record {|
     int count;
     string next;
@@ -70,6 +91,29 @@ public function update_user(auth:User user, db:UserUpdate userUpdate) returns db
 
     if updatedUser is persist:Error {
         return createUserNotFound(user.id);
+    }
+
+    return updatedUser;
+}
+
+public function update_password(auth:User user, int id, UpdatePassword updatePassword) returns db:User|error {
+    db:Client connection = connection:getConnection();
+
+    db:User|persist:Error dbUser = connection->/users/[id](db:User);
+
+    if dbUser is persist:Error {
+        return error("User not found");
+    }
+
+    if updatePassword.oldPassword != dbUser.password {
+        return error("Invalid password");
+    }
+
+    db:UserUpdate userUpdate = {password: updatePassword.newPassword};
+    db:User|persist:Error updatedUser = connection->/users/[id].put(userUpdate);
+
+    if updatedUser is persist:Error {
+        return error("Failed to update the password");
     }
 
     return updatedUser;

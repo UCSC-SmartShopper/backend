@@ -5,6 +5,16 @@
 
 import ballerina/time;
 
+public enum OrderStatus {
+    ToPay,
+    Placed,
+    Prepared,
+    Processing,
+    Ready,
+    Delivered,
+    Cancelled
+}
+
 public type User record {|
     readonly int id;
     string name;
@@ -14,6 +24,7 @@ public type User record {|
     string profilePic;
     string role;
     string status;
+    time:Civil? lastLogin;
     time:Civil createdAt;
     time:Civil updatedAt;
     time:Civil? deletedAt;
@@ -29,6 +40,7 @@ public type UserOptionalized record {|
     string profilePic?;
     string role?;
     string status?;
+    time:Civil? lastLogin?;
     time:Civil createdAt?;
     time:Civil updatedAt?;
     time:Civil? deletedAt?;
@@ -38,6 +50,8 @@ public type UserWithRelations record {|
     *UserOptionalized;
     ConsumerOptionalized consumer?;
     SupermarketOptionalized supermarket?;
+    DriverOptionalized driver?;
+    ReviewOptionalized[] review?;
 |};
 
 public type UserTargetType typedesc<UserWithRelations>;
@@ -50,6 +64,7 @@ public type UserInsert record {|
     string profilePic;
     string role;
     string status;
+    time:Civil? lastLogin;
     time:Civil createdAt;
     time:Civil updatedAt;
     time:Civil? deletedAt;
@@ -63,6 +78,7 @@ public type UserUpdate record {|
     string profilePic?;
     string role?;
     string status?;
+    time:Civil? lastLogin?;
     time:Civil createdAt?;
     time:Civil updatedAt?;
     time:Civil? deletedAt?;
@@ -117,7 +133,7 @@ public type NonVerifiedDriver record {|
     string vehicleName;
     string vehicleNumber;
     string password;
-    string otpStatus;
+    string status;
 |};
 
 public type NonVerifiedDriverOptionalized record {|
@@ -133,7 +149,7 @@ public type NonVerifiedDriverOptionalized record {|
     string vehicleName?;
     string vehicleNumber?;
     string password?;
-    string otpStatus?;
+    string status?;
 |};
 
 public type NonVerifiedDriverTargetType typedesc<NonVerifiedDriverOptionalized>;
@@ -150,7 +166,7 @@ public type NonVerifiedDriverInsert record {|
     string vehicleName;
     string vehicleNumber;
     string password;
-    string otpStatus;
+    string status;
 |};
 
 public type NonVerifiedDriverUpdate record {|
@@ -165,7 +181,7 @@ public type NonVerifiedDriverUpdate record {|
     string vehicleName?;
     string vehicleNumber?;
     string password?;
-    string otpStatus?;
+    string status?;
 |};
 
 public type Address record {|
@@ -349,6 +365,7 @@ public type CartItem record {|
     int supermarketitemId;
     int quantity;
     int consumerId;
+    int productId;
 |};
 
 public type CartItemOptionalized record {|
@@ -356,6 +373,7 @@ public type CartItemOptionalized record {|
     int supermarketitemId?;
     int quantity?;
     int consumerId?;
+    int productId?;
 |};
 
 public type CartItemWithRelations record {|
@@ -369,12 +387,14 @@ public type CartItemInsert record {|
     int supermarketitemId;
     int quantity;
     int consumerId;
+    int productId;
 |};
 
 public type CartItemUpdate record {|
     int supermarketitemId?;
     int quantity?;
     int consumerId?;
+    int productId?;
 |};
 
 public type OrderItems record {|
@@ -421,11 +441,12 @@ public type OrderItemsUpdate record {|
 public type Order record {|
     readonly int id;
     int consumerId;
-    string status;
+    OrderStatus status;
     string shippingAddress;
     string shippingMethod;
     string location;
 
+    float deliveryFee;
     time:Civil orderPlacedOn;
 
 |};
@@ -433,10 +454,11 @@ public type Order record {|
 public type OrderOptionalized record {|
     int id?;
     int consumerId?;
-    string status?;
+    OrderStatus status?;
     string shippingAddress?;
     string shippingMethod?;
     string location?;
+    float deliveryFee?;
     time:Civil orderPlacedOn?;
 |};
 
@@ -444,25 +466,28 @@ public type OrderWithRelations record {|
     *OrderOptionalized;
     OrderItemsOptionalized[] orderItems?;
     SupermarketOrderOptionalized[] supermarketOrders?;
+    OpportunityOptionalized[] opportunity?;
 |};
 
 public type OrderTargetType typedesc<OrderWithRelations>;
 
 public type OrderInsert record {|
     int consumerId;
-    string status;
+    OrderStatus status;
     string shippingAddress;
     string shippingMethod;
     string location;
+    float deliveryFee;
     time:Civil orderPlacedOn;
 |};
 
 public type OrderUpdate record {|
     int consumerId?;
-    string status?;
+    OrderStatus status?;
     string shippingAddress?;
     string shippingMethod?;
     string location?;
+    float deliveryFee?;
     time:Civil orderPlacedOn?;
 |};
 
@@ -538,35 +563,36 @@ public type Opportunity record {|
     readonly int id;
     float totalDistance;
     float tripCost;
-    string orderPlacedOn;
     int consumerId;
     float deliveryCost;
     string startLocation;
     string deliveryLocation;
 
     string status;
-    int orderId;
+    int _orderId;
     int driverId;
+    time:Civil orderPlacedOn;
 |};
 
 public type OpportunityOptionalized record {|
     int id?;
     float totalDistance?;
     float tripCost?;
-    string orderPlacedOn?;
     int consumerId?;
     float deliveryCost?;
     string startLocation?;
     string deliveryLocation?;
     string status?;
-    int orderId?;
+    int _orderId?;
     int driverId?;
+    time:Civil orderPlacedOn?;
 |};
 
 public type OpportunityWithRelations record {|
     *OpportunityOptionalized;
     ConsumerOptionalized consumer?;
     OpportunitySupermarketOptionalized[] opportunitysupermarket?;
+    OrderOptionalized _order?;
 |};
 
 public type OpportunityTargetType typedesc<OpportunityWithRelations>;
@@ -574,27 +600,27 @@ public type OpportunityTargetType typedesc<OpportunityWithRelations>;
 public type OpportunityInsert record {|
     float totalDistance;
     float tripCost;
-    string orderPlacedOn;
     int consumerId;
     float deliveryCost;
     string startLocation;
     string deliveryLocation;
     string status;
-    int orderId;
+    int _orderId;
     int driverId;
+    time:Civil orderPlacedOn;
 |};
 
 public type OpportunityUpdate record {|
     float totalDistance?;
     float tripCost?;
-    string orderPlacedOn?;
     int consumerId?;
     float deliveryCost?;
     string startLocation?;
     string deliveryLocation?;
     string status?;
-    int orderId?;
+    int _orderId?;
     int driverId?;
+    time:Civil orderPlacedOn?;
 |};
 
 public type Consumer record {|
@@ -659,5 +685,127 @@ public type AdvertisementUpdate record {|
     string startDate?;
     string endDate?;
     string priority?;
+|};
+
+public type Driver record {|
+    readonly int id;
+    int userId;
+    string nic;
+    string courierCompany;
+    string vehicleType;
+    string vehicleColor;
+    string vehicleName;
+    string vehicleNumber;
+|};
+
+public type DriverOptionalized record {|
+    int id?;
+    int userId?;
+    string nic?;
+    string courierCompany?;
+    string vehicleType?;
+    string vehicleColor?;
+    string vehicleName?;
+    string vehicleNumber?;
+|};
+
+public type DriverWithRelations record {|
+    *DriverOptionalized;
+    UserOptionalized user?;
+|};
+
+public type DriverTargetType typedesc<DriverWithRelations>;
+
+public type DriverInsert record {|
+    int userId;
+    string nic;
+    string courierCompany;
+    string vehicleType;
+    string vehicleColor;
+    string vehicleName;
+    string vehicleNumber;
+|};
+
+public type DriverUpdate record {|
+    int userId?;
+    string nic?;
+    string courierCompany?;
+    string vehicleType?;
+    string vehicleColor?;
+    string vehicleName?;
+    string vehicleNumber?;
+|};
+
+public type Review record {|
+    readonly int id;
+    string reviewType;
+    int userId;
+    int targetId;
+    string title;
+    string content;
+    float rating;
+    time:Civil createdAt;
+|};
+
+public type ReviewOptionalized record {|
+    int id?;
+    string reviewType?;
+    int userId?;
+    int targetId?;
+    string title?;
+    string content?;
+    float rating?;
+    time:Civil createdAt?;
+|};
+
+public type ReviewWithRelations record {|
+    *ReviewOptionalized;
+    UserOptionalized user?;
+|};
+
+public type ReviewTargetType typedesc<ReviewWithRelations>;
+
+public type ReviewInsert record {|
+    string reviewType;
+    int userId;
+    int targetId;
+    string title;
+    string content;
+    float rating;
+    time:Civil createdAt;
+|};
+
+public type ReviewUpdate record {|
+    string reviewType?;
+    int userId?;
+    int targetId?;
+    string title?;
+    string content?;
+    float rating?;
+    time:Civil createdAt?;
+|};
+
+public type LikedProduct record {|
+    readonly int id;
+    int userId;
+    int productId;
+|};
+
+public type LikedProductOptionalized record {|
+    int id?;
+    int userId?;
+    int productId?;
+|};
+
+public type LikedProductTargetType typedesc<LikedProductOptionalized>;
+
+public type LikedProductInsert record {|
+    int userId;
+    int productId;
+|};
+
+public type LikedProductUpdate record {|
+    int userId?;
+    int productId?;
 |};
 
