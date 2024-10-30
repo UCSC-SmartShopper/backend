@@ -253,9 +253,9 @@ public type SupermarketOptionalized record {|
 public type SupermarketWithRelations record {|
     *SupermarketOptionalized;
     UserOptionalized supermarketManager?;
-    SupermarketItemOptionalized[] storeprice?;
+    SupermarketItemOptionalized[] supermarketItems?;
     OpportunitySupermarketOptionalized[] opportunitysupermarket?;
-    SupermarketOrderOptionalized[] supermarketorder?;
+    SupermarketOrderOptionalized[] supermarketOrder?;
 |};
 
 public type SupermarketTargetType typedesc<SupermarketWithRelations>;
@@ -297,7 +297,7 @@ public type ProductOptionalized record {|
 
 public type ProductWithRelations record {|
     *ProductOptionalized;
-    SupermarketItemOptionalized[] storeprice?;
+    SupermarketItemOptionalized[] supermarketItems?;
 |};
 
 public type ProductTargetType typedesc<ProductWithRelations>;

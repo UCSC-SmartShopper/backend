@@ -71,7 +71,7 @@ service / on new http:Listener(9090) {
     }
 
     // finalizing the driver signup
-    resource function post update_driver_signup/[int id](@http:Payload db:NonVerifiedDriverOptionalized driverUpdate) returns db:NonVerifiedDriver|error {
+    resource function post update_driver_vehicle_details/[int id](@http:Payload user_registration:NonVerifiedDriver driverUpdate) returns db:NonVerifiedDriver|error {
         return user_registration:update_driver_signup(driverUpdate, id);
     }
 
@@ -138,7 +138,7 @@ service / on new http:Listener(9090) {
         return products:getProducts(category, price, ordering, searchText, page, _limit);
     }
 
-    resource function get products/[int id]() returns products:Product|DataNotFound|error? {
+    resource function get products/[int id]() returns db:ProductWithRelations|DataNotFound|error? {
         return products:getProductsById(id);
     }
 
@@ -173,18 +173,18 @@ service / on new http:Listener(9090) {
     }
 
     // ---------------------------------------------- Supermarket Items Resource Functions --------------------------------------
-    resource function get supermarketitems(http:Request req, @http:Query int productId) returns supermarket_items:SupermarketItemResponse|error {
+    resource function get supermarket_items(http:Request req, @http:Query int productId) returns supermarket_items:SupermarketItemResponse|error {
         auth:User user = check auth:getUser(req);
 
         // if user is supermarket manager then return all items belongs to the supermarket
         return supermarket_items:get_supermarket_items(user, productId);
     }
 
-    resource function get supermarketitems/[int id]() returns db:SupermarketItemWithRelations|error {
+    resource function get supermarket_items/[int id]() returns db:SupermarketItemWithRelations|error {
         return supermarket_items:get_supermarket_item_by_id(id);
     }
 
-    resource function patch supermarketitems/[int id](http:Request req, @http:Payload db:SupermarketItemUpdate supermarketItem) returns db:SupermarketItem|error {
+    resource function patch supermarket_items/[int id](http:Request req, @http:Payload db:SupermarketItemUpdate supermarketItem) returns db:SupermarketItem|error {
         auth:User user = check auth:getUser(req);
         return supermarket_items:editSupermarketItem(user, id, supermarketItem);
     }
