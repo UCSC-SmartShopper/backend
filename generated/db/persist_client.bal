@@ -160,27 +160,27 @@ public isolated client class Client {
                 "supermarketManager.createdAt": {relation: {entityName: "supermarketManager", refField: "createdAt"}},
                 "supermarketManager.updatedAt": {relation: {entityName: "supermarketManager", refField: "updatedAt"}},
                 "supermarketManager.deletedAt": {relation: {entityName: "supermarketManager", refField: "deletedAt"}},
-                "storeprice[].id": {relation: {entityName: "storeprice", refField: "id"}},
-                "storeprice[].productId": {relation: {entityName: "storeprice", refField: "productId"}},
-                "storeprice[].supermarketId": {relation: {entityName: "storeprice", refField: "supermarketId"}},
-                "storeprice[].price": {relation: {entityName: "storeprice", refField: "price"}},
-                "storeprice[].discount": {relation: {entityName: "storeprice", refField: "discount"}},
-                "storeprice[].availableQuantity": {relation: {entityName: "storeprice", refField: "availableQuantity"}},
+                "supermarketItems[].id": {relation: {entityName: "supermarketItems", refField: "id"}},
+                "supermarketItems[].productId": {relation: {entityName: "supermarketItems", refField: "productId"}},
+                "supermarketItems[].supermarketId": {relation: {entityName: "supermarketItems", refField: "supermarketId"}},
+                "supermarketItems[].price": {relation: {entityName: "supermarketItems", refField: "price"}},
+                "supermarketItems[].discount": {relation: {entityName: "supermarketItems", refField: "discount"}},
+                "supermarketItems[].availableQuantity": {relation: {entityName: "supermarketItems", refField: "availableQuantity"}},
                 "opportunitysupermarket[].id": {relation: {entityName: "opportunitysupermarket", refField: "id"}},
                 "opportunitysupermarket[].supermarketId": {relation: {entityName: "opportunitysupermarket", refField: "supermarketId"}},
                 "opportunitysupermarket[].opportunityId": {relation: {entityName: "opportunitysupermarket", refField: "opportunityId"}},
-                "supermarketorder[].id": {relation: {entityName: "supermarketorder", refField: "id"}},
-                "supermarketorder[].status": {relation: {entityName: "supermarketorder", refField: "status"}},
-                "supermarketorder[].qrCode": {relation: {entityName: "supermarketorder", refField: "qrCode"}},
-                "supermarketorder[]._orderId": {relation: {entityName: "supermarketorder", refField: "_orderId"}},
-                "supermarketorder[].supermarketId": {relation: {entityName: "supermarketorder", refField: "supermarketId"}}
+                "supermarketOrder[].id": {relation: {entityName: "supermarketOrder", refField: "id"}},
+                "supermarketOrder[].status": {relation: {entityName: "supermarketOrder", refField: "status"}},
+                "supermarketOrder[].qrCode": {relation: {entityName: "supermarketOrder", refField: "qrCode"}},
+                "supermarketOrder[]._orderId": {relation: {entityName: "supermarketOrder", refField: "_orderId"}},
+                "supermarketOrder[].supermarketId": {relation: {entityName: "supermarketOrder", refField: "supermarketId"}}
             },
             keyFields: ["id"],
             joinMetadata: {
                 supermarketManager: {entity: User, fieldName: "supermarketManager", refTable: "User", refColumns: ["id"], joinColumns: ["supermarketmanagerId"], 'type: psql:ONE_TO_ONE},
-                storeprice: {entity: SupermarketItem, fieldName: "storeprice", refTable: "SupermarketItem", refColumns: ["supermarketId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
+                supermarketItems: {entity: SupermarketItem, fieldName: "supermarketItems", refTable: "SupermarketItem", refColumns: ["supermarketId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
                 opportunitysupermarket: {entity: OpportunitySupermarket, fieldName: "opportunitysupermarket", refTable: "OpportunitySupermarket", refColumns: ["supermarketId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
-                supermarketorder: {entity: SupermarketOrder, fieldName: "supermarketorder", refTable: "SupermarketOrder", refColumns: ["supermarketId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}
+                supermarketOrder: {entity: SupermarketOrder, fieldName: "supermarketOrder", refTable: "SupermarketOrder", refColumns: ["supermarketId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}
             }
         },
         [PRODUCT]: {
@@ -192,15 +192,15 @@ public isolated client class Client {
                 description: {columnName: "description"},
                 price: {columnName: "price"},
                 imageUrl: {columnName: "imageUrl"},
-                "storeprice[].id": {relation: {entityName: "storeprice", refField: "id"}},
-                "storeprice[].productId": {relation: {entityName: "storeprice", refField: "productId"}},
-                "storeprice[].supermarketId": {relation: {entityName: "storeprice", refField: "supermarketId"}},
-                "storeprice[].price": {relation: {entityName: "storeprice", refField: "price"}},
-                "storeprice[].discount": {relation: {entityName: "storeprice", refField: "discount"}},
-                "storeprice[].availableQuantity": {relation: {entityName: "storeprice", refField: "availableQuantity"}}
+                "supermarketItems[].id": {relation: {entityName: "supermarketItems", refField: "id"}},
+                "supermarketItems[].productId": {relation: {entityName: "supermarketItems", refField: "productId"}},
+                "supermarketItems[].supermarketId": {relation: {entityName: "supermarketItems", refField: "supermarketId"}},
+                "supermarketItems[].price": {relation: {entityName: "supermarketItems", refField: "price"}},
+                "supermarketItems[].discount": {relation: {entityName: "supermarketItems", refField: "discount"}},
+                "supermarketItems[].availableQuantity": {relation: {entityName: "supermarketItems", refField: "availableQuantity"}}
             },
             keyFields: ["id"],
-            joinMetadata: {storeprice: {entity: SupermarketItem, fieldName: "storeprice", refTable: "SupermarketItem", refColumns: ["productId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}}
+            joinMetadata: {supermarketItems: {entity: SupermarketItem, fieldName: "supermarketItems", refTable: "SupermarketItem", refColumns: ["productId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}}
         },
         [SUPERMARKET_ITEM]: {
             entityName: "SupermarketItem",

@@ -24,11 +24,19 @@ public type NonVerifiedDriver record {|
     string nic;
     string email;
     string contactNo;
+
+    // Vehicle Details
     string courierCompany;
     string vehicleType;
     string vehicleColor;
     string vehicleName;
     string vehicleNumber;
+
+    // Credentials
+    string password;
+    string confirmPassword;
+    string OTP;
+
 |};
 
 public type OtpMappingRequest record {|
@@ -44,7 +52,7 @@ public type SetPassword record {|
 
 public type DriverOtp record {|
     string OTP;
-    int id;
+    int driverId;
 |};
 
 public type RegisterForm record {|
@@ -55,6 +63,7 @@ public type RegisterForm record {|
 |};
 
 public type DriverPersonalDetails record {|
+
     string name;
     string nic;
     string email;
@@ -274,7 +283,7 @@ public function driver_otp_resend(int id) returns http:Created|error {
 public function match_driver_otp(DriverOtp driverOtp) returns db:NonVerifiedDriver|error {
     db:Client connection = connection:getConnection();
 
-    db:NonVerifiedDriver|persist:Error result = connection->/nonverifieddrivers/[driverOtp.id](db:NonVerifiedDriver);
+    db:NonVerifiedDriver|persist:Error result = connection->/nonverifieddrivers/[driverOtp.driverId](db:NonVerifiedDriver);
 
     if result is persist:Error {
         return error("Driver not found.");
@@ -285,11 +294,11 @@ public function match_driver_otp(DriverOtp driverOtp) returns db:NonVerifiedDriv
     }
     db:NonVerifiedDriverUpdate nonVerifiedDriverUpdate = {status: "Verified"};
 
-    db:NonVerifiedDriver|persist:Error updatedDriver = connection->/nonverifieddrivers/[driverOtp.id].put(nonVerifiedDriverUpdate);
+    db:NonVerifiedDriver|persist:Error updatedDriver = connection->/nonverifieddrivers/[driverOtp.driverId].put(nonVerifiedDriverUpdate);
     return updatedDriver;
 }
 
-public function update_driver_signup(db:NonVerifiedDriverOptionalized driverUpdate, int id) returns db:NonVerifiedDriver|error {
+public function update_driver_signup(NonVerifiedDriver driverUpdate, int id) returns db:NonVerifiedDriver|error {
 
     db:Client connection = connection:getConnection();
 
@@ -301,6 +310,10 @@ public function update_driver_signup(db:NonVerifiedDriverOptionalized driverUpda
 
     if (driverUpdate.OTP != result.OTP) {
         return error("Otp does not matched.");
+    }
+
+    if (driverUpdate.password != driverUpdate.confirmPassword) {
+        return error("Password does not matched.");
     }
 
     db:NonVerifiedDriverUpdate nonVerifiedDriverUpdate = {
@@ -393,7 +406,11 @@ public function get_all_driver_requests(auth:User user) returns DriverRequestsRe
             vehicleType: driverRequest.vehicleType,
             vehicleColor: driverRequest.vehicleColor,
             vehicleName: driverRequest.vehicleName,
-            vehicleNumber: driverRequest.vehicleNumber
+            vehicleNumber: driverRequest.vehicleNumber,
+            
+            OTP: "",
+            password: "",
+            confirmPassword: ""
         };
 
     return {count: driverRequestList.length(), next: "null", results: driverRequestList};

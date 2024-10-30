@@ -72,9 +72,9 @@ type Supermarket record {|
     string location;
     string address;
     User supermarketManager;
-    SupermarketItem[] storeprice;
+    SupermarketItem[] supermarketItems;
     OpportunitySupermarket[] opportunitysupermarket;
-    SupermarketOrder[] supermarketorder;
+    SupermarketOrder[] supermarketOrder;
 |};
 
 type Product record {|
@@ -84,7 +84,7 @@ type Product record {|
     string description;
     float price;
     string imageUrl;
-    SupermarketItem[] storeprice;
+    SupermarketItem[] supermarketItems;
 |};
 
 type SupermarketItem record {|
