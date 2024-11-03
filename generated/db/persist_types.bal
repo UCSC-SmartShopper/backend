@@ -282,6 +282,7 @@ public type Product record {|
     readonly int id;
     string name;
     string description;
+    string category;
     float price;
     string imageUrl;
 
@@ -291,6 +292,7 @@ public type ProductOptionalized record {|
     int id?;
     string name?;
     string description?;
+    string category?;
     float price?;
     string imageUrl?;
 |};
@@ -305,6 +307,7 @@ public type ProductTargetType typedesc<ProductWithRelations>;
 public type ProductInsert record {|
     string name;
     string description;
+    string category;
     float price;
     string imageUrl;
 |};
@@ -312,6 +315,7 @@ public type ProductInsert record {|
 public type ProductUpdate record {|
     string name?;
     string description?;
+    string category?;
     float price?;
     string imageUrl?;
 |};

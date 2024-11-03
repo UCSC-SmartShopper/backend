@@ -71,11 +71,13 @@ public function login(Credentials credentials) returns UserwithToken|error {
 
         User jwtUser = {id: user.id, name: user.name, email: user.email, number: user.number, profilePic: user.profilePic, role: user.role};
 
+        // attach consumerId, supermarketId or driverId based on the role
         match user.role {
             "Consumer" => {
                 int consumerId = getConsumerId(user.id);
                 jwtUser.consumerId = consumerId;
             }
+            // supermarket manager id is the user id of the supermarket
             "Supermarket Manager" => {
                 int supermarketId = getSupermarketId(user.id);
                 jwtUser.supermarketId = supermarketId;
@@ -87,13 +89,12 @@ public function login(Credentials credentials) returns UserwithToken|error {
         }
 
         // update last login
-        updateUserLastLogin(user.id);
-        io:println(2);
+        _ = start updateUserLastLogin(user.id);
 
         string jwtToken = check jwt:issue(getConfig(jwtUser));
         return {user: jwtUser, jwtToken: jwtToken};
     }
-    return error("Password incorrect");
+    return error("Invalid credentials");
 
 }
 
@@ -145,6 +146,7 @@ function getSupermarketId(int userId) returns int {
         db:Client connection = connection:getConnection();
         stream<db:Supermarket, persist:Error?> supermarketStream = connection->/supermarkets();
         db:Supermarket[] supermarketArray = check from db:Supermarket s in supermarketStream
+            // supermarket manager id is the user id of the supermarket
             where s.supermarketmanagerId == userId
             order by s.id descending
             select s;
