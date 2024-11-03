@@ -146,6 +146,7 @@ CREATE TABLE "Supermarket" (
 	"contactNo" VARCHAR(191) NOT NULL,
 	"logo" VARCHAR(191) NOT NULL,
 	"location" VARCHAR(191) NOT NULL,
+	"city" VARCHAR(191) NOT NULL,
 	"address" VARCHAR(191) NOT NULL,
 	"supermarketmanagerId" INT UNIQUE NOT NULL,
 	FOREIGN KEY("supermarketmanagerId") REFERENCES "User"("id"),

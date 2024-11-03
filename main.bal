@@ -5,6 +5,7 @@ import backend.consumer;
 import backend.db;
 import backend.driver;
 import backend.liked_products;
+import backend.locations;
 import backend.opportunities;
 import backend.orders;
 import backend.products;
@@ -305,6 +306,12 @@ service / on new http:Listener(9090) {
     resource function post reviews(http:Request req, @http:Payload reviews:ReviewInsert review) returns int|error? {
         auth:User user = check auth:getUser(req);
         return reviews:create_review(user, review);
+    }
+
+    //-------------------------------------------- Location Resource Functions----------------------------------------------------
+    resource function get locations/consumer_supermarket_distance/[string location](http:Request req) returns float|error {
+        auth:User user = check auth:getUser(req);
+        return locations:get_consumer_supermarket_distance(user, location);
     }
 
 }

@@ -24,6 +24,7 @@ public type NewSupermarket record {|
     string logo;
     string location;
     string address;
+    string city;
     string email;
     string password;
     string role;
@@ -99,6 +100,7 @@ public function register_supermarket(auth:User user, NewSupermarket supermarket)
         logo: supermarket.logo,
         location: supermarket.location,
         address: supermarket.address,
+        city: supermarket.city,
         supermarketmanagerId: userResult[0]
     };
 
