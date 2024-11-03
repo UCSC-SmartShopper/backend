@@ -129,7 +129,7 @@ service / on new http:Listener(9090) {
     // ---------------------------------------------- Products Resource Functions -----------------------------------------------
     resource function get products(
             string category,
-            float price,
+            string price,
             string ordering,
             string searchText,
             int page,
@@ -144,8 +144,12 @@ service / on new http:Listener(9090) {
 
     // ---------------------------------------------- Liked Products Resource Functions ------------------------------------------
     resource function get liked_products(http:Request req) returns liked_products:LikedProductResponse|error? {
-        auth:User user = check auth:getUser(req);
-        return liked_products:get_liked_products(user);
+        do {
+            auth:User user = check auth:getUser(req);
+            return liked_products:get_liked_products(user);
+        } on fail {
+            return {count: 0, next: false, results: []};
+        }
     }
 
     resource function post liked_products(http:Request req, @http:Payload record {int productId;} payload) returns int|error {
@@ -191,8 +195,12 @@ service / on new http:Listener(9090) {
 
     // ---------------------------------------------- Cart Items Resource Functions ---------------------------------------------------
     resource function get cart_items(http:Request req) returns cart:CartItemResponse|error {
-        auth:User user = check auth:getUser(req);
-        return cart:getCartItems(user.consumerId ?: -1);
+        do {
+            auth:User user = check auth:getUser(req);
+            return cart:getCartItems(user.consumerId ?: -1);
+        } on fail {
+            return {count: 0, next: "null", results: []};
+        }
     }
 
     resource function post cart_items(http:Request req, db:CartItemInsert cartItem) returns db:CartItem|int|error {

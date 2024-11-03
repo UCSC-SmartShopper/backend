@@ -82,6 +82,7 @@ type Product record {|
     readonly int id;
     string name;
     string description;
+    string category;
     float price;
     string imageUrl;
     SupermarketItem[] supermarketItems;

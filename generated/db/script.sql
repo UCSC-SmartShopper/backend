@@ -60,6 +60,7 @@ CREATE TABLE "Product" (
 	"id"  SERIAL,
 	"name" VARCHAR(191) NOT NULL,
 	"description" VARCHAR(191) NOT NULL,
+	"category" VARCHAR(191) NOT NULL,
 	"price" FLOAT NOT NULL,
 	"imageUrl" VARCHAR(191) NOT NULL,
 	PRIMARY KEY("id")
