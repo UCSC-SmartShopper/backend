@@ -59,7 +59,13 @@ public function getProducts(
     if (priceRanges.hasKey(price)) {
         float[] range = priceRanges[price] ?: [0.00, 100000.00];
         productList = from db:ProductWithRelations p in productList
-            where p.price >= range[0] && p.price < range[1]
+
+            let float originalPrice = p.price ?: 99999.00
+            let db:SupermarketItemOptionalized[] items = p.supermarketItems ?: []
+            let float[] prices = items.map((item) => item.price ?: 99999.00)
+            let float minVal = float:min(float:min(...prices), originalPrice)
+
+            where minVal >= range[0] && minVal <= range[1]
             select p;
     }
 
@@ -72,12 +78,24 @@ public function getProducts(
         }
         "Price: Low to High" => {
             productList = from db:ProductWithRelations p in productList
-                order by p.price ascending
+
+                let float originalPrice = p.price ?: 99999.00
+                let db:SupermarketItemOptionalized[] items = p.supermarketItems ?: []
+                let float[] prices = items.map((item) => item.price ?: 99999.00)
+                let float minVal = float:min(float:min(...prices), originalPrice)
+
+                order by minVal ascending
                 select p;
         }
         "Price: High to Low" => {
             productList = from db:ProductWithRelations p in productList
-                order by p.price descending
+
+                let float originalPrice = p.price ?: 99999.00
+                let db:SupermarketItemOptionalized[] items = p.supermarketItems ?: []
+                let float[] prices = items.map((item) => item.price ?: 99999.00)
+                let float minVal = float:min(float:min(...prices), originalPrice)
+
+                order by minVal descending
                 select p;
         }
         _ => {
@@ -98,7 +116,6 @@ public function getProducts(
     boolean hasNext = paginationResult.next;
     int count = paginationResult.count;
     productList = paginationResult.results.length() == 0 ? [] : <db:ProductWithRelations[]>paginationResult.results; // Type casting
-
 
     return {count: count, next: hasNext, results: productList};
 }

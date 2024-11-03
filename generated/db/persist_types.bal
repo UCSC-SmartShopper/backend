@@ -235,6 +235,7 @@ public type Supermarket record {|
     string contactNo;
     string logo;
     string location;
+    string city;
     string address;
     int supermarketmanagerId;
 
@@ -246,6 +247,7 @@ public type SupermarketOptionalized record {|
     string contactNo?;
     string logo?;
     string location?;
+    string city?;
     string address?;
     int supermarketmanagerId?;
 |};
@@ -265,6 +267,7 @@ public type SupermarketInsert record {|
     string contactNo;
     string logo;
     string location;
+    string city;
     string address;
     int supermarketmanagerId;
 |};
@@ -274,6 +277,7 @@ public type SupermarketUpdate record {|
     string contactNo?;
     string logo?;
     string location?;
+    string city?;
     string address?;
     int supermarketmanagerId?;
 |};
