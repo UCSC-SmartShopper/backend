@@ -5,6 +5,16 @@
 
 import ballerina/time;
 
+public enum OrderStatus {
+    ToPay,
+    Placed,
+    Prepared,
+    Processing,
+    Ready,
+    Delivered,
+    Cancelled
+}
+
 public type User record {|
     readonly int id;
     string name;
@@ -243,9 +253,9 @@ public type SupermarketOptionalized record {|
 public type SupermarketWithRelations record {|
     *SupermarketOptionalized;
     UserOptionalized supermarketManager?;
-    SupermarketItemOptionalized[] storeprice?;
+    SupermarketItemOptionalized[] supermarketItems?;
     OpportunitySupermarketOptionalized[] opportunitysupermarket?;
-    SupermarketOrderOptionalized[] supermarketorder?;
+    SupermarketOrderOptionalized[] supermarketOrder?;
 |};
 
 public type SupermarketTargetType typedesc<SupermarketWithRelations>;
@@ -287,7 +297,7 @@ public type ProductOptionalized record {|
 
 public type ProductWithRelations record {|
     *ProductOptionalized;
-    SupermarketItemOptionalized[] storeprice?;
+    SupermarketItemOptionalized[] supermarketItems?;
 |};
 
 public type ProductTargetType typedesc<ProductWithRelations>;
@@ -355,6 +365,7 @@ public type CartItem record {|
     int supermarketitemId;
     int quantity;
     int consumerId;
+    int productId;
 |};
 
 public type CartItemOptionalized record {|
@@ -362,6 +373,7 @@ public type CartItemOptionalized record {|
     int supermarketitemId?;
     int quantity?;
     int consumerId?;
+    int productId?;
 |};
 
 public type CartItemWithRelations record {|
@@ -375,12 +387,14 @@ public type CartItemInsert record {|
     int supermarketitemId;
     int quantity;
     int consumerId;
+    int productId;
 |};
 
 public type CartItemUpdate record {|
     int supermarketitemId?;
     int quantity?;
     int consumerId?;
+    int productId?;
 |};
 
 public type OrderItems record {|
@@ -427,7 +441,7 @@ public type OrderItemsUpdate record {|
 public type Order record {|
     readonly int id;
     int consumerId;
-    string status;
+    OrderStatus status;
     string shippingAddress;
     string shippingMethod;
     string location;
@@ -440,7 +454,7 @@ public type Order record {|
 public type OrderOptionalized record {|
     int id?;
     int consumerId?;
-    string status?;
+    OrderStatus status?;
     string shippingAddress?;
     string shippingMethod?;
     string location?;
@@ -459,7 +473,7 @@ public type OrderTargetType typedesc<OrderWithRelations>;
 
 public type OrderInsert record {|
     int consumerId;
-    string status;
+    OrderStatus status;
     string shippingAddress;
     string shippingMethod;
     string location;
@@ -469,7 +483,7 @@ public type OrderInsert record {|
 
 public type OrderUpdate record {|
     int consumerId?;
-    string status?;
+    OrderStatus status?;
     string shippingAddress?;
     string shippingMethod?;
     string location?;
@@ -769,5 +783,29 @@ public type ReviewUpdate record {|
     string content?;
     float rating?;
     time:Civil createdAt?;
+|};
+
+public type LikedProduct record {|
+    readonly int id;
+    int userId;
+    int productId;
+|};
+
+public type LikedProductOptionalized record {|
+    int id?;
+    int userId?;
+    int productId?;
+|};
+
+public type LikedProductTargetType typedesc<LikedProductOptionalized>;
+
+public type LikedProductInsert record {|
+    int userId;
+    int productId;
+|};
+
+public type LikedProductUpdate record {|
+    int userId?;
+    int productId?;
 |};
 

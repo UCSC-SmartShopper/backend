@@ -19,6 +19,7 @@ DROP TABLE IF EXISTS "User";
 DROP TABLE IF EXISTS "NonVerifyUser";
 DROP TABLE IF EXISTS "Product";
 DROP TABLE IF EXISTS "Advertisement";
+DROP TABLE IF EXISTS "LikedProduct";
 DROP TABLE IF EXISTS "NonVerifiedDriver";
 
 CREATE TABLE "NonVerifiedDriver" (
@@ -35,6 +36,13 @@ CREATE TABLE "NonVerifiedDriver" (
 	"vehicleNumber" VARCHAR(191) NOT NULL,
 	"password" VARCHAR(191) NOT NULL,
 	"status" VARCHAR(191) NOT NULL,
+	PRIMARY KEY("id")
+);
+
+CREATE TABLE "LikedProduct" (
+	"id"  SERIAL,
+	"userId" INT NOT NULL,
+	"productId" INT NOT NULL,
 	PRIMARY KEY("id")
 );
 
@@ -86,7 +94,7 @@ CREATE TABLE "User" (
 CREATE TABLE "Order" (
 	"id"  SERIAL,
 	"consumerId" INT NOT NULL,
-	"status" VARCHAR(191) NOT NULL,
+	"status" VARCHAR(10) CHECK ("status" IN ('ToPay', 'Placed', 'Prepared', 'Processing', 'Ready', 'Delivered', 'Cancelled')) NOT NULL,
 	"shippingAddress" VARCHAR(191) NOT NULL,
 	"shippingMethod" VARCHAR(191) NOT NULL,
 	"location" VARCHAR(191) NOT NULL,
@@ -112,6 +120,7 @@ CREATE TABLE "CartItem" (
 	"id"  SERIAL,
 	"quantity" INT NOT NULL,
 	"consumerId" INT NOT NULL,
+	"productId" INT NOT NULL,
 	"supermarketitemId" INT NOT NULL,
 	FOREIGN KEY("supermarketitemId") REFERENCES "SupermarketItem"("id"),
 	PRIMARY KEY("id")
@@ -222,3 +231,5 @@ CREATE TABLE "OrderItems" (
 );
 
 
+CREATE UNIQUE INDEX "cart_item_unique_index" ON "CartItem" ("consumerId", "productId");
+CREATE UNIQUE INDEX "liked_product_unique_index" ON "LikedProduct" ("userId", "productId");

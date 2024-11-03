@@ -26,3 +26,27 @@ public function pagination_values(int count, int page, int _limit) returns int[]
 
     return [_start, _end];
 }
+
+public function paginateArray(anydata[] array, int page, int _limit) returns anydata[] {
+    int offset = (page - 1) * _limit;
+    
+    if (_limit <= 0 || offset < 0) {
+        return [];
+    }
+
+    int totalLength = array.length();
+
+    // If offset is out of bounds, return an empty array
+    if (offset >= totalLength) {
+        return [];
+    }
+
+    // Calculate the end index for slicing
+    int endIndex = offset + _limit;
+    if (endIndex > totalLength) {
+        endIndex = totalLength;
+    }
+
+    // Return the sliced portion of the array
+    return array.slice(offset, endIndex);
+}
