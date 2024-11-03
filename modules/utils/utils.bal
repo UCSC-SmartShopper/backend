@@ -29,7 +29,7 @@ public function pagination_values(int count, int page, int _limit) returns int[]
 
 public function paginateArray(anydata[] array, int page, int _limit) returns anydata[] {
     int offset = (page - 1) * _limit;
-    
+
     if (_limit <= 0 || offset < 0) {
         return [];
     }
@@ -49,4 +49,38 @@ public function paginateArray(anydata[] array, int page, int _limit) returns any
 
     // Return the sliced portion of the array
     return array.slice(offset, endIndex);
+}
+
+public type Pagination record {|
+    int count;
+    boolean next;
+    anydata[] results;
+|};
+
+public function paginate(anydata[] array, int page, int _limit) returns Pagination {
+    int count = array.length();
+    boolean hasNext = count > _limit * page;
+
+    // Paginate the array
+    int offset = (page - 1) * _limit;
+
+    if (_limit <= 0 || offset < 0) {
+        return {count: 0, next: false, results: []};
+    }
+
+    int totalLength = array.length();
+
+    // If offset is out of bounds, return an empty array
+    if (offset >= totalLength) {
+        return {count: 0, next: false, results: []};
+    }
+
+    // Calculate the end index for slicing
+    int endIndex = offset + _limit;
+    if (endIndex > totalLength) {
+        endIndex = totalLength;
+    }
+
+    // Return the sliced portion of the array
+    return {count: count, next: hasNext, results: array.slice(offset, endIndex)};
 }
