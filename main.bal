@@ -178,11 +178,16 @@ service / on new http:Listener(9090) {
     }
 
     // ---------------------------------------------- Supermarket Items Resource Functions --------------------------------------
+    // return all supermarket items for that product id
     resource function get supermarket_items(http:Request req, @http:Query int productId) returns supermarket_items:SupermarketItemResponse|error {
         auth:User user = check auth:getUser(req);
+        return supermarket_items:get_supermarket_items_by_product_id(user, productId);
+    }
 
-        // if user is supermarket manager then return all items belongs to the supermarket
-        return supermarket_items:get_supermarket_items(user, productId);
+    //  return all supermarket items belongs to the supermarket to the supermarket manager
+    resource function get supermarket_items_all(http:Request req) returns supermarket_items:SupermarketItemResponse|error {
+        auth:User user = check auth:getUser(req);
+        return supermarket_items:get_all_supermarket_items(user);
     }
 
     resource function get supermarket_items/[int id]() returns db:SupermarketItemWithRelations|error {
