@@ -5,6 +5,7 @@ import backend.consumer;
 import backend.db;
 import backend.driver;
 import backend.liked_products;
+import backend.locations;
 import backend.opportunities;
 import backend.orders;
 import backend.products;
@@ -177,11 +178,16 @@ service / on new http:Listener(9090) {
     }
 
     // ---------------------------------------------- Supermarket Items Resource Functions --------------------------------------
+    // return all supermarket items for that product id
     resource function get supermarket_items(http:Request req, @http:Query int productId) returns supermarket_items:SupermarketItemResponse|error {
         auth:User user = check auth:getUser(req);
+        return supermarket_items:get_supermarket_items_by_product_id(user, productId);
+    }
 
-        // if user is supermarket manager then return all items belongs to the supermarket
-        return supermarket_items:get_supermarket_items(user, productId);
+    //  return all supermarket items belongs to the supermarket to the supermarket manager
+    resource function get supermarket_items_all(http:Request req) returns supermarket_items:SupermarketItemResponse|error {
+        auth:User user = check auth:getUser(req);
+        return supermarket_items:get_all_supermarket_items(user);
     }
 
     resource function get supermarket_items/[int id]() returns db:SupermarketItemWithRelations|error {
@@ -305,6 +311,12 @@ service / on new http:Listener(9090) {
     resource function post reviews(http:Request req, @http:Payload reviews:ReviewInsert review) returns int|error? {
         auth:User user = check auth:getUser(req);
         return reviews:create_review(user, review);
+    }
+
+    //-------------------------------------------- Location Resource Functions----------------------------------------------------
+    resource function get locations/consumer_supermarket_distance/[string location](http:Request req) returns float|error {
+        auth:User user = check auth:getUser(req);
+        return locations:get_consumer_supermarket_distance(user, location);
     }
 
 }

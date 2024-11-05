@@ -70,6 +70,7 @@ type Supermarket record {|
     string contactNo;
     string logo;
     string location;
+    string city;
     string address;
     User supermarketManager;
     SupermarketItem[] supermarketItems;
