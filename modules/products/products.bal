@@ -1,58 +1,132 @@
-import backend.db;
-import backend.errors;
-
-import ballerina/http;
-import ballerina/persist;
-import ballerina/time;
 import backend.connection;
+import backend.db;
+import backend.utils;
 
-public type Product record {|
-    readonly int id;
-    string name;
-    string description;
-    float price;
-    string imageUrl;
+import ballerina/persist;
+
+// public type Product record {|
+//     readonly int id;
+//     string name;
+//     string description;
+//     float price;
+//     string imageUrl;
+// |};
+
+type productQuery record {|
+    int category;
+    string price;
+    string sortOrder;
+    string searchText;
+    int page;
+    int _limit;
 |};
 
 public type ProductResponse record {|
     int count;
-    string next;
-    Product[] results;
+    boolean next;
+    db:ProductWithRelations[] results;
 |};
 
-type ProductNotFound record {|
-    *http:NotFound;
-    errors:ErrorDetails body;
-|};
+public function getProducts(
+        string category,
+        string price,
+        string sortOrder,
+        string searchText,
+        int page,
+        int _limit)
+    returns ProductResponse|persist:Error? {
 
-function createProductNotFound(int id) returns ProductNotFound {
-    return {
-        body: {
-            message: "Product not found",
-            details: string `Product not found for the given id: ${id}`,
-            timestamp: time:utcNow()
-        }
-    };
-}
-
-
-public function getProducts() returns ProductResponse|persist:Error? {
     db:Client connection = connection:getConnection();
-    stream<Product, persist:Error?> products = connection->/products.get();
-    Product[] productList = check from Product product in products
+    stream<db:ProductWithRelations, persist:Error?> products = connection->/products.get();
+    db:ProductWithRelations[] productList = check from db:ProductWithRelations product in products
+        let string name = product.name ?: ""
+
+        where
+            (category == "" || category == "All Categories" || product.category == category) &&  // Filter by category
+            (searchText == "" || name.toLowerAscii().includes(searchText.toLowerAscii())) // Filter by search text
         select product;
 
-    return {count: productList.length(), next: "null", results: productList};
+    // Filter by price range
+    map<float[]> priceRanges = {
+        "Lower than Rs 250": [0.00, 250.00],
+        "Rs 250 - Rs 500": [250.00, 500.00],
+        "Rs 500 - Rs 1000": [500.00, 1000.00],
+        "Rs 1000 - Rs 2000": [1000.00, 2000.00],
+        "Rs 2000 - Rs 5000": [2000.00, 5000.00],
+        "More than Rs 5000": [5000.00, 100000.00]
+    };
+
+    if (priceRanges.hasKey(price)) {
+        float[] range = priceRanges[price] ?: [0.00, 100000.00];
+        productList = from db:ProductWithRelations p in productList
+
+            let float originalPrice = p.price ?: 99999.00
+            let db:SupermarketItemOptionalized[] items = p.supermarketItems ?: []
+            let float[] prices = items.map((item) => item.price ?: 99999.00)
+            let float minVal = float:min(float:min(...prices), originalPrice)
+
+            where minVal >= range[0] && minVal <= range[1]
+            select p;
+    }
+
+    // Sort the product list based on the sort order
+    match sortOrder {
+        "Oldest" => {
+            productList = from db:ProductWithRelations p in productList
+                order by p.id ascending
+                select p;
+        }
+        "Price: Low to High" => {
+            productList = from db:ProductWithRelations p in productList
+
+                let float originalPrice = p.price ?: 99999.00
+                let db:SupermarketItemOptionalized[] items = p.supermarketItems ?: []
+                let float[] prices = items.map((item) => item.price ?: 99999.00)
+                let float minVal = float:min(float:min(...prices), originalPrice)
+
+                order by minVal ascending
+                select p;
+        }
+        "Price: High to Low" => {
+            productList = from db:ProductWithRelations p in productList
+
+                let float originalPrice = p.price ?: 99999.00
+                let db:SupermarketItemOptionalized[] items = p.supermarketItems ?: []
+                let float[] prices = items.map((item) => item.price ?: 99999.00)
+                let float minVal = float:min(float:min(...prices), originalPrice)
+
+                order by minVal descending
+                select p;
+        }
+        _ => {
+            productList = from db:ProductWithRelations p in productList
+                // FIXME: Default sort order
+                order by p.id ascending
+                select p;
+        }
+    }
+
+    // Pagination
+    // boolean hasNext = productList.length() > _limit * page;
+    // anydata[] paginateArray = utils:paginateArray(productList, page, _limit);
+    // productList = paginateArray.length() == 0 ? [] : <db:ProductWithRelations[]>paginateArray; // Type casting
+
+    utils:Pagination paginationResult = utils:paginate(productList, page, _limit);
+
+    boolean hasNext = paginationResult.next;
+    int count = paginationResult.count;
+    productList = paginationResult.results.length() == 0 ? [] : <db:ProductWithRelations[]>paginationResult.results; // Type casting
+
+    return {count: count, next: hasNext, results: productList};
 }
 
-public function getProductsById(int id) returns Product|ProductNotFound|error? {
+public function getProductsById(int id) returns db:ProductWithRelations|error? {
     db:Client connection = connection:getConnection();
 
-    Product|persist:Error? product = connection->/products/[id](Product);
+    db:ProductWithRelations|persist:Error? product = connection->/products/[id](db:ProductWithRelations);
     if product is persist:Error {
-        return createProductNotFound(id);
+        return error("Product not found for id: " + id.toBalString());
     }
     return product;
 }
-
 

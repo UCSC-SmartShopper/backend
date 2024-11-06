@@ -7,8 +7,7 @@ import backend.utils;
 import ballerina/http;
 import ballerina/persist;
 import ballerina/time;
-import ballerina/sql;
-import ballerina/log;
+// import ballerina/log;
 
 public type ConsumerResponse record {|
     int count;
@@ -37,7 +36,7 @@ public function get_all_consumers(string searchText, int month, int page, int _l
     //     return http:UNAUTHORIZED;
     // }
 
-    sql:Client connection = connection:getConnection();
+    db:Client connection = connection:getConnection();
     stream<Consumer, persist:Error?> consumers = connection->/consumers.get();
     Consumer[] consumerList = check from Consumer consumer in consumers
         where
@@ -81,40 +80,40 @@ public function get_consumer(auth:User user, int id) returns Consumer|http:Unaut
 // }
 
 
-public function get_activities(int userId) returns Activity[]|error {
-    // Get a database connection
-    db:Client connection = connection:getConnection();
+// public function get_activities(int userId) returns Activity[]|error {
+//     // Get a database connection
+//     db:Client connection = connection:getConnection();
 
-    // Write an SQL query to select activities based on userId
-    sql:ParameterizedQuery query = `SELECT * FROM activities WHERE userId = ${userId}`;
+//     // Write an SQL query to select activities based on userId
+//     sql:ParameterizedQuery query = `SELECT * FROM activities WHERE userId = ${userId}`;
 
-    // Execute the query and collect the activities
-    stream<Activity, error> activityStream = connection->query(query, Activity);
+//     // Execute the query and collect the activities
+//     stream<Activity, error> activityStream = connection->query(query, Activity);
 
-    // Collect the activities from the stream
-    Activity[] activities = check from Activity activity in activityStream
-        select activity;
+//     // Collect the activities from the stream
+//     Activity[] activities = check from Activity activity in activityStream
+//         select activity;
 
-    return activities;
-}
+//     return activities;
+// }
 
-public function add_activity(Activity activity) returns error? {
-    // Get a database connection
-    db:Client connection = connection:getConnection();
+// public function add_activity(Activity activity) returns error? {
+//     // Get a database connection
+//     db:Client connection = connection:getConnection();
 
-    // SQL query to insert a new activity
-    string query = "INSERT INTO activities (userId, actionType, description, timestamp) VALUES (?, ?, ?, ?)";
+//     // SQL query to insert a new activity
+//     string query = "INSERT INTO activities (userId, actionType, description, timestamp) VALUES (?, ?, ?, ?)";
 
-    // Execute the SQL query with the activity details
-    sql:ExecutionResult result = check connection->execute(query, activity.userId, activity.actionType, 
-                                                           activity.description, activity.timestamp);
+//     // Execute the SQL query with the activity details
+//     sql:ExecutionResult result = check connection->execute(query, activity.userId, activity.actionType, 
+//                                                            activity.description, activity.timestamp);
 
-    // Check if the query was successful
-    if (result.affectedRowCount > 0) {
-        log:printInfo("Activity added successfully");
-    } else {
-        log:printError("Failed to add activity");
-    }
+//     // Check if the query was successful
+//     if (result.affectedRowCount > 0) {
+//         log:printInfo("Activity added successfully");
+//     } else {
+//         log:printError("Failed to add activity");
+//     }
 
-    return;
-}
+//     return;
+// }

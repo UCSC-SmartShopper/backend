@@ -22,7 +22,7 @@ type User record {|
     Consumer? consumer;
     Supermarket? supermarket;
     Driver? driver;
-	Review[] review;
+    Review[] review;
 |};
 
 type NonVerifyUser record {|
@@ -70,11 +70,12 @@ type Supermarket record {|
     string contactNo;
     string logo;
     string location;
+    string city;
     string address;
     User supermarketManager;
-    SupermarketItem[] storeprice;
+    SupermarketItem[] supermarketItems;
     OpportunitySupermarket[] opportunitysupermarket;
-    SupermarketOrder[] supermarketorder;
+    SupermarketOrder[] supermarketOrder;
 |};
 
 type Product record {|
@@ -82,9 +83,10 @@ type Product record {|
     readonly int id;
     string name;
     string description;
+    string category;
     float price;
     string imageUrl;
-    SupermarketItem[] storeprice;
+    SupermarketItem[] supermarketItems;
 |};
 
 type SupermarketItem record {|
@@ -103,7 +105,11 @@ type CartItem record {|
     readonly int id;
     SupermarketItem supermarketItem;
     int quantity;
+
+    @sql:UniqueIndex {name: "cart_item_unique_index"}
     int consumerId;
+    @sql:UniqueIndex {name: "cart_item_unique_index"}
+    int productId;
 |};
 
 type OrderItems record {|
@@ -116,11 +122,21 @@ type OrderItems record {|
     Order _order;
 |};
 
+enum OrderStatus {
+    ToPay,
+    Placed,
+    Prepared,
+    Processing,
+    Ready,
+    Delivered,
+    Cancelled
+};
+
 type Order record {|
     @sql:Generated
     readonly int id;
     int consumerId;
-    string status;
+    OrderStatus status;
     string shippingAddress;
     string shippingMethod;
     string location;
@@ -131,7 +147,7 @@ type Order record {|
     time:Civil orderPlacedOn;
 
     SupermarketOrder[] supermarketOrders;
-	Opportunity[] opportunity;
+    Opportunity[] opportunity;
 |};
 
 type SupermarketOrder record {|
@@ -156,7 +172,7 @@ type OpportunitySupermarket record {|
 type Opportunity record {|
     @sql:Generated
     readonly int id;
-    
+
     float totalDistance;
     float tripCost;
     Consumer consumer;
@@ -168,7 +184,7 @@ type Opportunity record {|
 
     Order _order;
     int driverId;
-    
+
     time:Civil orderPlacedOn;
 |};
 
@@ -212,6 +228,16 @@ type Review record {|
     string content;
     float rating;
     time:Civil createdAt;
+|};
+
+type LikedProduct record {|
+    @sql:Generated
+    readonly int id;
+
+    @sql:UniqueIndex {name: "liked_product_unique_index"}
+    int userId;
+    @sql:UniqueIndex {name: "liked_product_unique_index"}
+    int productId;
 |};
 
 type Activity record {|
