@@ -49,13 +49,13 @@ function createUserNotFound(int id) returns UserNotFound {
     };
 }
 
-public function get_all_user() returns UserResponse|http:Unauthorized|error {
+public function get_all_user(auth:User authUser) returns UserResponse|http:Unauthorized|error {
 
-    // string[] authorizedRoles = ["Admin", "SupermarketManager", "Driver"];
+    string[] authorizedRoles = ["Admin", "SupermarketManager", "Driver"];
 
-    // if !authorizedRoles.some((role) => role == user.role) {
-    //     return http:UNAUTHORIZED;
-    // }
+    if !authorizedRoles.some((role) => role == authUser.role) {
+        return http:UNAUTHORIZED;
+    }
 
     db:Client connection = connection:getConnection();
     stream<db:User, persist:Error?> users = connection->/users.get();
