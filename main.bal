@@ -15,7 +15,7 @@ import backend.supermarket_items;
 import backend.supermarkets;
 import backend.user;
 import backend.user_registration;
-// import backend.utils;
+import backend.utils;
 
 import ballerina/http;
 import ballerina/io;
@@ -41,7 +41,7 @@ service / on new http:Listener(9090) {
 
     function init() {
         io:println("Service started on port 9090");
-        // _ = start utils:sendHeartbeat();
+        _ = start utils:sendHeartbeat();
     }
 
     // ------------------------------------------- User Login and Signup Resource Functions ---------------------------------------
