@@ -15,6 +15,7 @@ import backend.supermarket_items;
 import backend.supermarkets;
 import backend.user;
 import backend.user_registration;
+import backend.utils;
 
 import ballerina/http;
 import ballerina/io;
@@ -40,6 +41,7 @@ service / on new http:Listener(9090) {
 
     function init() {
         io:println("Service started on port 9090");
+        _ = start utils:sendHeartbeat();
     }
 
     // ------------------------------------------- User Login and Signup Resource Functions ---------------------------------------
@@ -88,8 +90,9 @@ service / on new http:Listener(9090) {
     }
 
     // ---------------------------------------------- User Resource Functions ------------------------------------------------
-    resource function get users() returns user:UserResponse|http:Unauthorized|error {
-        return user:get_all_user();
+    resource function get users(http:Request req) returns user:UserResponse|http:Unauthorized|error {
+        auth:User user = check auth:getUser(req);
+        return user:get_all_user(user);
     }
 
     resource function get users/[int id](http:Request req) returns db:UserWithRelations|http:Unauthorized|user:UserNotFound|error {
@@ -128,7 +131,7 @@ service / on new http:Listener(9090) {
     }
 
     // ---------------------------------------------- Products Resource Functions -----------------------------------------------
-    resource function get products(
+    isolated resource function get products(
             string category,
             string price,
             string ordering,
@@ -319,4 +322,9 @@ service / on new http:Listener(9090) {
         return locations:get_consumer_supermarket_distance(user, location);
     }
 
+    //-------------------------------------------- Heartbeat Resource Functions----------------------------------------------------
+
+    resource function get heartbeat() returns string {
+        return "Heartbeat successful";
+    }
 }

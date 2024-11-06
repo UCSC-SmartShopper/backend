@@ -27,7 +27,7 @@ public type ProductResponse record {|
     db:ProductWithRelations[] results;
 |};
 
-public function getProducts(
+public isolated function getProducts(
         string category,
         string price,
         string sortOrder,

@@ -1,3 +1,6 @@
+import ballerina/http;
+import ballerina/io;
+import ballerina/lang.runtime;
 
 public function pagination_values(int count, int page, int _limit) returns int[] {
     if (count == 0) {
@@ -57,7 +60,7 @@ public type Pagination record {|
     anydata[] results;
 |};
 
-public function paginate(anydata[] array, int page, int _limit) returns Pagination {
+public isolated function paginate(anydata[] array, int page, int _limit) returns Pagination {
     int count = array.length();
     boolean hasNext = count > _limit * page;
 
@@ -83,4 +86,19 @@ public function paginate(anydata[] array, int page, int _limit) returns Paginati
 
     // Return the sliced portion of the array
     return {count: count, next: hasNext, results: array.slice(offset, endIndex)};
+}
+
+configurable string HEART_BEAT_URL = ?;
+
+public isolated function sendHeartbeat() {
+    while true {
+        runtime:sleep(5);
+        do {
+            http:Client clientEndpoint = check new (HEART_BEAT_URL);
+            http:Response _ = check clientEndpoint->get("/heartbeat");
+        } on fail {
+            io:println("Failed to send heartbeat");
+        }
+        runtime:sleep(30);
+    }
 }
