@@ -89,3 +89,12 @@ function calculateDistance(float[] homeCoordinates, float[] supermarketCoordinat
     return EARTH_RADIUS * c;
 }
 
+// function optimizeCart(int[] productIds, int[] homeCoordinates) {
+    // productIds -> supermarket_items okkoma kadawal
+
+    // goal -> minimize the cost of the cart + (total travel distance )* cost_per_km
+
+
+    // return [supermarket_items]
+
+// }
