@@ -58,7 +58,7 @@ CREATE TABLE "Advertisement" (
 );
 
 CREATE TABLE "Activity" (
-	"id" INT NOT NULL,
+	"id"  SERIAL,
 	"userId" INT NOT NULL,
 	"description" VARCHAR(191) NOT NULL,
 	"dateTime" TIMESTAMP NOT NULL,

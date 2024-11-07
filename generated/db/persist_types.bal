@@ -833,7 +833,11 @@ public type ActivityOptionalized record {|
 
 public type ActivityTargetType typedesc<ActivityOptionalized>;
 
-public type ActivityInsert Activity;
+public type ActivityInsert record {|
+    int userId;
+    string description;
+    time:Civil dateTime;
+|};
 
 public type ActivityUpdate record {|
     int userId?;

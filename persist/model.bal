@@ -241,6 +241,7 @@ type LikedProduct record {|
 |};
 
 type Activity record {|
+    @sql:Generated
     readonly int id;
     int userId;
     string description;

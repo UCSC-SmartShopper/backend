@@ -554,7 +554,7 @@ public isolated client class Client {
             entityName: "Activity",
             tableName: "Activity",
             fieldMetadata: {
-                id: {columnName: "id"},
+                id: {columnName: "id", dbGenerated: true},
                 userId: {columnName: "userId"},
                 description: {columnName: "description"},
                 dateTime: {columnName: "dateTime"}
@@ -1327,9 +1327,10 @@ public isolated client class Client {
         lock {
             sqlClient = self.persistClients.get(ACTIVITY);
         }
-        _ = check sqlClient.runBatchInsertQuery(data);
-        return from ActivityInsert inserted in data
-            select inserted.id;
+        sql:ExecutionResult[] result = check sqlClient.runBatchInsertQuery(data);
+        return from sql:ExecutionResult inserted in result
+            where inserted.lastInsertId != ()
+            select <int>inserted.lastInsertId;
     }
 
     isolated resource function put activities/[int id](ActivityUpdate value) returns Activity|persist:Error {
