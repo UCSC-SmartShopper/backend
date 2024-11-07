@@ -6,8 +6,6 @@ import backend.utils;
 
 import ballerina/http;
 import ballerina/persist;
-import ballerina/time;
-// import ballerina/log;
 
 public type ConsumerResponse record {|
     int count;
@@ -15,12 +13,6 @@ public type ConsumerResponse record {|
     Consumer[] results;
 |};
 
-public type Activity record {|
-    string description;
-    time:Civil dateTime;
-|};
-
-// created a new type Consumer to remove the password field from the User type
 public type Consumer record {|
     *db:ConsumerOptionalized;
     user:User user;
@@ -67,53 +59,3 @@ public function get_consumer(auth:User user, int id) returns Consumer|http:Unaut
 
     return result;
 }
-
-// public function get_activities(int userId) returns Activity[]|error {
-//     db:Client connection = connection:getConnection();
-//     // Query activities by userId
-//     Activity|persist:Error activityStream = connection->/activities/[userId](Activity);
-//     // Collect the activities
-//     Activity[] activities = from Activity activity in check activityStream
-//         select activity;
-
-//     return activities;
-// }
-
-
-// public function get_activities(int userId) returns Activity[]|error {
-//     // Get a database connection
-//     db:Client connection = connection:getConnection();
-
-//     // Write an SQL query to select activities based on userId
-//     sql:ParameterizedQuery query = `SELECT * FROM activities WHERE userId = ${userId}`;
-
-//     // Execute the query and collect the activities
-//     stream<Activity, error> activityStream = connection->query(query, Activity);
-
-//     // Collect the activities from the stream
-//     Activity[] activities = check from Activity activity in activityStream
-//         select activity;
-
-//     return activities;
-// }
-
-// public function add_activity(Activity activity) returns error? {
-//     // Get a database connection
-//     db:Client connection = connection:getConnection();
-
-//     // SQL query to insert a new activity
-//     string query = "INSERT INTO activities (userId, actionType, description, timestamp) VALUES (?, ?, ?, ?)";
-
-//     // Execute the SQL query with the activity details
-//     sql:ExecutionResult result = check connection->execute(query, activity.userId, activity.actionType, 
-//                                                            activity.description, activity.timestamp);
-
-//     // Check if the query was successful
-//     if (result.affectedRowCount > 0) {
-//         log:printInfo("Activity added successfully");
-//     } else {
-//         log:printError("Failed to add activity");
-//     }
-
-//     return;
-// }
