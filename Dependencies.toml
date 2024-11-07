@@ -29,6 +29,9 @@ dependencies = [
 	{org = "ballerina", name = "task"},
 	{org = "ballerina", name = "time"}
 ]
+modules = [
+	{org = "ballerina", packageName = "cache", moduleName = "cache"}
+]
 
 [[package]]
 org = "ballerina"
@@ -419,6 +422,7 @@ org = "djaya"
 name = "backend"
 version = "0.1.0"
 dependencies = [
+	{org = "ballerina", name = "cache"},
 	{org = "ballerina", name = "email"},
 	{org = "ballerina", name = "http"},
 	{org = "ballerina", name = "io"},
@@ -440,6 +444,7 @@ modules = [
 	{org = "djaya", packageName = "backend", moduleName = "backend"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.advertisements"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.auth"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.cache_module"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.cart"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.connection"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.consumer"},

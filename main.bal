@@ -131,14 +131,14 @@ service / on new http:Listener(9090) {
     }
 
     // ---------------------------------------------- Products Resource Functions -----------------------------------------------
-    isolated resource function get products(
+    resource function get products(
             string category,
             string price,
             string ordering,
             string searchText,
             int page,
             int _limit
-            ) returns products:ProductResponse|persist:Error? {
+            ) returns products:ProductResponse|error {
         return products:getProducts(category, price, ordering, searchText, page, _limit);
     }
 

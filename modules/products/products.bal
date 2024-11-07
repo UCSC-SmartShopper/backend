@@ -1,3 +1,4 @@
+import backend.cache_module;
 import backend.connection;
 import backend.db;
 import backend.utils;
@@ -27,18 +28,35 @@ public type ProductResponse record {|
     db:ProductWithRelations[] results;
 |};
 
-public isolated function getProducts(
+cache_module:ProductCache productCache = new ();
+cache_module:CacheManager cacheManager = new ();
+
+public function getProducts(
         string category,
         string price,
         string sortOrder,
         string searchText,
         int page,
         int _limit)
-    returns ProductResponse|persist:Error? {
+    returns ProductResponse|error {
 
-    db:Client connection = connection:getConnection();
-    stream<db:ProductWithRelations, persist:Error?> products = connection->/products.get();
-    db:ProductWithRelations[] productList = check from db:ProductWithRelations product in products
+    db:ProductWithRelations[] products = check productCache.get("products", getAllProducts);
+    // db:ProductWithRelations[] products;
+
+    // if (cachedProducts is error) {
+    //     products = check getAllProducts();
+
+    // } else {
+    //     products = cachedProducts;
+
+    //     if (!cacheManager.isValid("productCache")) {
+    //         _ = start getAllProducts();
+    //     }
+
+    // }
+
+    // stream<db:ProductWithRelations, persist:Error?> products = connection->/products.get();
+    db:ProductWithRelations[] productList = from db:ProductWithRelations product in products
         let string name = product.name ?: ""
 
         where
@@ -128,5 +146,17 @@ public function getProductsById(int id) returns db:ProductWithRelations|error? {
         return error("Product not found for id: " + id.toBalString());
     }
     return product;
+}
+
+public function getAllProducts() returns db:ProductWithRelations[]|error {
+    db:Client connection = connection:getConnection();
+
+    stream<db:ProductWithRelations, persist:Error?> productStream = connection->/products.get();
+    db:ProductWithRelations[] products = check from db:ProductWithRelations product in productStream
+        select product;
+
+    // productCache.put("products", products);
+
+    return products;
 }
 
