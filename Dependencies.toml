@@ -440,6 +440,7 @@ dependencies = [
 ]
 modules = [
 	{org = "djaya", packageName = "backend", moduleName = "backend"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.activity"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.advertisements"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.auth"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.cart"},
