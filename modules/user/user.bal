@@ -2,6 +2,8 @@ import backend.auth;
 import backend.connection;
 import backend.db;
 import backend.errors;
+import backend.file_service;
+import backend.utils;
 
 import ballerina/http;
 import ballerina/persist;
@@ -49,13 +51,13 @@ function createUserNotFound(int id) returns UserNotFound {
     };
 }
 
-public function get_all_user() returns UserResponse|http:Unauthorized|error {
+public function get_all_user(auth:User authUser) returns UserResponse|http:Unauthorized|error {
 
-    // string[] authorizedRoles = ["Admin", "SupermarketManager", "Driver"];
+    string[] authorizedRoles = ["Admin", "SupermarketManager", "Driver"];
 
-    // if !authorizedRoles.some((role) => role == user.role) {
-    //     return http:UNAUTHORIZED;
-    // }
+    if !authorizedRoles.some((role) => role == authUser.role) {
+        return http:UNAUTHORIZED;
+    }
 
     db:Client connection = connection:getConnection();
     stream<db:User, persist:Error?> users = connection->/users.get();
@@ -117,4 +119,28 @@ public function update_password(auth:User user, int id, UpdatePassword updatePas
     }
 
     return updatedUser;
+}
+
+public function update_profile_picture(auth:User user, http:Request req, int id) returns string|error {
+
+    // Admin can update any user's profile picture
+    // Other users can only update their own profile picture
+    int userId = user.role == "Admin" ? id : user.id;
+    string imagePath = "";
+
+    utils:FormData[] formData = check utils:decodedFormData(req);
+    foreach utils:FormData data in formData {
+        if (data.name == "profilePicture") {
+            imagePath = check file_service:saveFile(<byte[]>data.value, data.contentType);
+        }
+
+    }
+
+    db:Client connection = connection:getConnection();
+    db:User|persist:Error dbUser = connection->/users/[userId].put({profilePic: imagePath});
+    if dbUser is persist:Error {
+        return error("Failed to update the profile picture");
+    }
+
+    return "Profile picture updated successfully";
 }

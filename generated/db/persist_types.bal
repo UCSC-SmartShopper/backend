@@ -5,6 +5,13 @@
 
 import ballerina/time;
 
+public enum NonVerifiedDriverStatus {
+    OTPPending,
+    OTPVerified,
+    Accepted,
+    Declined
+}
+
 public enum OrderStatus {
     ToPay,
     Placed,
@@ -133,7 +140,8 @@ public type NonVerifiedDriver record {|
     string vehicleName;
     string vehicleNumber;
     string password;
-    string status;
+    NonVerifiedDriverStatus status;
+    time:Civil createdAt;
 |};
 
 public type NonVerifiedDriverOptionalized record {|
@@ -149,7 +157,8 @@ public type NonVerifiedDriverOptionalized record {|
     string vehicleName?;
     string vehicleNumber?;
     string password?;
-    string status?;
+    NonVerifiedDriverStatus status?;
+    time:Civil createdAt?;
 |};
 
 public type NonVerifiedDriverTargetType typedesc<NonVerifiedDriverOptionalized>;
@@ -166,7 +175,8 @@ public type NonVerifiedDriverInsert record {|
     string vehicleName;
     string vehicleNumber;
     string password;
-    string status;
+    NonVerifiedDriverStatus status;
+    time:Civil createdAt;
 |};
 
 public type NonVerifiedDriverUpdate record {|
@@ -181,7 +191,8 @@ public type NonVerifiedDriverUpdate record {|
     string vehicleName?;
     string vehicleNumber?;
     string password?;
-    string status?;
+    NonVerifiedDriverStatus status?;
+    time:Civil createdAt?;
 |};
 
 public type Address record {|
@@ -815,5 +826,29 @@ public type LikedProductInsert record {|
 public type LikedProductUpdate record {|
     int userId?;
     int productId?;
+|};
+
+public type Files record {|
+    readonly int id;
+    string name;
+    byte[] data;
+|};
+
+public type FilesOptionalized record {|
+    int id?;
+    string name?;
+    byte[] data?;
+|};
+
+public type FilesTargetType typedesc<FilesOptionalized>;
+
+public type FilesInsert record {|
+    string name;
+    byte[] data;
+|};
+
+public type FilesUpdate record {|
+    string name?;
+    byte[] data?;
 |};
 

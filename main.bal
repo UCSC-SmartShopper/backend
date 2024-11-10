@@ -15,10 +15,12 @@ import backend.supermarket_items;
 import backend.supermarkets;
 import backend.user;
 import backend.user_registration;
+import backend.utils;
 
 import ballerina/http;
 import ballerina/io;
 import ballerina/persist;
+import backend.file_service;
 
 type productQuery record {|
     int category;
@@ -40,6 +42,7 @@ service / on new http:Listener(9090) {
 
     function init() {
         io:println("Service started on port 9090");
+        _ = start utils:sendHeartbeat();
     }
 
     // ------------------------------------------- User Login and Signup Resource Functions ---------------------------------------
@@ -88,8 +91,9 @@ service / on new http:Listener(9090) {
     }
 
     // ---------------------------------------------- User Resource Functions ------------------------------------------------
-    resource function get users() returns user:UserResponse|http:Unauthorized|error {
-        return user:get_all_user();
+    resource function get users(http:Request req) returns user:UserResponse|http:Unauthorized|error {
+        auth:User user = check auth:getUser(req);
+        return user:get_all_user(user);
     }
 
     resource function get users/[int id](http:Request req) returns db:UserWithRelations|http:Unauthorized|user:UserNotFound|error {
@@ -105,6 +109,11 @@ service / on new http:Listener(9090) {
     resource function patch change_password/[int id](http:Request req, @http:Payload user:UpdatePassword updatePassword) returns db:User|DataNotFound|error {
         auth:User user = check auth:getUser(req);
         return user:update_password(user, id, updatePassword);
+    }
+
+    resource function patch update_profile_picture/[int id](http:Request req) returns string|error {
+        auth:User user = check auth:getUser(req);
+        return user:update_profile_picture(user, req, id);
     }
 
     // ---------------------------------------------- Driver Resource Functions ----------------------------------------------
@@ -135,7 +144,7 @@ service / on new http:Listener(9090) {
             string searchText,
             int page,
             int _limit
-            ) returns products:ProductResponse|persist:Error? {
+            ) returns products:ProductResponse|error {
         return products:getProducts(category, price, ordering, searchText, page, _limit);
     }
 
@@ -318,5 +327,16 @@ service / on new http:Listener(9090) {
         auth:User user = check auth:getUser(req);
         return locations:get_consumer_supermarket_distance(user, location);
     }
+
+    //-------------------------------------------- Heartbeat Resource Functions----------------------------------------------------
+
+    resource function get heartbeat() returns string {
+        return "Heartbeat successful";
+    }
+
+    // ---------------------------------------------- Serve Files  -----------------------------------------------------------
+    resource function get images/[string path]() returns byte[]|error {
+        return file_service:getImage(path);
+    };
 
 }

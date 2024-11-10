@@ -35,6 +35,13 @@ type NonVerifyUser record {|
     string password;
 |};
 
+enum NonVerifiedDriverStatus {
+    OTPPending,
+    OTPVerified,
+    Accepted,
+    Declined
+};
+
 type NonVerifiedDriver record {|
     @sql:Generated
     readonly int id;
@@ -49,7 +56,9 @@ type NonVerifiedDriver record {|
     string vehicleName;
     string vehicleNumber;
     string password;
-    string status;
+    NonVerifiedDriverStatus status;
+
+    time:Civil createdAt;
 |};
 
 type Address record {|
@@ -240,3 +249,10 @@ type LikedProduct record {|
     int productId;
 |};
 
+type Files record {|
+    @sql:Generated
+    readonly int id;
+
+    string name;
+    byte[] data;
+|};
