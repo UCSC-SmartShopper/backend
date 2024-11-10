@@ -236,7 +236,8 @@ public function driver_otp_genaration(DriverPersonalDetails driverPersonalDetail
         vehicleName: "",
         vehicleNumber: "",
         password: "",
-        status: "Pending"
+        status: "OTPPending",
+        createdAt: time:utcToCivil(time:utcNow())
     };
 
     db:Client connection = connection:getConnection();
@@ -292,7 +293,7 @@ public function match_driver_otp(DriverOtp driverOtp) returns db:NonVerifiedDriv
     if (driverOtp.OTP != result.OTP) {
         return error("Otp does not matched.");
     }
-    db:NonVerifiedDriverUpdate nonVerifiedDriverUpdate = {status: "Verified"};
+    db:NonVerifiedDriverUpdate nonVerifiedDriverUpdate = {status: "OTPVerified"};
 
     db:NonVerifiedDriver|persist:Error updatedDriver = connection->/nonverifieddrivers/[driverOtp.driverId].put(nonVerifiedDriverUpdate);
     return updatedDriver;

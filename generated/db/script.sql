@@ -36,7 +36,8 @@ CREATE TABLE "NonVerifiedDriver" (
 	"vehicleName" VARCHAR(191) NOT NULL,
 	"vehicleNumber" VARCHAR(191) NOT NULL,
 	"password" VARCHAR(191) NOT NULL,
-	"status" VARCHAR(191) NOT NULL,
+	"status" VARCHAR(11) CHECK ("status" IN ('OTPPending', 'OTPVerified', 'Accepted', 'Declined')) NOT NULL,
+	"createdAt" TIMESTAMP NOT NULL,
 	PRIMARY KEY("id")
 );
 

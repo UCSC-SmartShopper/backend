@@ -118,7 +118,8 @@ public isolated client class Client {
                 vehicleName: {columnName: "vehicleName"},
                 vehicleNumber: {columnName: "vehicleNumber"},
                 password: {columnName: "password"},
-                status: {columnName: "status"}
+                status: {columnName: "status"},
+                createdAt: {columnName: "createdAt"}
             },
             keyFields: ["id"]
         },
