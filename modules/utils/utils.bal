@@ -2,7 +2,6 @@ import ballerina/http;
 import ballerina/io;
 import ballerina/lang.runtime;
 import ballerina/mime;
-import ballerina/time;
 
 public type FormData record {|
     string name;
@@ -112,33 +111,7 @@ public isolated function sendHeartbeat() {
     }
 }
 
-// --------------------------- Image Upload ---------------------------
-string filePath = "./files/";
 
-public function saveFile(byte[] image, string fileType) returns string|error {
-
-    string fileName = time:utcNow()[0].toBalString();
-
-    match fileType {
-        "image/jpeg" => {
-            fileName = fileName + ".jpeg";
-        }
-
-        "image/png" => {
-            fileName = fileName + ".png";
-        }
-        "image/jpg" => {
-            fileName = fileName + ".jpg";
-        }
-    }
-    _ = check io:fileWriteBytes(filePath + fileName, image);
-    return fileName;
-}
-
-public function getImage(string fileName) returns byte[]|error {
-    byte[] image = check io:fileReadBytes(filePath + fileName);
-    return image;
-}
 
 // --------------------------- Form Data Decoder  ---------------------------
 public function decodedFormData(http:Request req) returns FormData[]|error {

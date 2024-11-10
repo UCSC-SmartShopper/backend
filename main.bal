@@ -20,6 +20,7 @@ import backend.utils;
 import ballerina/http;
 import ballerina/io;
 import ballerina/persist;
+import backend.file_service;
 
 type productQuery record {|
     int category;
@@ -335,7 +336,7 @@ service / on new http:Listener(9090) {
 
     // ---------------------------------------------- Serve Files  -----------------------------------------------------------
     resource function get images/[string path]() returns byte[]|error {
-        return utils:getImage(path);
+        return file_service:getImage(path);
     };
 
 }

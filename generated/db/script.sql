@@ -20,6 +20,7 @@ DROP TABLE IF EXISTS "NonVerifyUser";
 DROP TABLE IF EXISTS "Product";
 DROP TABLE IF EXISTS "Advertisement";
 DROP TABLE IF EXISTS "LikedProduct";
+DROP TABLE IF EXISTS "Files";
 DROP TABLE IF EXISTS "NonVerifiedDriver";
 
 CREATE TABLE "NonVerifiedDriver" (
@@ -36,6 +37,13 @@ CREATE TABLE "NonVerifiedDriver" (
 	"vehicleNumber" VARCHAR(191) NOT NULL,
 	"password" VARCHAR(191) NOT NULL,
 	"status" VARCHAR(191) NOT NULL,
+	PRIMARY KEY("id")
+);
+
+CREATE TABLE "Files" (
+	"id"  SERIAL,
+	"name" VARCHAR(191) NOT NULL,
+	"data" BYTEA NOT NULL,
 	PRIMARY KEY("id")
 );
 

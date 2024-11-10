@@ -29,7 +29,6 @@ public type ProductResponse record {|
 |};
 
 cache_module:ProductCache productCache = new ();
-cache_module:CacheManager cacheManager = new ();
 
 public function getProducts(
         string category,

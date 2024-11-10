@@ -2,6 +2,7 @@ import backend.auth;
 import backend.connection;
 import backend.db;
 import backend.errors;
+import backend.file_service;
 import backend.utils;
 
 import ballerina/http;
@@ -130,7 +131,7 @@ public function update_profile_picture(auth:User user, http:Request req, int id)
     utils:FormData[] formData = check utils:decodedFormData(req);
     foreach utils:FormData data in formData {
         if (data.name == "profilePicture") {
-            imagePath = check utils:saveFile(<byte[]>data.value, data.contentType);
+            imagePath = check file_service:saveFile(<byte[]>data.value, data.contentType);
         }
 
     }
