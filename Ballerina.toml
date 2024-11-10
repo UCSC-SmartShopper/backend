@@ -16,7 +16,7 @@ filePath = "persist/model.bal"
 
 [[platform.java17.dependency]]
 groupId = "io.ballerina.stdlib"
-artifactId = "persist.sql-native"
+artifactId = "persist.sql-native"   
 version = "1.4.0"
 
 
