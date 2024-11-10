@@ -1,6 +1,13 @@
 import ballerina/http;
 import ballerina/io;
 import ballerina/lang.runtime;
+import ballerina/mime;
+
+public type FormData record {|
+    string name;
+    string|byte[] value;
+    string contentType;
+|};
 
 public function pagination_values(int count, int page, int _limit) returns int[] {
     if (count == 0) {
@@ -88,6 +95,7 @@ public isolated function paginate(anydata[] array, int page, int _limit) returns
     return {count: count, next: hasNext, results: array.slice(offset, endIndex)};
 }
 
+// --------------------------- Heartbeat ---------------------------
 configurable string HEART_BEAT_URL = ?;
 
 public isolated function sendHeartbeat() {
@@ -101,4 +109,22 @@ public isolated function sendHeartbeat() {
         }
         runtime:sleep(30);
     }
+}
+
+
+
+// --------------------------- Form Data Decoder  ---------------------------
+public function decodedFormData(http:Request req) returns FormData[]|error {
+    FormData[] formData = [];
+
+    mime:Entity[] listResult = check req.getBodyParts();
+    foreach mime:Entity i in listResult {
+
+        if (i.getContentType() == "") {
+            formData.push({name: i.getContentDisposition().name, value: check i.getText(), contentType: "string"});
+        } else {
+            formData.push({name: i.getContentDisposition().name, value: check i.getByteArray(), contentType: i.getContentType()});
+        }
+    }
+    return formData;
 }
