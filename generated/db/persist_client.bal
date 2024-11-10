@@ -28,6 +28,7 @@ const ADVERTISEMENT = "advertisements";
 const DRIVER = "drivers";
 const REVIEW = "reviews";
 const LIKED_PRODUCT = "likedproducts";
+const FILES = "files";
 const ACTIVITY = "activities";
 
 public isolated client class Client {
@@ -550,6 +551,16 @@ public isolated client class Client {
             },
             keyFields: ["id"]
         },
+        [FILES]: {
+            entityName: "Files",
+            tableName: "Files",
+            fieldMetadata: {
+                id: {columnName: "id", dbGenerated: true},
+                name: {columnName: "name"},
+                data: {columnName: "data"}
+            },
+            keyFields: ["id"]
+        },
         [ACTIVITY]: {
             entityName: "Activity",
             tableName: "Activity",
@@ -588,6 +599,7 @@ public isolated client class Client {
             [DRIVER]: check new (dbClient, self.metadata.get(DRIVER), psql:POSTGRESQL_SPECIFICS),
             [REVIEW]: check new (dbClient, self.metadata.get(REVIEW), psql:POSTGRESQL_SPECIFICS),
             [LIKED_PRODUCT]: check new (dbClient, self.metadata.get(LIKED_PRODUCT), psql:POSTGRESQL_SPECIFICS),
+            [FILES]: check new (dbClient, self.metadata.get(FILES), psql:POSTGRESQL_SPECIFICS),
             [ACTIVITY]: check new (dbClient, self.metadata.get(ACTIVITY), psql:POSTGRESQL_SPECIFICS)
         };
     }
@@ -1307,6 +1319,46 @@ public isolated client class Client {
         psql:SQLClient sqlClient;
         lock {
             sqlClient = self.persistClients.get(LIKED_PRODUCT);
+        }
+        _ = check sqlClient.runDeleteQuery(id);
+        return result;
+    }
+
+    isolated resource function get files(FilesTargetType targetType = <>, sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``) returns stream<targetType, persist:Error?> = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.PostgreSQLProcessor",
+        name: "query"
+    } external;
+
+    isolated resource function get files/[int id](FilesTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.PostgreSQLProcessor",
+        name: "queryOne"
+    } external;
+
+    isolated resource function post files(FilesInsert[] data) returns int[]|persist:Error {
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(FILES);
+        }
+        sql:ExecutionResult[] result = check sqlClient.runBatchInsertQuery(data);
+        return from sql:ExecutionResult inserted in result
+            where inserted.lastInsertId != ()
+            select <int>inserted.lastInsertId;
+    }
+
+    isolated resource function put files/[int id](FilesUpdate value) returns Files|persist:Error {
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(FILES);
+        }
+        _ = check sqlClient.runUpdateQuery(id, value);
+        return self->/files/[id].get();
+    }
+
+    isolated resource function delete files/[int id]() returns Files|persist:Error {
+        Files result = check self->/files/[id].get();
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(FILES);
         }
         _ = check sqlClient.runDeleteQuery(id);
         return result;

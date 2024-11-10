@@ -247,3 +247,11 @@ type Activity record {|
     string description;
     time:Civil dateTime;
 |};
+
+type Files record {|
+    @sql:Generated
+    readonly int id;
+    
+    string name;
+    byte[] data;
+|};

@@ -817,6 +817,30 @@ public type LikedProductUpdate record {|
     int productId?;
 |};
 
+public type Files record {|
+    readonly int id;
+    string name;
+    byte[] data;
+|};
+
+public type FilesOptionalized record {|
+    int id?;
+    string name?;
+    byte[] data?;
+|};
+
+public type FilesTargetType typedesc<FilesOptionalized>;
+
+public type FilesInsert record {|
+    string name;
+    byte[] data;
+|};
+
+public type FilesUpdate record {|
+    string name?;
+    byte[] data?;
+|};
+
 public type Activity record {|
     readonly int id;
     int userId;

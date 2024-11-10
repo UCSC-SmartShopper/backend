@@ -20,6 +20,7 @@ import backend.utils;
 import ballerina/http;
 import ballerina/io;
 import ballerina/persist;
+import backend.file_service;
 import backend.activity;
 
 type productQuery record {|
@@ -111,6 +112,11 @@ service / on new http:Listener(9090) {
         return user:update_password(user, id, updatePassword);
     }
 
+    resource function patch update_profile_picture/[int id](http:Request req) returns string|error {
+        auth:User user = check auth:getUser(req);
+        return user:update_profile_picture(user, req, id);
+    }
+
     // ---------------------------------------------- Driver Resource Functions ----------------------------------------------
     resource function get drivers() returns driver:DriverResponse|http:Unauthorized|error {
         return driver:get_all_drivers();
@@ -147,14 +153,14 @@ service / on new http:Listener(9090) {
     }
 
     // ---------------------------------------------- Products Resource Functions -----------------------------------------------
-    isolated resource function get products(
+    resource function get products(
             string category,
             string price,
             string ordering,
             string searchText,
             int page,
             int _limit
-            ) returns products:ProductResponse|persist:Error? {
+            ) returns products:ProductResponse|error {
         return products:getProducts(category, price, ordering, searchText, page, _limit);
     }
 
@@ -343,4 +349,10 @@ service / on new http:Listener(9090) {
     resource function get heartbeat() returns string {
         return "Heartbeat successful";
     }
+
+    // ---------------------------------------------- Serve Files  -----------------------------------------------------------
+    resource function get images/[string path]() returns byte[]|error {
+        return file_service:getImage(path);
+    };
+
 }
