@@ -86,13 +86,13 @@ public function get_user(auth:User user, int id) returns db:UserWithRelations|ht
     return result;
 }
 
-public function update_user(auth:User user, db:UserUpdate userUpdate) returns db:User|UserNotFound {
+public function update_user(auth:User user, db:UserUpdate userUpdate) returns db:User|error {
     db:Client connection = connection:getConnection();
 
     db:User|persist:Error updatedUser = connection->/users/[user.id].put(userUpdate);
 
     if updatedUser is persist:Error {
-        return createUserNotFound(user.id);
+        return error("Failed to update the user");
     }
 
     return updatedUser;

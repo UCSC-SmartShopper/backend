@@ -29,14 +29,15 @@ CREATE TABLE "NonVerifiedDriver" (
 	"nic" VARCHAR(191) NOT NULL,
 	"email" VARCHAR(191) NOT NULL,
 	"contactNo" VARCHAR(191) NOT NULL,
-	"OTP" VARCHAR(191) NOT NULL,
+	"profilePic" VARCHAR(191) NOT NULL,
 	"courierCompany" VARCHAR(191) NOT NULL,
 	"vehicleType" VARCHAR(191) NOT NULL,
 	"vehicleColor" VARCHAR(191) NOT NULL,
 	"vehicleName" VARCHAR(191) NOT NULL,
 	"vehicleNumber" VARCHAR(191) NOT NULL,
+	"OTP" VARCHAR(191) NOT NULL,
 	"password" VARCHAR(191) NOT NULL,
-	"status" VARCHAR(11) CHECK ("status" IN ('OTPPending', 'OTPVerified', 'Accepted', 'Declined')) NOT NULL,
+	"status" VARCHAR(11) CHECK ("status" IN ('OTPPending', 'OTPVerified', 'Accepted', 'Declined')),
 	"createdAt" TIMESTAMP NOT NULL,
 	PRIMARY KEY("id")
 );

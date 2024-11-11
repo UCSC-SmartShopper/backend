@@ -49,14 +49,19 @@ type NonVerifiedDriver record {|
     string nic;
     string email;
     string contactNo;
-    string OTP;
+    string profilePic;
+
+    // Vehicle details
     string courierCompany;
     string vehicleType;
     string vehicleColor;
     string vehicleName;
     string vehicleNumber;
+
+    // Credentials
+    string OTP;
     string password;
-    NonVerifiedDriverStatus status;
+    NonVerifiedDriverStatus? status;
 
     time:Civil createdAt;
 |};

@@ -133,14 +133,15 @@ public type NonVerifiedDriver record {|
     string nic;
     string email;
     string contactNo;
-    string OTP;
+    string profilePic;
     string courierCompany;
     string vehicleType;
     string vehicleColor;
     string vehicleName;
     string vehicleNumber;
+    string OTP;
     string password;
-    NonVerifiedDriverStatus status;
+    NonVerifiedDriverStatus? status;
     time:Civil createdAt;
 |};
 
@@ -150,14 +151,15 @@ public type NonVerifiedDriverOptionalized record {|
     string nic?;
     string email?;
     string contactNo?;
-    string OTP?;
+    string profilePic?;
     string courierCompany?;
     string vehicleType?;
     string vehicleColor?;
     string vehicleName?;
     string vehicleNumber?;
+    string OTP?;
     string password?;
-    NonVerifiedDriverStatus status?;
+    NonVerifiedDriverStatus? status?;
     time:Civil createdAt?;
 |};
 
@@ -168,14 +170,15 @@ public type NonVerifiedDriverInsert record {|
     string nic;
     string email;
     string contactNo;
-    string OTP;
+    string profilePic;
     string courierCompany;
     string vehicleType;
     string vehicleColor;
     string vehicleName;
     string vehicleNumber;
+    string OTP;
     string password;
-    NonVerifiedDriverStatus status;
+    NonVerifiedDriverStatus? status;
     time:Civil createdAt;
 |};
 
@@ -184,14 +187,15 @@ public type NonVerifiedDriverUpdate record {|
     string nic?;
     string email?;
     string contactNo?;
-    string OTP?;
+    string profilePic?;
     string courierCompany?;
     string vehicleType?;
     string vehicleColor?;
     string vehicleName?;
     string vehicleNumber?;
+    string OTP?;
     string password?;
-    NonVerifiedDriverStatus status?;
+    NonVerifiedDriverStatus? status?;
     time:Civil createdAt?;
 |};
 
