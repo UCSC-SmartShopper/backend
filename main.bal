@@ -96,7 +96,7 @@ service / on new http:Listener(9090) {
         return user:get_all_user(user);
     }
 
-    resource function get users/[int id](http:Request req) returns db:UserWithRelations|http:Unauthorized|user:UserNotFound|error {
+    resource function get users/[int id](http:Request req) returns db:UserWithRelations|http:Unauthorized|error {
         auth:User user = check auth:getUser(req);
         return user:get_user(user, id);
     }

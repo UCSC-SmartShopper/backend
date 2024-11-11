@@ -46,6 +46,7 @@ CREATE TABLE "Files" (
 	"id"  SERIAL,
 	"name" VARCHAR(191) NOT NULL,
 	"data" BYTEA NOT NULL,
+	"file_code" VARCHAR(191) NOT NULL,
 	PRIMARY KEY("id")
 );
 
@@ -245,3 +246,4 @@ CREATE TABLE "OrderItems" (
 
 CREATE UNIQUE INDEX "cart_item_unique_index" ON "CartItem" ("consumerId", "productId");
 CREATE UNIQUE INDEX "liked_product_unique_index" ON "LikedProduct" ("userId", "productId");
+CREATE UNIQUE INDEX "file_unique_index" ON "Files" ("file_code");

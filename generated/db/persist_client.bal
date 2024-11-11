@@ -558,7 +558,8 @@ public isolated client class Client {
             fieldMetadata: {
                 id: {columnName: "id", dbGenerated: true},
                 name: {columnName: "name"},
-                data: {columnName: "data"}
+                data: {columnName: "data"},
+                file_code: {columnName: "file_code"}
             },
             keyFields: ["id"]
         }

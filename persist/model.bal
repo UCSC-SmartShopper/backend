@@ -260,4 +260,9 @@ type Files record {|
 
     string name;
     byte[] data;
+
+    // User can't have multiple files for same purpose
+    // Ex: profile pic, NIC, etc
+    @sql:UniqueIndex {name: "file_unique_index"}
+    string file_code;
 |};

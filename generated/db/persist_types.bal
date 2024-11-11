@@ -836,12 +836,14 @@ public type Files record {|
     readonly int id;
     string name;
     byte[] data;
+    string file_code;
 |};
 
 public type FilesOptionalized record {|
     int id?;
     string name?;
     byte[] data?;
+    string file_code?;
 |};
 
 public type FilesTargetType typedesc<FilesOptionalized>;
@@ -849,10 +851,12 @@ public type FilesTargetType typedesc<FilesOptionalized>;
 public type FilesInsert record {|
     string name;
     byte[] data;
+    string file_code;
 |};
 
 public type FilesUpdate record {|
     string name?;
     byte[] data?;
+    string file_code?;
 |};
 
