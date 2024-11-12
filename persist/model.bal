@@ -49,6 +49,7 @@ type NonVerifiedDriver record {|
     string nic;
     string email;
     string contactNo;
+    string profilePic;
     string OTP;
     string courierCompany;
     string vehicleType;

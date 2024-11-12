@@ -111,6 +111,7 @@ public isolated client class Client {
                 nic: {columnName: "nic"},
                 email: {columnName: "email"},
                 contactNo: {columnName: "contactNo"},
+                profilePic: {columnName: "profilePic"},
                 OTP: {columnName: "OTP"},
                 courierCompany: {columnName: "courierCompany"},
                 vehicleType: {columnName: "vehicleType"},

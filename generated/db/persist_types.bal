@@ -133,6 +133,7 @@ public type NonVerifiedDriver record {|
     string nic;
     string email;
     string contactNo;
+    string profilePic;
     string OTP;
     string courierCompany;
     string vehicleType;
@@ -150,6 +151,7 @@ public type NonVerifiedDriverOptionalized record {|
     string nic?;
     string email?;
     string contactNo?;
+    string profilePic?;
     string OTP?;
     string courierCompany?;
     string vehicleType?;
@@ -168,6 +170,7 @@ public type NonVerifiedDriverInsert record {|
     string nic;
     string email;
     string contactNo;
+    string profilePic;
     string OTP;
     string courierCompany;
     string vehicleType;
@@ -184,6 +187,7 @@ public type NonVerifiedDriverUpdate record {|
     string nic?;
     string email?;
     string contactNo?;
+    string profilePic?;
     string OTP?;
     string courierCompany?;
     string vehicleType?;

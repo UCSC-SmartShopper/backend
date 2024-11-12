@@ -24,6 +24,7 @@ public type NonVerifiedDriver record {|
     string nic;
     string email;
     string contactNo;
+    string profilePic;
 
     // Vehicle Details
     string courierCompany;
@@ -228,6 +229,7 @@ public function driver_otp_genaration(DriverPersonalDetails driverPersonalDetail
         nic: driverPersonalDetails.nic,
         email: driverPersonalDetails.email,
         contactNo: driverPersonalDetails.contactNo,
+        profilePic: "",
         OTP: otp_string,
 
         courierCompany: "",
@@ -395,7 +397,7 @@ public function get_all_driver_requests(auth:User user) returns DriverRequestsRe
     db:Client connection = connection:getConnection();
     stream<db:NonVerifiedDriver, persist:Error?> driverRequests = connection->/nonverifieddrivers();
     NonVerifiedDriver[] driverRequestList = check from db:NonVerifiedDriver driverRequest in driverRequests
-        where driverRequest.status == "Verified"
+        where driverRequest.status == "OTPVerified"
         order by driverRequest.id descending
         select {
             id: driverRequest.id,
@@ -403,6 +405,7 @@ public function get_all_driver_requests(auth:User user) returns DriverRequestsRe
             nic: driverRequest.nic,
             email: driverRequest.email,
             contactNo: driverRequest.contactNo,
+            profilePic: driverRequest.profilePic,
             courierCompany: driverRequest.courierCompany,
             vehicleType: driverRequest.vehicleType,
             vehicleColor: driverRequest.vehicleColor,

@@ -29,6 +29,7 @@ CREATE TABLE "NonVerifiedDriver" (
 	"nic" VARCHAR(191) NOT NULL,
 	"email" VARCHAR(191) NOT NULL,
 	"contactNo" VARCHAR(191) NOT NULL,
+	"profilePic" VARCHAR(191) NOT NULL,
 	"OTP" VARCHAR(191) NOT NULL,
 	"courierCompany" VARCHAR(191) NOT NULL,
 	"vehicleType" VARCHAR(191) NOT NULL,
