@@ -30,14 +30,14 @@ CREATE TABLE "NonVerifiedDriver" (
 	"email" VARCHAR(191) NOT NULL,
 	"contactNo" VARCHAR(191) NOT NULL,
 	"profilePic" VARCHAR(191) NOT NULL,
-	"OTP" VARCHAR(191) NOT NULL,
 	"courierCompany" VARCHAR(191) NOT NULL,
 	"vehicleType" VARCHAR(191) NOT NULL,
 	"vehicleColor" VARCHAR(191) NOT NULL,
 	"vehicleName" VARCHAR(191) NOT NULL,
 	"vehicleNumber" VARCHAR(191) NOT NULL,
+	"OTP" VARCHAR(191) NOT NULL,
 	"password" VARCHAR(191) NOT NULL,
-	"status" VARCHAR(11) CHECK ("status" IN ('OTPPending', 'OTPVerified', 'Accepted', 'Declined')) NOT NULL,
+	"status" VARCHAR(11) CHECK ("status" IN ('OTPPending', 'OTPVerified', 'Accepted', 'Declined')),
 	"createdAt" TIMESTAMP NOT NULL,
 	PRIMARY KEY("id")
 );
@@ -46,6 +46,7 @@ CREATE TABLE "Files" (
 	"id"  SERIAL,
 	"name" VARCHAR(191) NOT NULL,
 	"data" BYTEA NOT NULL,
+	"file_code" VARCHAR(191) NOT NULL,
 	PRIMARY KEY("id")
 );
 
@@ -245,3 +246,4 @@ CREATE TABLE "OrderItems" (
 
 CREATE UNIQUE INDEX "cart_item_unique_index" ON "CartItem" ("consumerId", "productId");
 CREATE UNIQUE INDEX "liked_product_unique_index" ON "LikedProduct" ("userId", "productId");
+CREATE UNIQUE INDEX "file_unique_index" ON "Files" ("file_code");

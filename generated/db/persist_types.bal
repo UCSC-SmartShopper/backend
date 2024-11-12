@@ -134,14 +134,14 @@ public type NonVerifiedDriver record {|
     string email;
     string contactNo;
     string profilePic;
-    string OTP;
     string courierCompany;
     string vehicleType;
     string vehicleColor;
     string vehicleName;
     string vehicleNumber;
+    string OTP;
     string password;
-    NonVerifiedDriverStatus status;
+    NonVerifiedDriverStatus? status;
     time:Civil createdAt;
 |};
 
@@ -152,14 +152,14 @@ public type NonVerifiedDriverOptionalized record {|
     string email?;
     string contactNo?;
     string profilePic?;
-    string OTP?;
     string courierCompany?;
     string vehicleType?;
     string vehicleColor?;
     string vehicleName?;
     string vehicleNumber?;
+    string OTP?;
     string password?;
-    NonVerifiedDriverStatus status?;
+    NonVerifiedDriverStatus? status?;
     time:Civil createdAt?;
 |};
 
@@ -171,14 +171,14 @@ public type NonVerifiedDriverInsert record {|
     string email;
     string contactNo;
     string profilePic;
-    string OTP;
     string courierCompany;
     string vehicleType;
     string vehicleColor;
     string vehicleName;
     string vehicleNumber;
+    string OTP;
     string password;
-    NonVerifiedDriverStatus status;
+    NonVerifiedDriverStatus? status;
     time:Civil createdAt;
 |};
 
@@ -188,14 +188,14 @@ public type NonVerifiedDriverUpdate record {|
     string email?;
     string contactNo?;
     string profilePic?;
-    string OTP?;
     string courierCompany?;
     string vehicleType?;
     string vehicleColor?;
     string vehicleName?;
     string vehicleNumber?;
+    string OTP?;
     string password?;
-    NonVerifiedDriverStatus status?;
+    NonVerifiedDriverStatus? status?;
     time:Civil createdAt?;
 |};
 
@@ -836,12 +836,14 @@ public type Files record {|
     readonly int id;
     string name;
     byte[] data;
+    string file_code;
 |};
 
 public type FilesOptionalized record {|
     int id?;
     string name?;
     byte[] data?;
+    string file_code?;
 |};
 
 public type FilesTargetType typedesc<FilesOptionalized>;
@@ -849,10 +851,12 @@ public type FilesTargetType typedesc<FilesOptionalized>;
 public type FilesInsert record {|
     string name;
     byte[] data;
+    string file_code;
 |};
 
 public type FilesUpdate record {|
     string name?;
     byte[] data?;
+    string file_code?;
 |};
 

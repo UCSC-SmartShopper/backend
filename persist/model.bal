@@ -50,14 +50,18 @@ type NonVerifiedDriver record {|
     string email;
     string contactNo;
     string profilePic;
-    string OTP;
+
+    // Vehicle details
     string courierCompany;
     string vehicleType;
     string vehicleColor;
     string vehicleName;
     string vehicleNumber;
+
+    // Credentials
+    string OTP;
     string password;
-    NonVerifiedDriverStatus status;
+    NonVerifiedDriverStatus? status;
 
     time:Civil createdAt;
 |};
@@ -256,4 +260,9 @@ type Files record {|
 
     string name;
     byte[] data;
+
+    // User can't have multiple files for same purpose
+    // Ex: profile pic, NIC, etc
+    @sql:UniqueIndex {name: "file_unique_index"}
+    string file_code;
 |};
