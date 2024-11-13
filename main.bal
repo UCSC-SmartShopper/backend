@@ -16,6 +16,7 @@ import backend.supermarkets;
 import backend.user;
 import backend.user_registration;
 import backend.utils;
+import backend.optimizer;
 
 import ballerina/http;
 import ballerina/io;
@@ -338,5 +339,23 @@ service / on new http:Listener(9090) {
     resource function get images/[string path]() returns byte[]|error {
         return file_service:getImage(path);
     };
+
+
+    // ---------------------------------------------- Optimizing Algorithm  -----------------------------------------------------------
+    resource function get optimizer() returns optimizer:Item[] {
+    // Hardcoded list of items
+    io:println("Optimizer service called");
+    optimizer:Item[] items = [
+        {id: 1, name: "item1", price: 100.0, rating: 4, distance: 10.0, score: 0.0},
+        {id: 2, name: "item2", price: 150.0, rating: 5, distance: 15.0, score: 0.0},
+        {id: 3, name: "item3", price: 120.0, rating: 3, distance: 12.0, score: 0.0},
+        {id: 4, name: "item4", price: 200.0, rating: 4, distance: 8.0, score: 0.0}
+    ];
+    
+    return optimizer:rateItems(items);
+}
+
+
+    
 
 }
