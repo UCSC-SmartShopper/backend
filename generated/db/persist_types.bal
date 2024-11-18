@@ -832,6 +832,34 @@ public type LikedProductUpdate record {|
     int productId?;
 |};
 
+public type Activity record {|
+    readonly int id;
+    int userId;
+    string description;
+    time:Civil dateTime;
+|};
+
+public type ActivityOptionalized record {|
+    int id?;
+    int userId?;
+    string description?;
+    time:Civil dateTime?;
+|};
+
+public type ActivityTargetType typedesc<ActivityOptionalized>;
+
+public type ActivityInsert record {|
+    int userId;
+    string description;
+    time:Civil dateTime;
+|};
+
+public type ActivityUpdate record {|
+    int userId?;
+    string description?;
+    time:Civil dateTime?;
+|};
+
 public type Files record {|
     readonly int id;
     string name;
