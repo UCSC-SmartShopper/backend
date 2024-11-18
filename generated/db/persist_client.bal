@@ -112,12 +112,13 @@ public isolated client class Client {
                 nic: {columnName: "nic"},
                 email: {columnName: "email"},
                 contactNo: {columnName: "contactNo"},
-                OTP: {columnName: "OTP"},
+                profilePic: {columnName: "profilePic"},
                 courierCompany: {columnName: "courierCompany"},
                 vehicleType: {columnName: "vehicleType"},
                 vehicleColor: {columnName: "vehicleColor"},
                 vehicleName: {columnName: "vehicleName"},
                 vehicleNumber: {columnName: "vehicleNumber"},
+                OTP: {columnName: "OTP"},
                 password: {columnName: "password"},
                 status: {columnName: "status"},
                 createdAt: {columnName: "createdAt"}
@@ -569,7 +570,8 @@ public isolated client class Client {
             fieldMetadata: {
                 id: {columnName: "id", dbGenerated: true},
                 name: {columnName: "name"},
-                data: {columnName: "data"}
+                data: {columnName: "data"},
+                file_code: {columnName: "file_code"}
             },
             keyFields: ["id"]
         }

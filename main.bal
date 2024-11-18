@@ -76,7 +76,7 @@ service / on new http:Listener(9090) {
     }
 
     // finalizing the driver signup
-    resource function post update_driver_vehicle_details/[int id](@http:Payload user_registration:NonVerifiedDriver driverUpdate) returns db:NonVerifiedDriver|error {
+    resource function post update_driver_vehicle_details/[int id](@http:Payload db:NonVerifiedDriver driverUpdate) returns db:NonVerifiedDriver|error {
         return user_registration:update_driver_signup(driverUpdate, id);
     }
 
@@ -97,17 +97,17 @@ service / on new http:Listener(9090) {
         return user:get_all_user(user);
     }
 
-    resource function get users/[int id](http:Request req) returns db:UserWithRelations|http:Unauthorized|user:UserNotFound|error {
+    resource function get users/[int id](http:Request req) returns db:UserWithRelations|http:Unauthorized|error {
         auth:User user = check auth:getUser(req);
         return user:get_user(user, id);
     }
 
-    resource function patch users/[int id](http:Request req, @http:Payload db:UserUpdate userUpdate) returns db:User|DataNotFound|error {
+    resource function patch users/[int id](http:Request req, @http:Payload db:UserUpdate userUpdate) returns db:User|error {
         auth:User user = check auth:getUser(req);
         return user:update_user(user, userUpdate);
     }
 
-    resource function patch change_password/[int id](http:Request req, @http:Payload user:UpdatePassword updatePassword) returns db:User|DataNotFound|error {
+    resource function patch change_password/[int id](http:Request req, @http:Payload user:UpdatePassword updatePassword) returns db:User|error {
         auth:User user = check auth:getUser(req);
         return user:update_password(user, id, updatePassword);
     }
@@ -164,7 +164,7 @@ service / on new http:Listener(9090) {
         return products:getProducts(category, price, ordering, searchText, page, _limit);
     }
 
-    resource function get products/[int id]() returns db:ProductWithRelations|DataNotFound|error? {
+    resource function get products/[int id]() returns db:ProductWithRelations|error? {
         return products:getProductsById(id);
     }
 
