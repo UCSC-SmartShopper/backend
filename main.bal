@@ -17,6 +17,7 @@ import backend.user;
 import backend.user_registration;
 import backend.utils;
 import backend.optimizer;
+import backend.user_preference;
 
 import ballerina/http;
 import ballerina/io;
@@ -353,6 +354,11 @@ service / on new http:Listener(9090) {
     ];
     
     return optimizer:rateItems(items);
+}
+
+
+    resource function post userpreference/add(@http:Payload user_preference:UserPreference userPreference) returns string|error {
+    return user_preference:addUserPreference(userPreference);
 }
 
 

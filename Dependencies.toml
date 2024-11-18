@@ -470,6 +470,7 @@ modules = [
 	{org = "djaya", packageName = "backend", moduleName = "backend.supermarket_items"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.supermarkets"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.user"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.user_preference"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.user_registration"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.utils"}
 ]
