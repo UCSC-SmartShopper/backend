@@ -1,33 +1,13 @@
-import backend.auth;
-import backend.connection;
-import backend.db;
+import backend.supermarkets;
+import backend.utils;
 
 import ballerina/regex;
 
-public function get_consumer_supermarket_distance(auth:User user, string location) returns float|error {
+public function get_consumer_supermarket_distance(string location1, string location2) returns float|error {
     do {
-        db:Client connection = connection:getConnection();
-        int consumerId = user.consumerId ?: -1;
 
-        db:ConsumerWithRelations consumer = check connection->/consumers/[consumerId](db:ConsumerWithRelations);
-
-        db:AddressOptionalized[] addresses = consumer.addresses ?: [];
-
-        float[] homeCoordinates = [];
-        float[] supermarketCoordinates = check get_coordinates(location);
-
-        foreach db:AddressOptionalized address in addresses {
-            boolean isDefault = address.isDefault ?: false;
-            string addressString = address.location ?: "";
-
-            if (isDefault) {
-                homeCoordinates = check get_coordinates(addressString);
-                break;
-            }
-        }
-
-        // homeCoordinates = [6.8555632, 79.9092448];
-        // supermarketCoordinates = [6.8577889, 79.9059171];
+        float[] homeCoordinates = check get_coordinates(location1);
+        float[] supermarketCoordinates = check get_coordinates(location2);
 
         return calculateDistance(homeCoordinates, supermarketCoordinates);
     } on fail {
@@ -90,11 +70,83 @@ function calculateDistance(float[] homeCoordinates, float[] supermarketCoordinat
 }
 
 // function optimizeCart(int[] productIds, int[] homeCoordinates) {
-    // productIds -> supermarket_items okkoma kadawal
+// productIds -> supermarket_items okkoma kadawal
 
-    // goal -> minimize the cost of the cart + (total travel distance )* cost_per_km
+// goal -> minimize the cost of the cart + (total travel distance )* cost_per_km
 
-
-    // return [supermarket_items]
+// return [supermarket_items]
 
 // }
+
+// ------------------------ Delivery Cost ------------------------
+public function get_delivery_cost(string[] supermarketLocations, string deliveryLocation) returns float|error {
+    float baseCost = 150;
+    float costPerKm = 30;
+
+    float totalDistance = 0;
+
+    foreach string location in supermarketLocations {
+        float distance = check get_consumer_supermarket_distance(deliveryLocation, location);
+        totalDistance += distance;
+    }
+
+    return (totalDistance * costPerKm) + baseCost;
+}
+
+// ------------------------ getOptimizedRoute ------------------------
+public function getOptimizedRoute(int[] supermarketIds, string homeLocation) returns string[]|error {
+
+    // supermarket id -> supermarket location
+    map<string> locationMap = {};
+    locationMap["0"] = homeLocation;
+
+    // supermarket id -> index of coordinates in allCoordinates
+    map<int> indexMap = {};
+    indexMap["0"] = 0;
+
+    // All coordinates list including the home location
+    float[][] allCoordinates = [check get_coordinates(homeLocation)];
+
+    supermarkets:SupermarketResponse supermarketList = check supermarkets:get_supermarkets();
+
+    // Get the coordinates of the all supermarkets
+    foreach var supermarket in supermarketList.results {
+        if (supermarketIds.indexOf(supermarket.id ?: -1) > -1) {
+            string location = supermarket.location ?: "";
+            if (location != "") {
+                locationMap[supermarket.id.toString()] = location;
+                allCoordinates.push(check get_coordinates(location));
+                indexMap[supermarket.id.toBalString()] = allCoordinates.length() - 1;
+            }
+        }
+    }
+
+    float[] orderedIdList = utils:dijkstra(allCoordinates, calculate_distance);
+
+    // Sort the supermarkets based on the distance from the home location
+    // string[] sortedSupermarketIds = locationMap.keys().sort("descending",  function(string[] i) returns float[] {
+    //     return i.map(id =>  orderedIdList[(indexMap[id]) ?: 0]);
+    // });
+
+    float[] & readonly orderedIdListReadonly = orderedIdList.cloneReadOnly();
+
+    // string[] sortedSupermarketIds = locationMap.keys().sort("descending", x => getOrderedId(x, orderedIdListReadonly, indexMap));
+
+    return ["1", "2", "3"];
+}
+
+public function dikstra(float[][] allCoordinates) returns int[] {
+    int[] orderedIdList = [];
+
+    // Implement the dikstra algorithm here
+
+    return orderedIdList;
+}
+
+// function sortSupermarketsBasedOnDistance(string[] supermarketIds, string homeLocation) returns string[] {
+
+function getOrderedId(string id, float[] orderedIdList, map<int> indexMap) returns float {
+    int index = indexMap[id] ?: 0;
+    return orderedIdList[index];
+}
+

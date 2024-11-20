@@ -3,6 +3,8 @@ import backend.cart;
 import backend.connection;
 import backend.db;
 import backend.errors;
+import backend.locations;
+import backend.supermarkets;
 
 import ballerina/http;
 import ballerina/io;
@@ -11,6 +13,7 @@ import ballerina/time;
 
 public type CartToOrderRequest record {
     int consumerId;
+    string shippingLocation;
     string shippingAddress;
     string shippingMethod;
 };
@@ -64,6 +67,7 @@ public function getOrders(auth:User user, int supermarketId) returns OrderRespon
             select _order;
 
         orders = userOrders;
+
     } else if (user.role == "Admin") {
         orders = from db:OrderWithRelations _order in orderList
             let db:SupermarketOrderOptionalized[] supermarketOrders = _order.supermarketOrders ?: []
@@ -84,9 +88,11 @@ public function getOrdersById(int id) returns db:OrderWithRelations|OrderNotFoun
     return order2;
 }
 
-public function cartToOrder(CartToOrderRequest cartToOrderRequest) returns db:OrderWithRelations|persist:Error|error {
+public function cartToOrder(CartToOrderRequest cartToOrderRequest) returns int|persist:Error|error {
+
     int consumerId = cartToOrderRequest.consumerId;
     string shippingAddress = cartToOrderRequest.shippingAddress;
+    string shippingLocation = cartToOrderRequest.shippingLocation;
     string shippingMethod = cartToOrderRequest.shippingMethod;
 
     db:Client connection = connection:getConnection();
@@ -95,20 +101,39 @@ public function cartToOrder(CartToOrderRequest cartToOrderRequest) returns db:Or
         where cartItem.consumerId == consumerId
         select cartItem;
 
+    // Calculate the total price of the order and get the supermarket ids
+    float subTotal = 0.0;
     map<int> supermarketIdMap = {};
     foreach cart:CartItem item in cartItems {
         supermarketIdMap[item.supermarketItem.supermarketId.toBalString()] = item.supermarketItem.supermarketId;
+        subTotal = subTotal + (item.supermarketItem.price * item.quantity);
     }
     int[] supermarketIdList = supermarketIdMap.toArray();
+
+    // ------------------ Calculate the delivery fee ------------------
+    float deliveryFee = 0.0;
+    if (shippingMethod == "Home Delivery") {
+        supermarkets:SupermarketResponse supermarketList = check supermarkets:get_supermarkets();
+
+        string[] supermarketLocations = from var supermarket in supermarketList.results
+            where supermarketIdMap.keys().indexOf(supermarket.id.toString()) > -1 && supermarket.location != ""
+            select supermarket.location ?: "";
+
+        deliveryFee = check locations:get_delivery_cost(supermarketLocations, shippingLocation);
+    }
 
     // -------------------------- Create the Order --------------------------
     db:OrderInsert orderInsert = {
         consumerId: consumerId,
-        status: "ToPay",
+        status: "Processing",
         shippingAddress: shippingAddress,
+        shippingLocation: shippingLocation,
         shippingMethod: shippingMethod,
-        deliveryFee: 250.00,
-        location: "6.8657635,79.8571086",
+
+        subTotal: subTotal,
+        deliveryFee: deliveryFee,
+        totalCost: subTotal + deliveryFee,
+        
         orderPlacedOn: time:utcToCivil(time:utcNow())
     };
     int[]|persist:Error result = connection->/orders.post([orderInsert]);
@@ -152,7 +177,7 @@ public function cartToOrder(CartToOrderRequest cartToOrderRequest) returns db:Or
     // Remove all the cart items of the consumer from the database
     _ = check connection->executeNativeSQL(`DELETE FROM "CartItem" WHERE "consumerId" = ${consumerId}`);
 
-    return {id: orderId};
+    return orderId;
 }
 
 public function supermarket_order_ready(auth:User user, OrderReadyRequest orderReadyRequest) returns db:SupermarketOrderWithRelations|OrderNotFound|http:Unauthorized|error {
@@ -180,12 +205,14 @@ public function supermarket_order_ready(auth:User user, OrderReadyRequest orderR
         return error("Error updating the supermarket order");
     }
 
-    update_order_status_to_prepared(updatedSupermarketOrder._orderId ?: -1);
+    // This function will update the order status to Prepared if all the supermarket orders are ready
+    _ = start update_order_status_to_prepared(updatedSupermarketOrder._orderId ?: -1);
 
     return updatedSupermarketOrder;
 }
 
-function update_order_status_to_prepared(int orderId) {
+// This function will update the order status to Prepared if all the supermarket orders are ready
+function update_order_status_to_prepared(int orderId) returns error? {
     do {
         if (orderId != -1) {
 
@@ -202,14 +229,23 @@ function update_order_status_to_prepared(int orderId) {
                 // Update the order status to Prepared
                 _ = check connection->/orders/[orderId].put(orderUpdate);
 
+                // Get Supermarket Ids
+                int[] supermarketIds = from db:SupermarketOrderOptionalized supermarketOrder in superMarketOrders
+                    select supermarketOrder.supermarketId ?: -1;
+
+                string[] supermarketLocations = check locations:getOptimizedRoute(supermarketIds, _order.shippingLocation ?: "");
+
                 // Create an opportunity
                 db:OpportunityInsert opportunityInsert = {
                     totalDistance: 0.0,
                     tripCost: 0.0,
                     consumerId: _order.consumerId ?: -1,
                     deliveryCost: _order.deliveryFee ?: 0.0,
-                    startLocation: "6.8657635,79.8571086",
+
+                    startLocation: _order.shippingLocation ?: "",
                     deliveryLocation: _order.shippingAddress ?: "",
+
+                    waypoints: supermarketLocations.toBalString().toBytes(),
                     status: "Pending",
                     _orderId: orderId,
                     orderPlacedOn: _order.orderPlacedOn ?: time:utcToCivil(time:utcNow()),
