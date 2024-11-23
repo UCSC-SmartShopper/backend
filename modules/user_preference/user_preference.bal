@@ -15,7 +15,7 @@ map<int> preferenceWeights = {
     "Ratings or Reviews": 5
 };
 
-// Temp hardcoded user interactions
+
 record {| int userId; int referenceId; int points; |}[] userInteractions = [
     {userId: 1, referenceId: 101, points: 10},
     {userId: 1, referenceId: 104,  points: 2},
@@ -25,28 +25,27 @@ record {| int userId; int referenceId; int points; |}[] userInteractions = [
     {userId: 1, referenceId: 109, points: 1}
 ];
 
-// Function to calculate rank and update points
+
 function calculateRank(UserPreference userPreference) returns int? {
-    // Check if the userInteraction exists
+
     foreach var interaction in userInteractions {
         if (interaction.userId == userPreference.userId && 
             interaction.referenceId == userPreference.referenceId ) {
 
-            // Update points based on preferenceType
+
             int weight = preferenceWeights[userPreference.preferenceType] ?: 0;
             interaction.points = interaction.points + weight;
             return interaction.points;
         }
     }
     
-    // If no matching entry is found, return null
+
     return null;
 }
 
 public function addUserPreference(UserPreference userPreference) returns string {
     int? updatedPoints = calculateRank(userPreference);
 
-    // Check if the points were updated
     if (updatedPoints != null) {
         io:println("User preference updated successfully");
         io:println("User ID: ", userPreference.userId, 
