@@ -28,6 +28,8 @@ const ADVERTISEMENT = "advertisements";
 const DRIVER = "drivers";
 const REVIEW = "reviews";
 const LIKED_PRODUCT = "likedproducts";
+const ACTIVITY = "activities";
+const FILES = "files";
 
 public isolated client class Client {
     *persist:AbstractPersistClient;
@@ -60,6 +62,7 @@ public isolated client class Client {
                 "supermarket.contactNo": {relation: {entityName: "supermarket", refField: "contactNo"}},
                 "supermarket.logo": {relation: {entityName: "supermarket", refField: "logo"}},
                 "supermarket.location": {relation: {entityName: "supermarket", refField: "location"}},
+                "supermarket.city": {relation: {entityName: "supermarket", refField: "city"}},
                 "supermarket.address": {relation: {entityName: "supermarket", refField: "address"}},
                 "supermarket.supermarketmanagerId": {relation: {entityName: "supermarket", refField: "supermarketmanagerId"}},
                 "driver.id": {relation: {entityName: "driver", refField: "id"}},
@@ -109,14 +112,16 @@ public isolated client class Client {
                 nic: {columnName: "nic"},
                 email: {columnName: "email"},
                 contactNo: {columnName: "contactNo"},
-                OTP: {columnName: "OTP"},
+                profilePic: {columnName: "profilePic"},
                 courierCompany: {columnName: "courierCompany"},
                 vehicleType: {columnName: "vehicleType"},
                 vehicleColor: {columnName: "vehicleColor"},
                 vehicleName: {columnName: "vehicleName"},
                 vehicleNumber: {columnName: "vehicleNumber"},
+                OTP: {columnName: "OTP"},
                 password: {columnName: "password"},
-                status: {columnName: "status"}
+                status: {columnName: "status"},
+                createdAt: {columnName: "createdAt"}
             },
             keyFields: ["id"]
         },
@@ -146,6 +151,7 @@ public isolated client class Client {
                 contactNo: {columnName: "contactNo"},
                 logo: {columnName: "logo"},
                 location: {columnName: "location"},
+                city: {columnName: "city"},
                 address: {columnName: "address"},
                 supermarketmanagerId: {columnName: "supermarketmanagerId"},
                 "supermarketManager.id": {relation: {entityName: "supermarketManager", refField: "id"}},
@@ -160,27 +166,27 @@ public isolated client class Client {
                 "supermarketManager.createdAt": {relation: {entityName: "supermarketManager", refField: "createdAt"}},
                 "supermarketManager.updatedAt": {relation: {entityName: "supermarketManager", refField: "updatedAt"}},
                 "supermarketManager.deletedAt": {relation: {entityName: "supermarketManager", refField: "deletedAt"}},
-                "storeprice[].id": {relation: {entityName: "storeprice", refField: "id"}},
-                "storeprice[].productId": {relation: {entityName: "storeprice", refField: "productId"}},
-                "storeprice[].supermarketId": {relation: {entityName: "storeprice", refField: "supermarketId"}},
-                "storeprice[].price": {relation: {entityName: "storeprice", refField: "price"}},
-                "storeprice[].discount": {relation: {entityName: "storeprice", refField: "discount"}},
-                "storeprice[].availableQuantity": {relation: {entityName: "storeprice", refField: "availableQuantity"}},
+                "supermarketItems[].id": {relation: {entityName: "supermarketItems", refField: "id"}},
+                "supermarketItems[].productId": {relation: {entityName: "supermarketItems", refField: "productId"}},
+                "supermarketItems[].supermarketId": {relation: {entityName: "supermarketItems", refField: "supermarketId"}},
+                "supermarketItems[].price": {relation: {entityName: "supermarketItems", refField: "price"}},
+                "supermarketItems[].discount": {relation: {entityName: "supermarketItems", refField: "discount"}},
+                "supermarketItems[].availableQuantity": {relation: {entityName: "supermarketItems", refField: "availableQuantity"}},
                 "opportunitysupermarket[].id": {relation: {entityName: "opportunitysupermarket", refField: "id"}},
                 "opportunitysupermarket[].supermarketId": {relation: {entityName: "opportunitysupermarket", refField: "supermarketId"}},
                 "opportunitysupermarket[].opportunityId": {relation: {entityName: "opportunitysupermarket", refField: "opportunityId"}},
-                "supermarketorder[].id": {relation: {entityName: "supermarketorder", refField: "id"}},
-                "supermarketorder[].status": {relation: {entityName: "supermarketorder", refField: "status"}},
-                "supermarketorder[].qrCode": {relation: {entityName: "supermarketorder", refField: "qrCode"}},
-                "supermarketorder[]._orderId": {relation: {entityName: "supermarketorder", refField: "_orderId"}},
-                "supermarketorder[].supermarketId": {relation: {entityName: "supermarketorder", refField: "supermarketId"}}
+                "supermarketOrder[].id": {relation: {entityName: "supermarketOrder", refField: "id"}},
+                "supermarketOrder[].status": {relation: {entityName: "supermarketOrder", refField: "status"}},
+                "supermarketOrder[].qrCode": {relation: {entityName: "supermarketOrder", refField: "qrCode"}},
+                "supermarketOrder[]._orderId": {relation: {entityName: "supermarketOrder", refField: "_orderId"}},
+                "supermarketOrder[].supermarketId": {relation: {entityName: "supermarketOrder", refField: "supermarketId"}}
             },
             keyFields: ["id"],
             joinMetadata: {
                 supermarketManager: {entity: User, fieldName: "supermarketManager", refTable: "User", refColumns: ["id"], joinColumns: ["supermarketmanagerId"], 'type: psql:ONE_TO_ONE},
-                storeprice: {entity: SupermarketItem, fieldName: "storeprice", refTable: "SupermarketItem", refColumns: ["supermarketId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
+                supermarketItems: {entity: SupermarketItem, fieldName: "supermarketItems", refTable: "SupermarketItem", refColumns: ["supermarketId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
                 opportunitysupermarket: {entity: OpportunitySupermarket, fieldName: "opportunitysupermarket", refTable: "OpportunitySupermarket", refColumns: ["supermarketId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE},
-                supermarketorder: {entity: SupermarketOrder, fieldName: "supermarketorder", refTable: "SupermarketOrder", refColumns: ["supermarketId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}
+                supermarketOrder: {entity: SupermarketOrder, fieldName: "supermarketOrder", refTable: "SupermarketOrder", refColumns: ["supermarketId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}
             }
         },
         [PRODUCT]: {
@@ -190,17 +196,18 @@ public isolated client class Client {
                 id: {columnName: "id", dbGenerated: true},
                 name: {columnName: "name"},
                 description: {columnName: "description"},
+                category: {columnName: "category"},
                 price: {columnName: "price"},
                 imageUrl: {columnName: "imageUrl"},
-                "storeprice[].id": {relation: {entityName: "storeprice", refField: "id"}},
-                "storeprice[].productId": {relation: {entityName: "storeprice", refField: "productId"}},
-                "storeprice[].supermarketId": {relation: {entityName: "storeprice", refField: "supermarketId"}},
-                "storeprice[].price": {relation: {entityName: "storeprice", refField: "price"}},
-                "storeprice[].discount": {relation: {entityName: "storeprice", refField: "discount"}},
-                "storeprice[].availableQuantity": {relation: {entityName: "storeprice", refField: "availableQuantity"}}
+                "supermarketItems[].id": {relation: {entityName: "supermarketItems", refField: "id"}},
+                "supermarketItems[].productId": {relation: {entityName: "supermarketItems", refField: "productId"}},
+                "supermarketItems[].supermarketId": {relation: {entityName: "supermarketItems", refField: "supermarketId"}},
+                "supermarketItems[].price": {relation: {entityName: "supermarketItems", refField: "price"}},
+                "supermarketItems[].discount": {relation: {entityName: "supermarketItems", refField: "discount"}},
+                "supermarketItems[].availableQuantity": {relation: {entityName: "supermarketItems", refField: "availableQuantity"}}
             },
             keyFields: ["id"],
-            joinMetadata: {storeprice: {entity: SupermarketItem, fieldName: "storeprice", refTable: "SupermarketItem", refColumns: ["productId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}}
+            joinMetadata: {supermarketItems: {entity: SupermarketItem, fieldName: "supermarketItems", refTable: "SupermarketItem", refColumns: ["productId"], joinColumns: ["id"], 'type: psql:MANY_TO_ONE}}
         },
         [SUPERMARKET_ITEM]: {
             entityName: "SupermarketItem",
@@ -215,6 +222,7 @@ public isolated client class Client {
                 "product.id": {relation: {entityName: "product", refField: "id"}},
                 "product.name": {relation: {entityName: "product", refField: "name"}},
                 "product.description": {relation: {entityName: "product", refField: "description"}},
+                "product.category": {relation: {entityName: "product", refField: "category"}},
                 "product.price": {relation: {entityName: "product", refField: "price"}},
                 "product.imageUrl": {relation: {entityName: "product", refField: "imageUrl"}},
                 "supermarket.id": {relation: {entityName: "supermarket", refField: "id"}},
@@ -222,12 +230,14 @@ public isolated client class Client {
                 "supermarket.contactNo": {relation: {entityName: "supermarket", refField: "contactNo"}},
                 "supermarket.logo": {relation: {entityName: "supermarket", refField: "logo"}},
                 "supermarket.location": {relation: {entityName: "supermarket", refField: "location"}},
+                "supermarket.city": {relation: {entityName: "supermarket", refField: "city"}},
                 "supermarket.address": {relation: {entityName: "supermarket", refField: "address"}},
                 "supermarket.supermarketmanagerId": {relation: {entityName: "supermarket", refField: "supermarketmanagerId"}},
                 "cartItem[].id": {relation: {entityName: "cartItem", refField: "id"}},
                 "cartItem[].supermarketitemId": {relation: {entityName: "cartItem", refField: "supermarketitemId"}},
                 "cartItem[].quantity": {relation: {entityName: "cartItem", refField: "quantity"}},
-                "cartItem[].consumerId": {relation: {entityName: "cartItem", refField: "consumerId"}}
+                "cartItem[].consumerId": {relation: {entityName: "cartItem", refField: "consumerId"}},
+                "cartItem[].productId": {relation: {entityName: "cartItem", refField: "productId"}}
             },
             keyFields: ["id"],
             joinMetadata: {
@@ -244,6 +254,7 @@ public isolated client class Client {
                 supermarketitemId: {columnName: "supermarketitemId"},
                 quantity: {columnName: "quantity"},
                 consumerId: {columnName: "consumerId"},
+                productId: {columnName: "productId"},
                 "supermarketItem.id": {relation: {entityName: "supermarketItem", refField: "id"}},
                 "supermarketItem.productId": {relation: {entityName: "supermarketItem", refField: "productId"}},
                 "supermarketItem.supermarketId": {relation: {entityName: "supermarketItem", refField: "supermarketId"}},
@@ -340,6 +351,7 @@ public isolated client class Client {
                 "supermarket.contactNo": {relation: {entityName: "supermarket", refField: "contactNo"}},
                 "supermarket.logo": {relation: {entityName: "supermarket", refField: "logo"}},
                 "supermarket.location": {relation: {entityName: "supermarket", refField: "location"}},
+                "supermarket.city": {relation: {entityName: "supermarket", refField: "city"}},
                 "supermarket.address": {relation: {entityName: "supermarket", refField: "address"}},
                 "supermarket.supermarketmanagerId": {relation: {entityName: "supermarket", refField: "supermarketmanagerId"}}
             },
@@ -361,6 +373,7 @@ public isolated client class Client {
                 "supermarket.contactNo": {relation: {entityName: "supermarket", refField: "contactNo"}},
                 "supermarket.logo": {relation: {entityName: "supermarket", refField: "logo"}},
                 "supermarket.location": {relation: {entityName: "supermarket", refField: "location"}},
+                "supermarket.city": {relation: {entityName: "supermarket", refField: "city"}},
                 "supermarket.address": {relation: {entityName: "supermarket", refField: "address"}},
                 "supermarket.supermarketmanagerId": {relation: {entityName: "supermarket", refField: "supermarketmanagerId"}},
                 "opportunity.id": {relation: {entityName: "opportunity", refField: "id"}},
@@ -539,6 +552,28 @@ public isolated client class Client {
                 productId: {columnName: "productId"}
             },
             keyFields: ["id"]
+        },
+        [ACTIVITY]: {
+            entityName: "Activity",
+            tableName: "Activity",
+            fieldMetadata: {
+                id: {columnName: "id", dbGenerated: true},
+                userId: {columnName: "userId"},
+                description: {columnName: "description"},
+                dateTime: {columnName: "dateTime"}
+            },
+            keyFields: ["id"]
+        },
+        [FILES]: {
+            entityName: "Files",
+            tableName: "Files",
+            fieldMetadata: {
+                id: {columnName: "id", dbGenerated: true},
+                name: {columnName: "name"},
+                data: {columnName: "data"},
+                file_code: {columnName: "file_code"}
+            },
+            keyFields: ["id"]
         }
     };
 
@@ -566,7 +601,9 @@ public isolated client class Client {
             [ADVERTISEMENT]: check new (dbClient, self.metadata.get(ADVERTISEMENT), psql:POSTGRESQL_SPECIFICS),
             [DRIVER]: check new (dbClient, self.metadata.get(DRIVER), psql:POSTGRESQL_SPECIFICS),
             [REVIEW]: check new (dbClient, self.metadata.get(REVIEW), psql:POSTGRESQL_SPECIFICS),
-            [LIKED_PRODUCT]: check new (dbClient, self.metadata.get(LIKED_PRODUCT), psql:POSTGRESQL_SPECIFICS)
+            [LIKED_PRODUCT]: check new (dbClient, self.metadata.get(LIKED_PRODUCT), psql:POSTGRESQL_SPECIFICS),
+            [ACTIVITY]: check new (dbClient, self.metadata.get(ACTIVITY), psql:POSTGRESQL_SPECIFICS),
+            [FILES]: check new (dbClient, self.metadata.get(FILES), psql:POSTGRESQL_SPECIFICS)
         };
     }
 
@@ -1285,6 +1322,86 @@ public isolated client class Client {
         psql:SQLClient sqlClient;
         lock {
             sqlClient = self.persistClients.get(LIKED_PRODUCT);
+        }
+        _ = check sqlClient.runDeleteQuery(id);
+        return result;
+    }
+
+    isolated resource function get activities(ActivityTargetType targetType = <>, sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``) returns stream<targetType, persist:Error?> = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.PostgreSQLProcessor",
+        name: "query"
+    } external;
+
+    isolated resource function get activities/[int id](ActivityTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.PostgreSQLProcessor",
+        name: "queryOne"
+    } external;
+
+    isolated resource function post activities(ActivityInsert[] data) returns int[]|persist:Error {
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(ACTIVITY);
+        }
+        sql:ExecutionResult[] result = check sqlClient.runBatchInsertQuery(data);
+        return from sql:ExecutionResult inserted in result
+            where inserted.lastInsertId != ()
+            select <int>inserted.lastInsertId;
+    }
+
+    isolated resource function put activities/[int id](ActivityUpdate value) returns Activity|persist:Error {
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(ACTIVITY);
+        }
+        _ = check sqlClient.runUpdateQuery(id, value);
+        return self->/activities/[id].get();
+    }
+
+    isolated resource function delete activities/[int id]() returns Activity|persist:Error {
+        Activity result = check self->/activities/[id].get();
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(ACTIVITY);
+        }
+        _ = check sqlClient.runDeleteQuery(id);
+        return result;
+    }
+
+    isolated resource function get files(FilesTargetType targetType = <>, sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``) returns stream<targetType, persist:Error?> = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.PostgreSQLProcessor",
+        name: "query"
+    } external;
+
+    isolated resource function get files/[int id](FilesTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.PostgreSQLProcessor",
+        name: "queryOne"
+    } external;
+
+    isolated resource function post files(FilesInsert[] data) returns int[]|persist:Error {
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(FILES);
+        }
+        sql:ExecutionResult[] result = check sqlClient.runBatchInsertQuery(data);
+        return from sql:ExecutionResult inserted in result
+            where inserted.lastInsertId != ()
+            select <int>inserted.lastInsertId;
+    }
+
+    isolated resource function put files/[int id](FilesUpdate value) returns Files|persist:Error {
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(FILES);
+        }
+        _ = check sqlClient.runUpdateQuery(id, value);
+        return self->/files/[id].get();
+    }
+
+    isolated resource function delete files/[int id]() returns Files|persist:Error {
+        Files result = check self->/files/[id].get();
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(FILES);
         }
         _ = check sqlClient.runDeleteQuery(id);
         return result;

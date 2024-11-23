@@ -5,6 +5,13 @@
 
 import ballerina/time;
 
+public enum NonVerifiedDriverStatus {
+    OTPPending,
+    OTPVerified,
+    Accepted,
+    Declined
+}
+
 public enum OrderStatus {
     ToPay,
     Placed,
@@ -126,14 +133,16 @@ public type NonVerifiedDriver record {|
     string nic;
     string email;
     string contactNo;
-    string OTP;
+    string profilePic;
     string courierCompany;
     string vehicleType;
     string vehicleColor;
     string vehicleName;
     string vehicleNumber;
+    string OTP;
     string password;
-    string status;
+    NonVerifiedDriverStatus? status;
+    time:Civil createdAt;
 |};
 
 public type NonVerifiedDriverOptionalized record {|
@@ -142,14 +151,16 @@ public type NonVerifiedDriverOptionalized record {|
     string nic?;
     string email?;
     string contactNo?;
-    string OTP?;
+    string profilePic?;
     string courierCompany?;
     string vehicleType?;
     string vehicleColor?;
     string vehicleName?;
     string vehicleNumber?;
+    string OTP?;
     string password?;
-    string status?;
+    NonVerifiedDriverStatus? status?;
+    time:Civil createdAt?;
 |};
 
 public type NonVerifiedDriverTargetType typedesc<NonVerifiedDriverOptionalized>;
@@ -159,14 +170,16 @@ public type NonVerifiedDriverInsert record {|
     string nic;
     string email;
     string contactNo;
-    string OTP;
+    string profilePic;
     string courierCompany;
     string vehicleType;
     string vehicleColor;
     string vehicleName;
     string vehicleNumber;
+    string OTP;
     string password;
-    string status;
+    NonVerifiedDriverStatus? status;
+    time:Civil createdAt;
 |};
 
 public type NonVerifiedDriverUpdate record {|
@@ -174,14 +187,16 @@ public type NonVerifiedDriverUpdate record {|
     string nic?;
     string email?;
     string contactNo?;
-    string OTP?;
+    string profilePic?;
     string courierCompany?;
     string vehicleType?;
     string vehicleColor?;
     string vehicleName?;
     string vehicleNumber?;
+    string OTP?;
     string password?;
-    string status?;
+    NonVerifiedDriverStatus? status?;
+    time:Civil createdAt?;
 |};
 
 public type Address record {|
@@ -235,6 +250,7 @@ public type Supermarket record {|
     string contactNo;
     string logo;
     string location;
+    string city;
     string address;
     int supermarketmanagerId;
 
@@ -246,6 +262,7 @@ public type SupermarketOptionalized record {|
     string contactNo?;
     string logo?;
     string location?;
+    string city?;
     string address?;
     int supermarketmanagerId?;
 |};
@@ -253,9 +270,9 @@ public type SupermarketOptionalized record {|
 public type SupermarketWithRelations record {|
     *SupermarketOptionalized;
     UserOptionalized supermarketManager?;
-    SupermarketItemOptionalized[] storeprice?;
+    SupermarketItemOptionalized[] supermarketItems?;
     OpportunitySupermarketOptionalized[] opportunitysupermarket?;
-    SupermarketOrderOptionalized[] supermarketorder?;
+    SupermarketOrderOptionalized[] supermarketOrder?;
 |};
 
 public type SupermarketTargetType typedesc<SupermarketWithRelations>;
@@ -265,6 +282,7 @@ public type SupermarketInsert record {|
     string contactNo;
     string logo;
     string location;
+    string city;
     string address;
     int supermarketmanagerId;
 |};
@@ -274,6 +292,7 @@ public type SupermarketUpdate record {|
     string contactNo?;
     string logo?;
     string location?;
+    string city?;
     string address?;
     int supermarketmanagerId?;
 |};
@@ -282,6 +301,7 @@ public type Product record {|
     readonly int id;
     string name;
     string description;
+    string category;
     float price;
     string imageUrl;
 
@@ -291,13 +311,14 @@ public type ProductOptionalized record {|
     int id?;
     string name?;
     string description?;
+    string category?;
     float price?;
     string imageUrl?;
 |};
 
 public type ProductWithRelations record {|
     *ProductOptionalized;
-    SupermarketItemOptionalized[] storeprice?;
+    SupermarketItemOptionalized[] supermarketItems?;
 |};
 
 public type ProductTargetType typedesc<ProductWithRelations>;
@@ -305,6 +326,7 @@ public type ProductTargetType typedesc<ProductWithRelations>;
 public type ProductInsert record {|
     string name;
     string description;
+    string category;
     float price;
     string imageUrl;
 |};
@@ -312,6 +334,7 @@ public type ProductInsert record {|
 public type ProductUpdate record {|
     string name?;
     string description?;
+    string category?;
     float price?;
     string imageUrl?;
 |};
@@ -365,6 +388,7 @@ public type CartItem record {|
     int supermarketitemId;
     int quantity;
     int consumerId;
+    int productId;
 |};
 
 public type CartItemOptionalized record {|
@@ -372,6 +396,7 @@ public type CartItemOptionalized record {|
     int supermarketitemId?;
     int quantity?;
     int consumerId?;
+    int productId?;
 |};
 
 public type CartItemWithRelations record {|
@@ -385,12 +410,14 @@ public type CartItemInsert record {|
     int supermarketitemId;
     int quantity;
     int consumerId;
+    int productId;
 |};
 
 public type CartItemUpdate record {|
     int supermarketitemId?;
     int quantity?;
     int consumerId?;
+    int productId?;
 |};
 
 public type OrderItems record {|
@@ -803,5 +830,61 @@ public type LikedProductInsert record {|
 public type LikedProductUpdate record {|
     int userId?;
     int productId?;
+|};
+
+public type Activity record {|
+    readonly int id;
+    int userId;
+    string description;
+    time:Civil dateTime;
+|};
+
+public type ActivityOptionalized record {|
+    int id?;
+    int userId?;
+    string description?;
+    time:Civil dateTime?;
+|};
+
+public type ActivityTargetType typedesc<ActivityOptionalized>;
+
+public type ActivityInsert record {|
+    int userId;
+    string description;
+    time:Civil dateTime;
+|};
+
+public type ActivityUpdate record {|
+    int userId?;
+    string description?;
+    time:Civil dateTime?;
+|};
+
+public type Files record {|
+    readonly int id;
+    string name;
+    byte[] data;
+    string file_code;
+|};
+
+public type FilesOptionalized record {|
+    int id?;
+    string name?;
+    byte[] data?;
+    string file_code?;
+|};
+
+public type FilesTargetType typedesc<FilesOptionalized>;
+
+public type FilesInsert record {|
+    string name;
+    byte[] data;
+    string file_code;
+|};
+
+public type FilesUpdate record {|
+    string name?;
+    byte[] data?;
+    string file_code?;
 |};
 

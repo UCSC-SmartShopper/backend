@@ -18,8 +18,10 @@ DROP TABLE IF EXISTS "Order";
 DROP TABLE IF EXISTS "User";
 DROP TABLE IF EXISTS "NonVerifyUser";
 DROP TABLE IF EXISTS "Product";
+DROP TABLE IF EXISTS "Activity";
 DROP TABLE IF EXISTS "Advertisement";
 DROP TABLE IF EXISTS "LikedProduct";
+DROP TABLE IF EXISTS "Files";
 DROP TABLE IF EXISTS "NonVerifiedDriver";
 
 CREATE TABLE "NonVerifiedDriver" (
@@ -28,14 +30,24 @@ CREATE TABLE "NonVerifiedDriver" (
 	"nic" VARCHAR(191) NOT NULL,
 	"email" VARCHAR(191) NOT NULL,
 	"contactNo" VARCHAR(191) NOT NULL,
-	"OTP" VARCHAR(191) NOT NULL,
+	"profilePic" VARCHAR(191) NOT NULL,
 	"courierCompany" VARCHAR(191) NOT NULL,
 	"vehicleType" VARCHAR(191) NOT NULL,
 	"vehicleColor" VARCHAR(191) NOT NULL,
 	"vehicleName" VARCHAR(191) NOT NULL,
 	"vehicleNumber" VARCHAR(191) NOT NULL,
+	"OTP" VARCHAR(191) NOT NULL,
 	"password" VARCHAR(191) NOT NULL,
-	"status" VARCHAR(191) NOT NULL,
+	"status" VARCHAR(11) CHECK ("status" IN ('OTPPending', 'OTPVerified', 'Accepted', 'Declined')),
+	"createdAt" TIMESTAMP NOT NULL,
+	PRIMARY KEY("id")
+);
+
+CREATE TABLE "Files" (
+	"id"  SERIAL,
+	"name" VARCHAR(191) NOT NULL,
+	"data" BYTEA NOT NULL,
+	"file_code" VARCHAR(191) NOT NULL,
 	PRIMARY KEY("id")
 );
 
@@ -56,10 +68,19 @@ CREATE TABLE "Advertisement" (
 	PRIMARY KEY("id")
 );
 
+CREATE TABLE "Activity" (
+	"id"  SERIAL,
+	"userId" INT NOT NULL,
+	"description" VARCHAR(191) NOT NULL,
+	"dateTime" TIMESTAMP NOT NULL,
+	PRIMARY KEY("id")
+);
+
 CREATE TABLE "Product" (
 	"id"  SERIAL,
 	"name" VARCHAR(191) NOT NULL,
 	"description" VARCHAR(191) NOT NULL,
+	"category" VARCHAR(191) NOT NULL,
 	"price" FLOAT NOT NULL,
 	"imageUrl" VARCHAR(191) NOT NULL,
 	PRIMARY KEY("id")
@@ -120,6 +141,7 @@ CREATE TABLE "CartItem" (
 	"id"  SERIAL,
 	"quantity" INT NOT NULL,
 	"consumerId" INT NOT NULL,
+	"productId" INT NOT NULL,
 	"supermarketitemId" INT NOT NULL,
 	FOREIGN KEY("supermarketitemId") REFERENCES "SupermarketItem"("id"),
 	PRIMARY KEY("id")
@@ -144,6 +166,7 @@ CREATE TABLE "Supermarket" (
 	"contactNo" VARCHAR(191) NOT NULL,
 	"logo" VARCHAR(191) NOT NULL,
 	"location" VARCHAR(191) NOT NULL,
+	"city" VARCHAR(191) NOT NULL,
 	"address" VARCHAR(191) NOT NULL,
 	"supermarketmanagerId" INT UNIQUE NOT NULL,
 	FOREIGN KEY("supermarketmanagerId") REFERENCES "User"("id"),
@@ -230,4 +253,6 @@ CREATE TABLE "OrderItems" (
 );
 
 
+CREATE UNIQUE INDEX "cart_item_unique_index" ON "CartItem" ("consumerId", "productId");
 CREATE UNIQUE INDEX "liked_product_unique_index" ON "LikedProduct" ("userId", "productId");
+CREATE UNIQUE INDEX "file_unique_index" ON "Files" ("file_code");

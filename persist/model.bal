@@ -35,6 +35,13 @@ type NonVerifyUser record {|
     string password;
 |};
 
+enum NonVerifiedDriverStatus {
+    OTPPending,
+    OTPVerified,
+    Accepted,
+    Declined
+};
+
 type NonVerifiedDriver record {|
     @sql:Generated
     readonly int id;
@@ -42,14 +49,21 @@ type NonVerifiedDriver record {|
     string nic;
     string email;
     string contactNo;
-    string OTP;
+    string profilePic;
+
+    // Vehicle details
     string courierCompany;
     string vehicleType;
     string vehicleColor;
     string vehicleName;
     string vehicleNumber;
+
+    // Credentials
+    string OTP;
     string password;
-    string status;
+    NonVerifiedDriverStatus? status;
+
+    time:Civil createdAt;
 |};
 
 type Address record {|
@@ -70,11 +84,12 @@ type Supermarket record {|
     string contactNo;
     string logo;
     string location;
+    string city;
     string address;
     User supermarketManager;
-    SupermarketItem[] storeprice;
+    SupermarketItem[] supermarketItems;
     OpportunitySupermarket[] opportunitysupermarket;
-    SupermarketOrder[] supermarketorder;
+    SupermarketOrder[] supermarketOrder;
 |};
 
 type Product record {|
@@ -82,9 +97,10 @@ type Product record {|
     readonly int id;
     string name;
     string description;
+    string category;
     float price;
     string imageUrl;
-    SupermarketItem[] storeprice;
+    SupermarketItem[] supermarketItems;
 |};
 
 type SupermarketItem record {|
@@ -103,7 +119,11 @@ type CartItem record {|
     readonly int id;
     SupermarketItem supermarketItem;
     int quantity;
+
+    @sql:UniqueIndex {name: "cart_item_unique_index"}
     int consumerId;
+    @sql:UniqueIndex {name: "cart_item_unique_index"}
+    int productId;
 |};
 
 type OrderItems record {|
@@ -227,10 +247,30 @@ type Review record {|
 type LikedProduct record {|
     @sql:Generated
     readonly int id;
-    
+
     @sql:UniqueIndex {name: "liked_product_unique_index"}
     int userId;
     @sql:UniqueIndex {name: "liked_product_unique_index"}
     int productId;
 |};
 
+type Activity record {|
+    @sql:Generated
+    readonly int id;
+    int userId;
+    string description;
+    time:Civil dateTime;
+|};
+
+type Files record {|
+    @sql:Generated
+    readonly int id;
+
+    string name;
+    byte[] data;
+
+    // User can't have multiple files for same purpose
+    // Ex: profile pic, NIC, etc
+    @sql:UniqueIndex {name: "file_unique_index"}
+    string file_code;
+|};

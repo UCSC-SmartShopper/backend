@@ -18,18 +18,26 @@ public type NonVerifyUser record {|
     string OTP;
 |};
 
-public type NonVerifiedDriver record {|
-    readonly int id;
-    string name;
-    string nic;
-    string email;
-    string contactNo;
-    string courierCompany;
-    string vehicleType;
-    string vehicleColor;
-    string vehicleName;
-    string vehicleNumber;
-|};
+// public type NonVerifiedDriver record {|
+//     readonly int id;
+//     string name;
+//     string nic;
+//     string email;
+//     string contactNo;
+
+//     // Vehicle Details
+//     string courierCompany;
+//     string vehicleType;
+//     string vehicleColor;
+//     string vehicleName;
+//     string vehicleNumber;
+
+//   // Credentials
+// string password;
+// string confirmPassword;
+// string OTP;
+
+// |};
 
 public type OtpMappingRequest record {|
     string contactNumber;
@@ -44,7 +52,7 @@ public type SetPassword record {|
 
 public type DriverOtp record {|
     string OTP;
-    int id;
+    int driverId;
 |};
 
 public type RegisterForm record {|
@@ -55,6 +63,7 @@ public type RegisterForm record {|
 |};
 
 public type DriverPersonalDetails record {|
+
     string name;
     string nic;
     string email;
@@ -69,7 +78,7 @@ public type NonVerifyUserNotFound record {|
 public type DriverRequestsResponse record {|
     int count;
     string next;
-    NonVerifiedDriver[] results;
+    db:NonVerifiedDriver[] results;
 |};
 
 function createNonVerifyUserNotFound(string otp) returns NonVerifyUserNotFound {
@@ -219,15 +228,19 @@ public function driver_otp_genaration(DriverPersonalDetails driverPersonalDetail
         nic: driverPersonalDetails.nic,
         email: driverPersonalDetails.email,
         contactNo: driverPersonalDetails.contactNo,
-        OTP: otp_string,
+        profilePic: "",
 
         courierCompany: "",
         vehicleType: "",
         vehicleColor: "",
         vehicleName: "",
         vehicleNumber: "",
+
+        OTP: otp_string,
         password: "",
-        status: "Pending"
+        status: "OTPPending",
+
+        createdAt: time:utcToCivil(time:utcNow())
     };
 
     db:Client connection = connection:getConnection();
@@ -274,7 +287,7 @@ public function driver_otp_resend(int id) returns http:Created|error {
 public function match_driver_otp(DriverOtp driverOtp) returns db:NonVerifiedDriver|error {
     db:Client connection = connection:getConnection();
 
-    db:NonVerifiedDriver|persist:Error result = connection->/nonverifieddrivers/[driverOtp.id](db:NonVerifiedDriver);
+    db:NonVerifiedDriver|persist:Error result = connection->/nonverifieddrivers/[driverOtp.driverId](db:NonVerifiedDriver);
 
     if result is persist:Error {
         return error("Driver not found.");
@@ -283,13 +296,13 @@ public function match_driver_otp(DriverOtp driverOtp) returns db:NonVerifiedDriv
     if (driverOtp.OTP != result.OTP) {
         return error("Otp does not matched.");
     }
-    db:NonVerifiedDriverUpdate nonVerifiedDriverUpdate = {status: "Verified"};
+    db:NonVerifiedDriverUpdate nonVerifiedDriverUpdate = {status: "OTPVerified"};
 
-    db:NonVerifiedDriver|persist:Error updatedDriver = connection->/nonverifieddrivers/[driverOtp.id].put(nonVerifiedDriverUpdate);
+    db:NonVerifiedDriver|persist:Error updatedDriver = connection->/nonverifieddrivers/[driverOtp.driverId].put(nonVerifiedDriverUpdate);
     return updatedDriver;
 }
 
-public function update_driver_signup(db:NonVerifiedDriverOptionalized driverUpdate, int id) returns db:NonVerifiedDriver|error {
+public function update_driver_signup(db:NonVerifiedDriver driverUpdate, int id) returns db:NonVerifiedDriver|error {
 
     db:Client connection = connection:getConnection();
 
@@ -380,8 +393,9 @@ public function get_all_driver_requests(auth:User user) returns DriverRequestsRe
 
     db:Client connection = connection:getConnection();
     stream<db:NonVerifiedDriver, persist:Error?> driverRequests = connection->/nonverifieddrivers();
-    NonVerifiedDriver[] driverRequestList = check from db:NonVerifiedDriver driverRequest in driverRequests
-        where driverRequest.status == "Verified"
+    db:NonVerifiedDriver[] driverRequestList = check from db:NonVerifiedDriver driverRequest in driverRequests
+        where driverRequest.status == "OTPVerified"
+
         order by driverRequest.id descending
         select {
             id: driverRequest.id,
@@ -389,11 +403,19 @@ public function get_all_driver_requests(auth:User user) returns DriverRequestsRe
             nic: driverRequest.nic,
             email: driverRequest.email,
             contactNo: driverRequest.contactNo,
+            profilePic: driverRequest.profilePic,
+
             courierCompany: driverRequest.courierCompany,
             vehicleType: driverRequest.vehicleType,
             vehicleColor: driverRequest.vehicleColor,
             vehicleName: driverRequest.vehicleName,
-            vehicleNumber: driverRequest.vehicleNumber
+            vehicleNumber: driverRequest.vehicleNumber,
+
+            // Sanitize sensitive data
+            OTP: "",
+            password: "",
+            status: driverRequest.status,
+            createdAt: driverRequest.createdAt
         };
 
     return {count: driverRequestList.length(), next: "null", results: driverRequestList};

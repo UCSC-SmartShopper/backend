@@ -5,6 +5,7 @@ import backend.consumer;
 import backend.db;
 import backend.driver;
 import backend.liked_products;
+import backend.locations;
 import backend.opportunities;
 import backend.orders;
 import backend.products;
@@ -14,10 +15,13 @@ import backend.supermarket_items;
 import backend.supermarkets;
 import backend.user;
 import backend.user_registration;
+import backend.utils;
 
 import ballerina/http;
 import ballerina/io;
 import ballerina/persist;
+import backend.file_service;
+import backend.activity;
 
 type productQuery record {|
     int category;
@@ -39,6 +43,7 @@ service / on new http:Listener(9090) {
 
     function init() {
         io:println("Service started on port 9090");
+        _ = start utils:sendHeartbeat();
     }
 
     // ------------------------------------------- User Login and Signup Resource Functions ---------------------------------------
@@ -71,7 +76,7 @@ service / on new http:Listener(9090) {
     }
 
     // finalizing the driver signup
-    resource function post update_driver_signup/[int id](@http:Payload db:NonVerifiedDriverOptionalized driverUpdate) returns db:NonVerifiedDriver|error {
+    resource function post update_driver_vehicle_details/[int id](@http:Payload db:NonVerifiedDriver driverUpdate) returns db:NonVerifiedDriver|error {
         return user_registration:update_driver_signup(driverUpdate, id);
     }
 
@@ -87,23 +92,29 @@ service / on new http:Listener(9090) {
     }
 
     // ---------------------------------------------- User Resource Functions ------------------------------------------------
-    resource function get users() returns user:UserResponse|http:Unauthorized|error {
-        return user:get_all_user();
+    resource function get users(http:Request req) returns user:UserResponse|http:Unauthorized|error {
+        auth:User user = check auth:getUser(req);
+        return user:get_all_user(user);
     }
 
-    resource function get users/[int id](http:Request req) returns db:UserWithRelations|http:Unauthorized|user:UserNotFound|error {
+    resource function get users/[int id](http:Request req) returns db:UserWithRelations|http:Unauthorized|error {
         auth:User user = check auth:getUser(req);
         return user:get_user(user, id);
     }
 
-    resource function patch users/[int id](http:Request req, @http:Payload db:UserUpdate userUpdate) returns db:User|DataNotFound|error {
+    resource function patch users/[int id](http:Request req, @http:Payload db:UserUpdate userUpdate) returns db:User|error {
         auth:User user = check auth:getUser(req);
         return user:update_user(user, userUpdate);
     }
 
-    resource function patch change_password/[int id](http:Request req, @http:Payload user:UpdatePassword updatePassword) returns db:User|DataNotFound|error {
+    resource function patch change_password/[int id](http:Request req, @http:Payload user:UpdatePassword updatePassword) returns db:User|error {
         auth:User user = check auth:getUser(req);
-        return user:update_password(user,id, updatePassword);
+        return user:update_password(user, id, updatePassword);
+    }
+
+    resource function patch update_profile_picture/[int id](http:Request req) returns string|error {
+        auth:User user = check auth:getUser(req);
+        return user:update_profile_picture(user, req, id);
     }
 
     // ---------------------------------------------- Driver Resource Functions ----------------------------------------------
@@ -126,26 +137,45 @@ service / on new http:Listener(9090) {
         return consumer:get_consumer(user, id);
     }
 
+    // ---------------------------------------------- Consumer Activity Resource Functions --------------------------------------- 
+    resource function get activities(http:Request req) returns activity:ActivityResponse|error? {
+        do {
+            auth:User user = check auth:getUser(req);
+            return activity:getActivities(user);
+        } on fail {
+            return {count: 0, next: false, activities: []};
+        }
+    }
+
+    resource function post activities(http:Request req, @http:Payload record {string description;} payload) returns int|error {
+        auth:User user = check auth:getUser(req);
+        return activity:createActivity(user, payload.description);
+    }
+
     // ---------------------------------------------- Products Resource Functions -----------------------------------------------
     resource function get products(
             string category,
-            float price,
+            string price,
             string ordering,
             string searchText,
             int page,
             int _limit
-            ) returns products:ProductResponse|persist:Error? {
+            ) returns products:ProductResponse|error {
         return products:getProducts(category, price, ordering, searchText, page, _limit);
     }
 
-    resource function get products/[int id]() returns products:Product|DataNotFound|error? {
+    resource function get products/[int id]() returns db:ProductWithRelations|error? {
         return products:getProductsById(id);
     }
 
     // ---------------------------------------------- Liked Products Resource Functions ------------------------------------------
     resource function get liked_products(http:Request req) returns liked_products:LikedProductResponse|error? {
-        auth:User user = check auth:getUser(req);
-        return liked_products:get_liked_products(user);
+        do {
+            auth:User user = check auth:getUser(req);
+            return liked_products:get_liked_products(user);
+        } on fail {
+            return {count: 0, next: false, results: []};
+        }
     }
 
     resource function post liked_products(http:Request req, @http:Payload record {int productId;} payload) returns int|error {
@@ -173,39 +203,48 @@ service / on new http:Listener(9090) {
     }
 
     // ---------------------------------------------- Supermarket Items Resource Functions --------------------------------------
-    resource function get supermarketitems(http:Request req, @http:Query int productId) returns supermarket_items:SupermarketItemResponse|error {
+    // return all supermarket items for that product id
+    resource function get supermarket_items(http:Request req, @http:Query int productId) returns supermarket_items:SupermarketItemResponse|error {
         auth:User user = check auth:getUser(req);
-
-        // if user is supermarket manager then return all items belongs to the supermarket
-        return supermarket_items:get_supermarket_items(user, productId);
+        return supermarket_items:get_supermarket_items_by_product_id(user, productId);
     }
 
-    resource function get supermarketitems/[int id]() returns db:SupermarketItemWithRelations|error {
+    //  return all supermarket items belongs to the supermarket to the supermarket manager
+    resource function get supermarket_items_all(http:Request req) returns supermarket_items:SupermarketItemResponse|error {
+        auth:User user = check auth:getUser(req);
+        return supermarket_items:get_all_supermarket_items(user);
+    }
+
+    resource function get supermarket_items/[int id]() returns db:SupermarketItemWithRelations|error {
         return supermarket_items:get_supermarket_item_by_id(id);
     }
 
-    resource function patch supermarketitems/[int id](http:Request req, @http:Payload db:SupermarketItemUpdate supermarketItem) returns db:SupermarketItem|error {
+    resource function patch supermarket_items/[int id](http:Request req, @http:Payload db:SupermarketItemUpdate supermarketItem) returns db:SupermarketItem|error {
         auth:User user = check auth:getUser(req);
         return supermarket_items:editSupermarketItem(user, id, supermarketItem);
     }
 
-    // ---------------------------------------------- Cart Resource Functions ---------------------------------------------------
-    resource function get carts(http:Request req) returns cart:CartItemResponse|error {
-        auth:User user = check auth:getUser(req);
-        return cart:getCartItems(user.consumerId ?: -1);
+    // ---------------------------------------------- Cart Items Resource Functions ---------------------------------------------------
+    resource function get cart_items(http:Request req) returns cart:CartItemResponse|error {
+        do {
+            auth:User user = check auth:getUser(req);
+            return cart:getCartItems(user.consumerId ?: -1);
+        } on fail {
+            return {count: 0, next: "null", results: []};
+        }
     }
 
-    resource function post carts(http:Request req, cart:CartItemInsert cartItem) returns db:CartItem|int|error {
+    resource function post cart_items(http:Request req, db:CartItemInsert cartItem) returns db:CartItem|int|error {
         auth:User user = check auth:getUser(req);
         return cart:addCartItem(user.consumerId ?: -1, cartItem);
     }
 
-    resource function patch carts/[int id](http:Request req, cart:CartItem cartItem) returns db:CartItem|int|error {
+    resource function patch cart_items/[int id](http:Request req, db:CartItem cartItem) returns db:CartItem|int|error {
         auth:User user = check auth:getUser(req);
         return cart:updateCartItem(user.consumerId ?: -1, cartItem);
     }
 
-    resource function delete carts(http:Request req, int id) returns db:CartItem|error {
+    resource function delete cart_items/[int id](http:Request req) returns db:CartItem|error {
         auth:User user = check auth:getUser(req);
         return cart:removeCartItem(user.consumerId ?: -1, id);
     }
@@ -308,5 +347,22 @@ service / on new http:Listener(9090) {
         auth:User user = check auth:getUser(req);
         return reviews:create_review(user, review);
     }
+
+    //-------------------------------------------- Location Resource Functions----------------------------------------------------
+    resource function get locations/consumer_supermarket_distance/[string location](http:Request req) returns float|error {
+        auth:User user = check auth:getUser(req);
+        return locations:get_consumer_supermarket_distance(user, location);
+    }
+
+    //-------------------------------------------- Heartbeat Resource Functions----------------------------------------------------
+
+    resource function get heartbeat() returns string {
+        return "Heartbeat successful";
+    }
+
+    // ---------------------------------------------- Serve Files  -----------------------------------------------------------
+    resource function get images/[string path]() returns byte[]|error {
+        return file_service:getImage(path);
+    };
 
 }
