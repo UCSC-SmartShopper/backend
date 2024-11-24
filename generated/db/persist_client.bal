@@ -569,9 +569,9 @@ public isolated client class Client {
             tableName: "UserPreference",
             fieldMetadata: {
                 id: {columnName: "id", dbGenerated: true},
-                userId: {columnName: "userId"},
+                userid: {columnName: "userid"},
                 points: {columnName: "points"},
-                referenceId: {columnName: "referenceId"},
+                referenceid: {columnName: "referenceid"},
                 createdAt: {columnName: "createdAt"}
             },
             keyFields: ["id"]

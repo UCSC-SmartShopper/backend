@@ -862,33 +862,33 @@ public type FilesUpdate record {|
 
 public type UserPreference record {|
     readonly int id;
-    int userId;
+    int userid;
     int points;
-    int referenceId;
+    int referenceid;
     time:Civil createdAt;
 |};
 
 public type UserPreferenceOptionalized record {|
     int id?;
-    int userId?;
+    int userid?;
     int points?;
-    int referenceId?;
+    int referenceid?;
     time:Civil createdAt?;
 |};
 
 public type UserPreferenceTargetType typedesc<UserPreferenceOptionalized>;
 
 public type UserPreferenceInsert record {|
-    int userId;
+    int userid;
     int points;
-    int referenceId;
+    int referenceid;
     time:Civil createdAt;
 |};
 
 public type UserPreferenceUpdate record {|
-    int userId?;
+    int userid?;
     int points?;
-    int referenceId?;
+    int referenceid?;
     time:Civil createdAt?;
 |};
 

@@ -53,9 +53,9 @@ CREATE TABLE "Files" (
 
 CREATE TABLE "UserPreference" (
 	"id"  SERIAL,
-	"userId" INT NOT NULL,
+	"userid" INT NOT NULL,
 	"points" INT NOT NULL,
-	"referenceId" INT NOT NULL,
+	"referenceid" INT NOT NULL,
 	"createdAt" TIMESTAMP NOT NULL,
 	PRIMARY KEY("id")
 );

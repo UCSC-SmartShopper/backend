@@ -270,11 +270,9 @@ type Files record {|
 type UserPreference record {|
     @sql:Generated
     readonly int id;
-
-    int userId;
-
+    int userid;
     int points;
-    int referenceId;
+    int referenceid;
     time:Civil createdAt;
 
 |};

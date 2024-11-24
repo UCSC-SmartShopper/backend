@@ -10,6 +10,7 @@ public type UserPreference record {|
     int referenceId; 
 |};
 
+
 map<int> preferenceWeights = {
     "Clicks": 1,
     "Purchases": 5,
@@ -47,40 +48,38 @@ function calculateRank(UserPreference userPreference) returns int? {
     return null;
 }
 
-public function addUserPreference(UserPreference userPreference) returns db:UserPreference|string|error {
-
-
+public function addUserPreference(UserPreference userPreference) returns db:UserPreference|error {
+    // Calculate rank and validate
     int? updatedPoints = calculateRank(userPreference);
-
-    if (updatedPoints != null) {
-        io:println("User preference updated successfully");
-        io:println("User ID: ", userPreference.userId, 
-                   ", Preference Type: ", userPreference.preferenceType, 
-                   ", Reference ID: ", userPreference.referenceId, 
-                   ", Updated Points: ", updatedPoints);
-    } else {
-        io:println("No existing preference found to update");
+    if updatedPoints is null {
+        return error("Points calculation failed; cannot insert.");
     }
-    
+
+    // Log the updated details
+    io:println("User preference updated successfully");
+    io:println("User ID: ", userPreference.userId, 
+               ", Preference Type: ", userPreference.preferenceType, 
+               ", Reference ID: ", userPreference.referenceId, 
+               ", Updated Points: ", updatedPoints);
+
     db:Client connection = connection:getConnection();
+    
+    io:println("Database connection established.");
 
     db:UserPreferenceInsert userPreferenceInsert = {
-        userId: userPreference.userId,
-        referenceId: userPreference.referenceId,
+        userid: userPreference.userId,
+        referenceid: userPreference.referenceId, 
         points: <int>updatedPoints,
         createdAt: time:utcToCivil(time:utcNow())
-        };
+    };
+    io:println("Insert Record: ", userPreferenceInsert);
 
     int[]|persist:Error result = connection->/userpreferences.post([userPreferenceInsert]);
-
     if result is persist:Error {
-        return error("Error while adding the user preference");
+        return error("Error while adding the user preference", result);
     }
 
-    db:UserPreference userPreferenceN = {...userPreferenceInsert, id:result[0]};
-
-
-    
-
+    db:UserPreference userPreferenceN = {...userPreferenceInsert, id: result[0]};
     return userPreferenceN;
 }
+
