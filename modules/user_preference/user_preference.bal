@@ -1,4 +1,8 @@
 import ballerina/io;
+import backend.db;
+import backend.connection;
+import ballerina/time;
+import ballerina/persist;
 
 public type UserPreference record {| 
     int userId; 
@@ -43,7 +47,9 @@ function calculateRank(UserPreference userPreference) returns int? {
     return null;
 }
 
-public function addUserPreference(UserPreference userPreference) returns string {
+public function addUserPreference(UserPreference userPreference) returns db:UserPreference|string|error {
+
+
     int? updatedPoints = calculateRank(userPreference);
 
     if (updatedPoints != null) {
@@ -55,6 +61,26 @@ public function addUserPreference(UserPreference userPreference) returns string 
     } else {
         io:println("No existing preference found to update");
     }
+    
+    db:Client connection = connection:getConnection();
 
-    return "User preference processed successfully";
+    db:UserPreferenceInsert userPreferenceInsert = {
+        userId: userPreference.userId,
+        referenceId: userPreference.referenceId,
+        points: <int>updatedPoints,
+        createdAt: time:utcToCivil(time:utcNow())
+        };
+
+    int[]|persist:Error result = connection->/userpreferences.post([userPreferenceInsert]);
+
+    if result is persist:Error {
+        return error("Error while adding the user preference");
+    }
+
+    db:UserPreference userPreferenceN = {...userPreferenceInsert, id:result[0]};
+
+
+    
+
+    return userPreferenceN;
 }

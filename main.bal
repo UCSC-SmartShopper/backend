@@ -357,7 +357,7 @@ service / on new http:Listener(9090) {
 }
 
 
-    resource function post userpreference/add(@http:Payload user_preference:UserPreference userPreference) returns string|error {
+    resource function post userpreference/add(@http:Payload user_preference:UserPreference userPreference) returns db:UserPreference|string|error {
     return user_preference:addUserPreference(userPreference);
 }
 
