@@ -4,11 +4,12 @@ import backend.connection;
 import ballerina/time;
 import ballerina/persist;
 
-public type UserPreference record {| 
-    int userId; 
-    string preferenceType; 
-    int referenceId; 
+public type UserPreference record {|
+    int userid;
+    string preferenceType;
+    int referenceid;
 |};
+
 
 
 map<int> preferenceWeights = {
@@ -21,55 +22,67 @@ map<int> preferenceWeights = {
 };
 
 
-record {| int userId; int referenceId; int points; |}[] userInteractions = [
-    {userId: 1, referenceId: 101, points: 10},
-    {userId: 1, referenceId: 104,  points: 2},
-    {userId: 1, referenceId: 102, points: 1},
-    {userId: 3, referenceId: 103, points: 5},
-    {userId: 2, referenceId: 107, points: 20},
-    {userId: 1, referenceId: 109, points: 1}
-];
+public function getUserPreferences() returns db:UserPreference[]|error {
+    db:Client connection = connection:getConnection();
 
-
-function calculateRank(UserPreference userPreference) returns int? {
-
-    foreach var interaction in userInteractions {
-        if (interaction.userId == userPreference.userId && 
-            interaction.referenceId == userPreference.referenceId ) {
-
-
-            int weight = preferenceWeights[userPreference.preferenceType] ?: 0;
-            interaction.points = interaction.points + weight;
-            return interaction.points;
-        }
-    }
+    stream<db:UserPreference, persist:Error?> userPreferenceStream = connection->/userpreferences;
+    db:UserPreference[] userPreferenceList = check from db:UserPreference userPreference in userPreferenceStream
+        select userPreference;
+    check userPreferenceStream.close();
     
-
-    return null;
+    return userPreferenceList;
 }
 
-public function addUserPreference(UserPreference userPreference) returns db:UserPreference|error {
-    // Calculate rank and validate
-    int? updatedPoints = calculateRank(userPreference);
-    if updatedPoints is null {
-        return error("Points calculation failed; cannot insert.");
+
+
+
+function calculateWeight(UserPreference userPreference) returns int {
+    int weight = preferenceWeights[userPreference.preferenceType] ?: 0;
+    return weight;
+}
+
+function calculatePoints(UserPreference userPreference) returns ()|db:UserPreference|error|int {
+
+    db:UserPreference[]|error userPreferencesResult = getUserPreferences();
+
+
+    if userPreferencesResult is error {
+        io:println("Error fetching user preferences: ", userPreferencesResult.message());
+        return null;
     }
 
-    // Log the updated details
-    io:println("User preference updated successfully");
-    io:println("User ID: ", userPreference.userId, 
-               ", Preference Type: ", userPreference.preferenceType, 
-               ", Reference ID: ", userPreference.referenceId, 
-               ", Updated Points: ", updatedPoints);
+    foreach var existingPreference in userPreferencesResult {
+        if existingPreference.userid == userPreference.userid && 
+           existingPreference.referenceid == userPreference.referenceid {
 
+            int existingPoints = existingPreference.points;
+            int additionalPoints = calculateWeight(userPreference);
+            int updatedPoints = existingPoints + additionalPoints;
+
+            io:println("Existing Preference Found. User ID: ", existingPreference.userid, 
+                       ", Reference ID: ", existingPreference.referenceid, 
+                       ", Updated Points: ", updatedPoints);
+            return updatedPoints;
+        }
+    }
+
+    io:println("No matching preference found for User ID: ", userPreference.userid, 
+               ", Reference ID: ", userPreference.referenceid);
+
+    int pointWeight = calculateWeight(userPreference);
+    return createUserPreference(userPreference,pointWeight );
+};
+
+
+public function createUserPreference(UserPreference userPreference,int updatedPoints ) returns db:UserPreference|error {
     db:Client connection = connection:getConnection();
     
     io:println("Database connection established.");
 
     db:UserPreferenceInsert userPreferenceInsert = {
-        userid: userPreference.userId,
-        referenceid: userPreference.referenceId, 
-        points: <int>updatedPoints,
+        userid: userPreference.userid,
+        referenceid: userPreference.referenceid, 
+        points: updatedPoints,
         createdAt: time:utcToCivil(time:utcNow())
     };
     io:println("Insert Record: ", userPreferenceInsert);
@@ -81,5 +94,31 @@ public function addUserPreference(UserPreference userPreference) returns db:User
 
     db:UserPreference userPreferenceN = {...userPreferenceInsert, id: result[0]};
     return userPreferenceN;
+};
+
+
+
+
+public function addUserPreference(UserPreference userPreference) returns string|error {
+    // Calculate rank and validate
+    ()|db:UserPreference|error|int updatedPoints = calculatePoints(userPreference);
+    if updatedPoints is null {
+        return error("Points calculation failed; cannot insert.");
+    }
+
+    
+
+
+
+    // Log the updated details
+    io:println("User preference updated successfully");
+    io:println("User ID: ", userPreference.userid, 
+               ", Preference Type: ", userPreference.preferenceType, 
+               ", Reference ID: ", userPreference.referenceid, 
+               ", Updated Points: ", updatedPoints);
+
+
+    
+    return "done";
 }
 
