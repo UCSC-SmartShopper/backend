@@ -16,6 +16,7 @@ import backend.supermarkets;
 import backend.user;
 import backend.user_registration;
 import backend.utils;
+import backend.distanceCalculation;
 
 import ballerina/http;
 import ballerina/io;
@@ -364,5 +365,11 @@ service / on new http:Listener(9090) {
     resource function get images/[string path]() returns byte[]|error {
         return file_service:getImage(path);
     };
+
+    // ---------------------------------------------- distance cal Files  -----------------------------------------------------------
+    resource function get distanceCalculation(int[] id, string currentLocation) returns map<float>|error? {
+        return distanceCalculation:distanceCalculation(id, currentLocation);
+    };
+
 
 }
