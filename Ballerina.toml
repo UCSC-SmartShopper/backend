@@ -8,11 +8,11 @@ distribution = "2201.9.2"
 [build-options]
 observabilityIncluded = true
 
-[[tool.persist]]
-id = "generate-db-client"
-targetModule = "backend.db"
-options.datastore = "postgresql"
-filePath = "persist/model.bal"
+# [[tool.persist]]
+# id = "generate-db-client"
+# targetModule = "backend.db"
+# options.datastore = "postgresql"
+# filePath = "persist/model.bal"
 
 [[platform.java17.dependency]]
 groupId = "io.ballerina.stdlib"
