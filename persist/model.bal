@@ -259,6 +259,14 @@ type LikedProduct record {|
     int productId;
 |};
 
+type Activity record {|
+    @sql:Generated
+    readonly int id;
+    int userId;
+    string description;
+    time:Civil dateTime;
+|};
+
 type Files record {|
     @sql:Generated
     readonly int id;

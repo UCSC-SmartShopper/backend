@@ -32,10 +32,10 @@ public type NonVerifyUser record {|
 //     string vehicleName;
 //     string vehicleNumber;
 
-//     // Credentials
-//     string password;
-//     string confirmPassword;
-//     string OTP;
+//   // Credentials
+// string password;
+// string confirmPassword;
+// string OTP;
 
 // |};
 
@@ -410,7 +410,7 @@ public function get_all_driver_requests(auth:User user) returns DriverRequestsRe
             vehicleColor: driverRequest.vehicleColor,
             vehicleName: driverRequest.vehicleName,
             vehicleNumber: driverRequest.vehicleNumber,
-            
+
             // Sanitize sensitive data
             OTP: "",
             password: "",

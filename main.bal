@@ -21,6 +21,8 @@ import backend.utils;
 import ballerina/http;
 import ballerina/io;
 import ballerina/persist;
+import backend.file_service;
+import backend.activity;
 
 type productQuery record {|
     int category;
@@ -134,6 +136,21 @@ service / on new http:Listener(9090) {
     resource function get consumers/[int id](http:Request req) returns consumer:Consumer|http:Unauthorized|error {
         auth:User user = check auth:getUser(req);
         return consumer:get_consumer(user, id);
+    }
+
+    // ---------------------------------------------- Consumer Activity Resource Functions --------------------------------------- 
+    resource function get activities(http:Request req) returns activity:ActivityResponse|error? {
+        do {
+            auth:User user = check auth:getUser(req);
+            return activity:getActivities(user);
+        } on fail {
+            return {count: 0, next: false, activities: []};
+        }
+    }
+
+    resource function post activities(http:Request req, @http:Payload record {string description;} payload) returns int|error {
+        auth:User user = check auth:getUser(req);
+        return activity:createActivity(user, payload.description);
     }
 
     // ---------------------------------------------- Products Resource Functions -----------------------------------------------
