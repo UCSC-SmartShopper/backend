@@ -21,7 +21,6 @@ import backend.utils;
 import ballerina/http;
 import ballerina/io;
 import ballerina/persist;
-import backend.file_service;
 import backend.activity;
 
 type productQuery record {|
