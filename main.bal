@@ -4,6 +4,7 @@ import backend.cart;
 import backend.consumer;
 import backend.db;
 import backend.driver;
+import backend.file_service;
 import backend.liked_products;
 import backend.locations;
 import backend.opportunities;
@@ -20,7 +21,7 @@ import backend.utils;
 import ballerina/http;
 import ballerina/io;
 import ballerina/persist;
-import backend.file_service;
+import backend.activity;
 
 type productQuery record {|
     int category;
@@ -75,7 +76,7 @@ service / on new http:Listener(9090) {
     }
 
     // finalizing the driver signup
-    resource function post update_driver_vehicle_details/[int id](@http:Payload user_registration:NonVerifiedDriver driverUpdate) returns db:NonVerifiedDriver|error {
+    resource function post update_driver_vehicle_details/[int id](@http:Payload db:NonVerifiedDriver driverUpdate) returns db:NonVerifiedDriver|error {
         return user_registration:update_driver_signup(driverUpdate, id);
     }
 
@@ -96,17 +97,17 @@ service / on new http:Listener(9090) {
         return user:get_all_user(user);
     }
 
-    resource function get users/[int id](http:Request req) returns db:UserWithRelations|http:Unauthorized|user:UserNotFound|error {
+    resource function get users/[int id](http:Request req) returns db:UserWithRelations|http:Unauthorized|error {
         auth:User user = check auth:getUser(req);
         return user:get_user(user, id);
     }
 
-    resource function patch users/[int id](http:Request req, @http:Payload db:UserUpdate userUpdate) returns db:User|DataNotFound|error {
+    resource function patch users/[int id](http:Request req, @http:Payload db:UserUpdate userUpdate) returns db:User|error {
         auth:User user = check auth:getUser(req);
         return user:update_user(user, userUpdate);
     }
 
-    resource function patch change_password/[int id](http:Request req, @http:Payload user:UpdatePassword updatePassword) returns db:User|DataNotFound|error {
+    resource function patch change_password/[int id](http:Request req, @http:Payload user:UpdatePassword updatePassword) returns db:User|error {
         auth:User user = check auth:getUser(req);
         return user:update_password(user, id, updatePassword);
     }
@@ -136,6 +137,21 @@ service / on new http:Listener(9090) {
         return consumer:get_consumer(user, id);
     }
 
+    // ---------------------------------------------- Consumer Activity Resource Functions --------------------------------------- 
+    resource function get activities(http:Request req) returns activity:ActivityResponse|error? {
+        do {
+            auth:User user = check auth:getUser(req);
+            return activity:getActivities(user);
+        } on fail {
+            return {count: 0, next: false, activities: []};
+        }
+    }
+
+    resource function post activities(http:Request req, @http:Payload record {string description;} payload) returns int|error {
+        auth:User user = check auth:getUser(req);
+        return activity:createActivity(user, payload.description);
+    }
+
     // ---------------------------------------------- Products Resource Functions -----------------------------------------------
     resource function get products(
             string category,
@@ -148,7 +164,7 @@ service / on new http:Listener(9090) {
         return products:getProducts(category, price, ordering, searchText, page, _limit);
     }
 
-    resource function get products/[int id]() returns db:ProductWithRelations|DataNotFound|error? {
+    resource function get products/[int id]() returns db:ProductWithRelations|error? {
         return products:getProductsById(id);
     }
 
@@ -264,7 +280,7 @@ service / on new http:Listener(9090) {
         return orders:getOrdersById(id);
     }
 
-    resource function post cartToOrder(@http:Payload orders:CartToOrderRequest cartToOrderRequest) returns db:OrderWithRelations|persist:Error|error {
+    resource function post cart_to_order(@http:Payload orders:CartToOrderRequest cartToOrderRequest) returns int|persist:Error|error {
         return orders:cartToOrder(cartToOrderRequest);
     }
 
@@ -323,9 +339,12 @@ service / on new http:Listener(9090) {
     }
 
     //-------------------------------------------- Location Resource Functions----------------------------------------------------
-    resource function get locations/consumer_supermarket_distance/[string location](http:Request req) returns float|error {
-        auth:User user = check auth:getUser(req);
-        return locations:get_consumer_supermarket_distance(user, location);
+    resource function post locations/consumer_supermarket_distance(@http:Payload record {string location1; string location2;} payload) returns float|error {
+        return locations:get_consumer_supermarket_distance(payload.location1, payload.location2);
+    }
+
+    resource function post locations/delivery_cost(@http:Payload record {string[] supermarketLocations; string deliveryLocation;} payload) returns float|error {
+        return locations:get_delivery_cost(payload.supermarketLocations, payload.deliveryLocation);
     }
 
     //-------------------------------------------- Heartbeat Resource Functions----------------------------------------------------

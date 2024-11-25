@@ -7,7 +7,7 @@ import ballerina/time;
 
 // --------------------------- Image Files ---------------------------
 
-public function saveFile(byte[] image, string fileType) returns string|error {
+public function saveFile(byte[] image, string fileType, string file_code) returns string|error {
 
     string fileName = "/images/" + time:utcNow()[0].toBalString();
 
@@ -27,12 +27,30 @@ public function saveFile(byte[] image, string fileType) returns string|error {
 
     db:FilesInsert filesInsert = {
         name: fileName,
-        data: image
+        data: image,
+        file_code: file_code
     };
 
-    int[]|persist:Error insertedFile = connection->/files.post([filesInsert]);
-    if (insertedFile is persist:Error) {
-        return insertedFile;
+    // Check if the file already exists
+    stream<db:Files, persist:Error?> streamResult = connection->/files.get(whereClause = ` "file_code" = ${file_code} `);
+    db:Files[] files = check from db:Files file in streamResult
+        select file;
+
+    if (files.length() > 0) {
+        // Update the existing file
+        db:Files|persist:Error updatedFile = connection->/files/[files[0].id].put(filesInsert);
+
+        if (updatedFile is persist:Error) {
+            return updatedFile;
+        }
+
+    } else {
+        // Insert the new file
+        int[]|persist:Error insertedFile = connection->/files.post([filesInsert]);
+
+        if (insertedFile is persist:Error) {
+            return insertedFile;
+        }
     }
 
     return fileName;

@@ -35,6 +35,13 @@ type NonVerifyUser record {|
     string password;
 |};
 
+enum NonVerifiedDriverStatus {
+    OTPPending,
+    OTPVerified,
+    Accepted,
+    Declined
+};
+
 type NonVerifiedDriver record {|
     @sql:Generated
     readonly int id;
@@ -42,14 +49,21 @@ type NonVerifiedDriver record {|
     string nic;
     string email;
     string contactNo;
-    string OTP;
+    string profilePic;
+
+    // Vehicle details
     string courierCompany;
     string vehicleType;
     string vehicleColor;
     string vehicleName;
     string vehicleNumber;
+
+    // Credentials
+    string OTP;
     string password;
-    string status;
+    NonVerifiedDriverStatus? status;
+
+    time:Civil createdAt;
 |};
 
 type Address record {|
@@ -124,11 +138,9 @@ type OrderItems record {|
 
 enum OrderStatus {
     ToPay,
-    Placed,
-    Prepared,
     Processing,
-    Ready,
-    Delivered,
+    Prepared,
+    Completed,
     Cancelled
 };
 
@@ -136,18 +148,23 @@ type Order record {|
     @sql:Generated
     readonly int id;
     int consumerId;
-    OrderStatus status;
-    string shippingAddress;
+
     string shippingMethod;
-    string location;
+    string shippingAddress;
+    string shippingLocation;
+    
     OrderItems[] orderItems;
 
+    float subTotal;
     float deliveryFee;
+    float totalCost;
 
     time:Civil orderPlacedOn;
 
     SupermarketOrder[] supermarketOrders;
     Opportunity[] opportunity;
+
+    OrderStatus status;
 |};
 
 type SupermarketOrder record {|
@@ -181,6 +198,8 @@ type Opportunity record {|
     string deliveryLocation;
     OpportunitySupermarket[] opportunitysupermarket;
     string status;
+
+    byte[] waypoints; // strore the supermarket ids and locations
 
     Order _order;
     int driverId;
@@ -240,11 +259,23 @@ type LikedProduct record {|
     int productId;
 |};
 
+type Activity record {|
+    @sql:Generated
+    readonly int id;
+    int userId;
+    string description;
+    time:Civil dateTime;
+|};
 
 type Files record {|
     @sql:Generated
     readonly int id;
-    
+
     string name;
     byte[] data;
+
+    // User can't have multiple files for same purpose
+    // Ex: profile pic, NIC, etc
+    @sql:UniqueIndex {name: "file_unique_index"}
+    string file_code;
 |};

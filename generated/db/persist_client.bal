@@ -28,6 +28,7 @@ const ADVERTISEMENT = "advertisements";
 const DRIVER = "drivers";
 const REVIEW = "reviews";
 const LIKED_PRODUCT = "likedproducts";
+const ACTIVITY = "activities";
 const FILES = "files";
 
 public isolated client class Client {
@@ -111,14 +112,16 @@ public isolated client class Client {
                 nic: {columnName: "nic"},
                 email: {columnName: "email"},
                 contactNo: {columnName: "contactNo"},
-                OTP: {columnName: "OTP"},
+                profilePic: {columnName: "profilePic"},
                 courierCompany: {columnName: "courierCompany"},
                 vehicleType: {columnName: "vehicleType"},
                 vehicleColor: {columnName: "vehicleColor"},
                 vehicleName: {columnName: "vehicleName"},
                 vehicleNumber: {columnName: "vehicleNumber"},
+                OTP: {columnName: "OTP"},
                 password: {columnName: "password"},
-                status: {columnName: "status"}
+                status: {columnName: "status"},
+                createdAt: {columnName: "createdAt"}
             },
             keyFields: ["id"]
         },
@@ -274,12 +277,14 @@ public isolated client class Client {
                 _orderId: {columnName: "_orderId"},
                 "_order.id": {relation: {entityName: "_order", refField: "id"}},
                 "_order.consumerId": {relation: {entityName: "_order", refField: "consumerId"}},
-                "_order.status": {relation: {entityName: "_order", refField: "status"}},
-                "_order.shippingAddress": {relation: {entityName: "_order", refField: "shippingAddress"}},
                 "_order.shippingMethod": {relation: {entityName: "_order", refField: "shippingMethod"}},
-                "_order.location": {relation: {entityName: "_order", refField: "location"}},
+                "_order.shippingAddress": {relation: {entityName: "_order", refField: "shippingAddress"}},
+                "_order.shippingLocation": {relation: {entityName: "_order", refField: "shippingLocation"}},
+                "_order.subTotal": {relation: {entityName: "_order", refField: "subTotal"}},
                 "_order.deliveryFee": {relation: {entityName: "_order", refField: "deliveryFee"}},
-                "_order.orderPlacedOn": {relation: {entityName: "_order", refField: "orderPlacedOn"}}
+                "_order.totalCost": {relation: {entityName: "_order", refField: "totalCost"}},
+                "_order.orderPlacedOn": {relation: {entityName: "_order", refField: "orderPlacedOn"}},
+                "_order.status": {relation: {entityName: "_order", refField: "status"}}
             },
             keyFields: ["id"],
             joinMetadata: {_order: {entity: Order, fieldName: "_order", refTable: "Order", refColumns: ["id"], joinColumns: ["_orderId"], 'type: psql:ONE_TO_MANY}}
@@ -290,12 +295,14 @@ public isolated client class Client {
             fieldMetadata: {
                 id: {columnName: "id", dbGenerated: true},
                 consumerId: {columnName: "consumerId"},
-                status: {columnName: "status"},
-                shippingAddress: {columnName: "shippingAddress"},
                 shippingMethod: {columnName: "shippingMethod"},
-                location: {columnName: "location"},
+                shippingAddress: {columnName: "shippingAddress"},
+                shippingLocation: {columnName: "shippingLocation"},
+                subTotal: {columnName: "subTotal"},
                 deliveryFee: {columnName: "deliveryFee"},
+                totalCost: {columnName: "totalCost"},
                 orderPlacedOn: {columnName: "orderPlacedOn"},
+                status: {columnName: "status"},
                 "orderItems[].id": {relation: {entityName: "orderItems", refField: "id"}},
                 "orderItems[].supermarketId": {relation: {entityName: "orderItems", refField: "supermarketId"}},
                 "orderItems[].productId": {relation: {entityName: "orderItems", refField: "productId"}},
@@ -315,6 +322,7 @@ public isolated client class Client {
                 "opportunity[].startLocation": {relation: {entityName: "opportunity", refField: "startLocation"}},
                 "opportunity[].deliveryLocation": {relation: {entityName: "opportunity", refField: "deliveryLocation"}},
                 "opportunity[].status": {relation: {entityName: "opportunity", refField: "status"}},
+                "opportunity[].waypoints": {relation: {entityName: "opportunity", refField: "waypoints"}},
                 "opportunity[]._orderId": {relation: {entityName: "opportunity", refField: "_orderId"}},
                 "opportunity[].driverId": {relation: {entityName: "opportunity", refField: "driverId"}},
                 "opportunity[].orderPlacedOn": {relation: {entityName: "opportunity", refField: "orderPlacedOn"}}
@@ -337,12 +345,14 @@ public isolated client class Client {
                 supermarketId: {columnName: "supermarketId"},
                 "_order.id": {relation: {entityName: "_order", refField: "id"}},
                 "_order.consumerId": {relation: {entityName: "_order", refField: "consumerId"}},
-                "_order.status": {relation: {entityName: "_order", refField: "status"}},
-                "_order.shippingAddress": {relation: {entityName: "_order", refField: "shippingAddress"}},
                 "_order.shippingMethod": {relation: {entityName: "_order", refField: "shippingMethod"}},
-                "_order.location": {relation: {entityName: "_order", refField: "location"}},
+                "_order.shippingAddress": {relation: {entityName: "_order", refField: "shippingAddress"}},
+                "_order.shippingLocation": {relation: {entityName: "_order", refField: "shippingLocation"}},
+                "_order.subTotal": {relation: {entityName: "_order", refField: "subTotal"}},
                 "_order.deliveryFee": {relation: {entityName: "_order", refField: "deliveryFee"}},
+                "_order.totalCost": {relation: {entityName: "_order", refField: "totalCost"}},
                 "_order.orderPlacedOn": {relation: {entityName: "_order", refField: "orderPlacedOn"}},
+                "_order.status": {relation: {entityName: "_order", refField: "status"}},
                 "supermarket.id": {relation: {entityName: "supermarket", refField: "id"}},
                 "supermarket.name": {relation: {entityName: "supermarket", refField: "name"}},
                 "supermarket.contactNo": {relation: {entityName: "supermarket", refField: "contactNo"}},
@@ -381,6 +391,7 @@ public isolated client class Client {
                 "opportunity.startLocation": {relation: {entityName: "opportunity", refField: "startLocation"}},
                 "opportunity.deliveryLocation": {relation: {entityName: "opportunity", refField: "deliveryLocation"}},
                 "opportunity.status": {relation: {entityName: "opportunity", refField: "status"}},
+                "opportunity.waypoints": {relation: {entityName: "opportunity", refField: "waypoints"}},
                 "opportunity._orderId": {relation: {entityName: "opportunity", refField: "_orderId"}},
                 "opportunity.driverId": {relation: {entityName: "opportunity", refField: "driverId"}},
                 "opportunity.orderPlacedOn": {relation: {entityName: "opportunity", refField: "orderPlacedOn"}}
@@ -403,6 +414,7 @@ public isolated client class Client {
                 startLocation: {columnName: "startLocation"},
                 deliveryLocation: {columnName: "deliveryLocation"},
                 status: {columnName: "status"},
+                waypoints: {columnName: "waypoints"},
                 _orderId: {columnName: "_orderId"},
                 driverId: {columnName: "driverId"},
                 orderPlacedOn: {columnName: "orderPlacedOn"},
@@ -413,12 +425,14 @@ public isolated client class Client {
                 "opportunitysupermarket[].opportunityId": {relation: {entityName: "opportunitysupermarket", refField: "opportunityId"}},
                 "_order.id": {relation: {entityName: "_order", refField: "id"}},
                 "_order.consumerId": {relation: {entityName: "_order", refField: "consumerId"}},
-                "_order.status": {relation: {entityName: "_order", refField: "status"}},
-                "_order.shippingAddress": {relation: {entityName: "_order", refField: "shippingAddress"}},
                 "_order.shippingMethod": {relation: {entityName: "_order", refField: "shippingMethod"}},
-                "_order.location": {relation: {entityName: "_order", refField: "location"}},
+                "_order.shippingAddress": {relation: {entityName: "_order", refField: "shippingAddress"}},
+                "_order.shippingLocation": {relation: {entityName: "_order", refField: "shippingLocation"}},
+                "_order.subTotal": {relation: {entityName: "_order", refField: "subTotal"}},
                 "_order.deliveryFee": {relation: {entityName: "_order", refField: "deliveryFee"}},
-                "_order.orderPlacedOn": {relation: {entityName: "_order", refField: "orderPlacedOn"}}
+                "_order.totalCost": {relation: {entityName: "_order", refField: "totalCost"}},
+                "_order.orderPlacedOn": {relation: {entityName: "_order", refField: "orderPlacedOn"}},
+                "_order.status": {relation: {entityName: "_order", refField: "status"}}
             },
             keyFields: ["id"],
             joinMetadata: {
@@ -460,6 +474,7 @@ public isolated client class Client {
                 "opportunity[].startLocation": {relation: {entityName: "opportunity", refField: "startLocation"}},
                 "opportunity[].deliveryLocation": {relation: {entityName: "opportunity", refField: "deliveryLocation"}},
                 "opportunity[].status": {relation: {entityName: "opportunity", refField: "status"}},
+                "opportunity[].waypoints": {relation: {entityName: "opportunity", refField: "waypoints"}},
                 "opportunity[]._orderId": {relation: {entityName: "opportunity", refField: "_orderId"}},
                 "opportunity[].driverId": {relation: {entityName: "opportunity", refField: "driverId"}},
                 "opportunity[].orderPlacedOn": {relation: {entityName: "opportunity", refField: "orderPlacedOn"}}
@@ -550,13 +565,25 @@ public isolated client class Client {
             },
             keyFields: ["id"]
         },
+        [ACTIVITY]: {
+            entityName: "Activity",
+            tableName: "Activity",
+            fieldMetadata: {
+                id: {columnName: "id", dbGenerated: true},
+                userId: {columnName: "userId"},
+                description: {columnName: "description"},
+                dateTime: {columnName: "dateTime"}
+            },
+            keyFields: ["id"]
+        },
         [FILES]: {
             entityName: "Files",
             tableName: "Files",
             fieldMetadata: {
                 id: {columnName: "id", dbGenerated: true},
                 name: {columnName: "name"},
-                data: {columnName: "data"}
+                data: {columnName: "data"},
+                file_code: {columnName: "file_code"}
             },
             keyFields: ["id"]
         }
@@ -587,6 +614,7 @@ public isolated client class Client {
             [DRIVER]: check new (dbClient, self.metadata.get(DRIVER), psql:POSTGRESQL_SPECIFICS),
             [REVIEW]: check new (dbClient, self.metadata.get(REVIEW), psql:POSTGRESQL_SPECIFICS),
             [LIKED_PRODUCT]: check new (dbClient, self.metadata.get(LIKED_PRODUCT), psql:POSTGRESQL_SPECIFICS),
+            [ACTIVITY]: check new (dbClient, self.metadata.get(ACTIVITY), psql:POSTGRESQL_SPECIFICS),
             [FILES]: check new (dbClient, self.metadata.get(FILES), psql:POSTGRESQL_SPECIFICS)
         };
     }
@@ -1306,6 +1334,46 @@ public isolated client class Client {
         psql:SQLClient sqlClient;
         lock {
             sqlClient = self.persistClients.get(LIKED_PRODUCT);
+        }
+        _ = check sqlClient.runDeleteQuery(id);
+        return result;
+    }
+
+    isolated resource function get activities(ActivityTargetType targetType = <>, sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``) returns stream<targetType, persist:Error?> = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.PostgreSQLProcessor",
+        name: "query"
+    } external;
+
+    isolated resource function get activities/[int id](ActivityTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.PostgreSQLProcessor",
+        name: "queryOne"
+    } external;
+
+    isolated resource function post activities(ActivityInsert[] data) returns int[]|persist:Error {
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(ACTIVITY);
+        }
+        sql:ExecutionResult[] result = check sqlClient.runBatchInsertQuery(data);
+        return from sql:ExecutionResult inserted in result
+            where inserted.lastInsertId != ()
+            select <int>inserted.lastInsertId;
+    }
+
+    isolated resource function put activities/[int id](ActivityUpdate value) returns Activity|persist:Error {
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(ACTIVITY);
+        }
+        _ = check sqlClient.runUpdateQuery(id, value);
+        return self->/activities/[id].get();
+    }
+
+    isolated resource function delete activities/[int id]() returns Activity|persist:Error {
+        Activity result = check self->/activities/[id].get();
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(ACTIVITY);
         }
         _ = check sqlClient.runDeleteQuery(id);
         return result;
