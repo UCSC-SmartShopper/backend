@@ -6,8 +6,8 @@ configurable string authToken = ?;
 
 twilio:ConnectionConfig twilioConfig = {
     auth: {
-        authToken: authToken,
-        accountSid: accountSid
+        password: authToken,
+        username: accountSid
     }
 };
 
