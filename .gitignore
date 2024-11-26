@@ -4,7 +4,7 @@
 
 # Ballerina maintains the compiler-generated source code here.
 # Remove this if you want to commit generated sources.
-# generated/*
+generated/*
 # !generated/db
 # generated/db/*
 # !generated/db/persist_db_config.bal
