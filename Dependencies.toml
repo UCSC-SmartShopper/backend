@@ -5,7 +5,7 @@
 
 [ballerina]
 dependencies-toml-version = "2"
-distribution-version = "2201.10.2"
+distribution-version = "2201.10.3"
 
 [[package]]
 org = "ballerina"
@@ -407,7 +407,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "twilio"
-version = "4.0.1"
+version = "5.0.0"
 dependencies = [
 	{org = "ballerina", name = "constraint"},
 	{org = "ballerina", name = "http"},

@@ -138,11 +138,9 @@ type OrderItems record {|
 
 enum OrderStatus {
     ToPay,
-    Placed,
-    Prepared,
     Processing,
-    Ready,
-    Delivered,
+    Prepared,
+    Completed,
     Cancelled
 };
 
@@ -150,18 +148,23 @@ type Order record {|
     @sql:Generated
     readonly int id;
     int consumerId;
-    OrderStatus status;
-    string shippingAddress;
+
     string shippingMethod;
-    string location;
+    string shippingAddress;
+    string shippingLocation;
+    
     OrderItems[] orderItems;
 
+    float subTotal;
     float deliveryFee;
+    float totalCost;
 
     time:Civil orderPlacedOn;
 
     SupermarketOrder[] supermarketOrders;
     Opportunity[] opportunity;
+
+    OrderStatus status;
 |};
 
 type SupermarketOrder record {|
@@ -195,6 +198,8 @@ type Opportunity record {|
     string deliveryLocation;
     OpportunitySupermarket[] opportunitysupermarket;
     string status;
+
+    byte[] waypoints; // strore the supermarket ids and locations
 
     Order _order;
     int driverId;
