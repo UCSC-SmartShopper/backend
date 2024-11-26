@@ -1,15 +1,9 @@
 import backend.connection;
 import backend.db;
-import backend.errors;
 
-import ballerina/http;
 import ballerina/persist;
 import ballerina/regex;
 
-public type SuperMarketNotFound record {|
-    *http:NotFound;
-    errors:ErrorDetails body;
-|};
 
 public function distanceCalculation(int[] id, string currentLocation) returns map<float>|error? {
     map<float> distanceMap = {};
