@@ -279,3 +279,13 @@ type Files record {|
     @sql:UniqueIndex {name: "file_unique_index"}
     string file_code;
 |};
+
+type UserPreference record {|
+    @sql:Generated
+    readonly int id;
+    int userid;
+    int points;
+    int referenceid;
+    time:Civil createdAt;
+
+|};
