@@ -30,6 +30,7 @@ const REVIEW = "reviews";
 const LIKED_PRODUCT = "likedproducts";
 const ACTIVITY = "activities";
 const FILES = "files";
+const USER_PREFERENCE = "userpreferences";
 
 public isolated client class Client {
     *persist:AbstractPersistClient;
@@ -586,6 +587,18 @@ public isolated client class Client {
                 file_code: {columnName: "file_code"}
             },
             keyFields: ["id"]
+        },
+        [USER_PREFERENCE]: {
+            entityName: "UserPreference",
+            tableName: "UserPreference",
+            fieldMetadata: {
+                id: {columnName: "id", dbGenerated: true},
+                userid: {columnName: "userid"},
+                points: {columnName: "points"},
+                referenceid: {columnName: "referenceid"},
+                createdAt: {columnName: "createdAt"}
+            },
+            keyFields: ["id"]
         }
     };
 
@@ -614,8 +627,10 @@ public isolated client class Client {
             [DRIVER]: check new (dbClient, self.metadata.get(DRIVER), psql:POSTGRESQL_SPECIFICS),
             [REVIEW]: check new (dbClient, self.metadata.get(REVIEW), psql:POSTGRESQL_SPECIFICS),
             [LIKED_PRODUCT]: check new (dbClient, self.metadata.get(LIKED_PRODUCT), psql:POSTGRESQL_SPECIFICS),
+            [USER_PREFERENCE]: check new (dbClient, self.metadata.get(USER_PREFERENCE), psql:POSTGRESQL_SPECIFICS),
             [ACTIVITY]: check new (dbClient, self.metadata.get(ACTIVITY), psql:POSTGRESQL_SPECIFICS),
             [FILES]: check new (dbClient, self.metadata.get(FILES), psql:POSTGRESQL_SPECIFICS)
+
         };
     }
 
@@ -1414,6 +1429,46 @@ public isolated client class Client {
         psql:SQLClient sqlClient;
         lock {
             sqlClient = self.persistClients.get(FILES);
+        }
+        _ = check sqlClient.runDeleteQuery(id);
+        return result;
+    }
+
+    isolated resource function get userpreferences(UserPreferenceTargetType targetType = <>, sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``) returns stream<targetType, persist:Error?> = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.PostgreSQLProcessor",
+        name: "query"
+    } external;
+
+    isolated resource function get userpreferences/[int id](UserPreferenceTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
+        'class: "io.ballerina.stdlib.persist.sql.datastore.PostgreSQLProcessor",
+        name: "queryOne"
+    } external;
+
+    isolated resource function post userpreferences(UserPreferenceInsert[] data) returns int[]|persist:Error {
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(USER_PREFERENCE);
+        }
+        sql:ExecutionResult[] result = check sqlClient.runBatchInsertQuery(data);
+        return from sql:ExecutionResult inserted in result
+            where inserted.lastInsertId != ()
+            select <int>inserted.lastInsertId;
+    }
+
+    isolated resource function put userpreferences/[int id](UserPreferenceUpdate value) returns UserPreference|persist:Error {
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(USER_PREFERENCE);
+        }
+        _ = check sqlClient.runUpdateQuery(id, value);
+        return self->/userpreferences/[id].get();
+    }
+
+    isolated resource function delete userpreferences/[int id]() returns UserPreference|persist:Error {
+        UserPreference result = check self->/userpreferences/[id].get();
+        psql:SQLClient sqlClient;
+        lock {
+            sqlClient = self.persistClients.get(USER_PREFERENCE);
         }
         _ = check sqlClient.runDeleteQuery(id);
         return result;
