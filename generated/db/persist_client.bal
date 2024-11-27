@@ -627,10 +627,9 @@ public isolated client class Client {
             [DRIVER]: check new (dbClient, self.metadata.get(DRIVER), psql:POSTGRESQL_SPECIFICS),
             [REVIEW]: check new (dbClient, self.metadata.get(REVIEW), psql:POSTGRESQL_SPECIFICS),
             [LIKED_PRODUCT]: check new (dbClient, self.metadata.get(LIKED_PRODUCT), psql:POSTGRESQL_SPECIFICS),
-            [USER_PREFERENCE]: check new (dbClient, self.metadata.get(USER_PREFERENCE), psql:POSTGRESQL_SPECIFICS),
             [ACTIVITY]: check new (dbClient, self.metadata.get(ACTIVITY), psql:POSTGRESQL_SPECIFICS),
-            [FILES]: check new (dbClient, self.metadata.get(FILES), psql:POSTGRESQL_SPECIFICS)
-
+            [FILES]: check new (dbClient, self.metadata.get(FILES), psql:POSTGRESQL_SPECIFICS),
+            [USER_PREFERENCE]: check new (dbClient, self.metadata.get(USER_PREFERENCE), psql:POSTGRESQL_SPECIFICS)
         };
     }
 

@@ -10,6 +10,8 @@ import ballerina/persist;
 import ballerina/random;
 import ballerina/time;
 import ballerinax/twilio;
+import backend.utils;
+import backend.file_service;
 
 public type NonVerifyUser record {|
     readonly int id;
@@ -302,7 +304,7 @@ public function match_driver_otp(DriverOtp driverOtp) returns db:NonVerifiedDriv
     return updatedDriver;
 }
 
-public function update_driver_signup(db:NonVerifiedDriver driverUpdate, int id) returns db:NonVerifiedDriver|error {
+public function update_driver_signup(db:NonVerifiedDriverOptionalized driverUpdate, int id) returns db:NonVerifiedDriver|error {
 
     db:Client connection = connection:getConnection();
 
@@ -419,4 +421,31 @@ public function get_all_driver_requests(auth:User user) returns DriverRequestsRe
         };
 
     return {count: driverRequestList.length(), next: "null", results: driverRequestList};
+}
+
+public function update_driver_profile_picture( http:Request req, int id) returns string|error {
+
+    // Admin can update any user's profile picture
+    // Other users can only update their own profile picture
+    int userId = id;
+    string imagePath = "";
+
+    utils:FormData[] formData = check utils:decodedFormData(req);
+    foreach utils:FormData data in formData {
+        if (data.name == "profilePicture") {
+
+            // used to save the file with a unique name
+            string file_code = "profile_pic_" + userId.toBalString();
+            imagePath = check file_service:saveFile(<byte[]>data.value, data.contentType, file_code);
+        }
+
+    }
+
+    db:Client connection = connection:getConnection();
+    db:NonVerifiedDriver|persist:Error dbUser = connection->/nonverifieddrivers/[userId].put({profilePic: imagePath});
+    if dbUser is persist:Error {
+        return error("Failed to update the profile picture");
+    }
+
+    return "Profile picture updated successfully";
 }

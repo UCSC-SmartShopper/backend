@@ -385,7 +385,6 @@ modules = [
 org = "ballerinax"
 name = "postgresql"
 version = "1.13.2"
-
 dependencies = [
 	{org = "ballerina", name = "crypto"},
 	{org = "ballerina", name = "io"},
@@ -465,7 +464,6 @@ modules = [
 	{org = "djaya", packageName = "backend", moduleName = "backend.locations"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.opportunities"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.optimizer"},
-	{org = "djaya", packageName = "backend", moduleName = "backend.order"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.orders"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.products"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.reviews"},
