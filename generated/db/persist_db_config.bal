@@ -27,4 +27,3 @@ configurable postgresql:Options & readonly connectionOptions = {
     loginTimeout: loginTimeout
 
 };
-
