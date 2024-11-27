@@ -4,6 +4,7 @@ import backend.cart;
 import backend.consumer;
 import backend.db;
 import backend.driver;
+import backend.file_service;
 import backend.liked_products;
 import backend.locations;
 import backend.opportunities;
@@ -20,7 +21,6 @@ import backend.utils;
 import ballerina/http;
 import ballerina/io;
 import ballerina/persist;
-import backend.file_service;
 import backend.activity;
 
 type productQuery record {|
@@ -280,7 +280,7 @@ service / on new http:Listener(9090) {
         return orders:getOrdersById(id);
     }
 
-    resource function post cartToOrder(@http:Payload orders:CartToOrderRequest cartToOrderRequest) returns db:OrderWithRelations|persist:Error|error {
+    resource function post cart_to_order(@http:Payload orders:CartToOrderRequest cartToOrderRequest) returns int|persist:Error|error {
         return orders:cartToOrder(cartToOrderRequest);
     }
 
@@ -339,9 +339,12 @@ service / on new http:Listener(9090) {
     }
 
     //-------------------------------------------- Location Resource Functions----------------------------------------------------
-    resource function get locations/consumer_supermarket_distance/[string location](http:Request req) returns float|error {
-        auth:User user = check auth:getUser(req);
-        return locations:get_consumer_supermarket_distance(user, location);
+    resource function post locations/consumer_supermarket_distance(@http:Payload record {string location1; string location2;} payload) returns float|error {
+        return locations:get_consumer_supermarket_distance(payload.location1, payload.location2);
+    }
+
+    resource function post locations/delivery_cost(@http:Payload record {string[] supermarketLocations; string deliveryLocation;} payload) returns float|error {
+        return locations:get_delivery_cost(payload.supermarketLocations, payload.deliveryLocation);
     }
 
     //-------------------------------------------- Heartbeat Resource Functions----------------------------------------------------

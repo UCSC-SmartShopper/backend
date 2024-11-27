@@ -115,12 +115,14 @@ CREATE TABLE "User" (
 CREATE TABLE "Order" (
 	"id"  SERIAL,
 	"consumerId" INT NOT NULL,
-	"status" VARCHAR(10) CHECK ("status" IN ('ToPay', 'Placed', 'Prepared', 'Processing', 'Ready', 'Delivered', 'Cancelled')) NOT NULL,
-	"shippingAddress" VARCHAR(191) NOT NULL,
 	"shippingMethod" VARCHAR(191) NOT NULL,
-	"location" VARCHAR(191) NOT NULL,
+	"shippingAddress" VARCHAR(191) NOT NULL,
+	"shippingLocation" VARCHAR(191) NOT NULL,
+	"subTotal" FLOAT NOT NULL,
 	"deliveryFee" FLOAT NOT NULL,
+	"totalCost" FLOAT NOT NULL,
 	"orderPlacedOn" TIMESTAMP NOT NULL,
+	"status" VARCHAR(10) CHECK ("status" IN ('ToPay', 'Processing', 'Prepared', 'Completed', 'Cancelled')) NOT NULL,
 	PRIMARY KEY("id")
 );
 
@@ -211,6 +213,7 @@ CREATE TABLE "Opportunity" (
 	"startLocation" VARCHAR(191) NOT NULL,
 	"deliveryLocation" VARCHAR(191) NOT NULL,
 	"status" VARCHAR(191) NOT NULL,
+	"waypoints" BYTEA NOT NULL,
 	"driverId" INT NOT NULL,
 	"orderPlacedOn" TIMESTAMP NOT NULL,
 	"consumerId" INT NOT NULL,
