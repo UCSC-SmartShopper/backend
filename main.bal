@@ -343,18 +343,25 @@ service / on new http:Listener(9090) {
 
 
     // ---------------------------------------------- Optimizing Algorithm  -----------------------------------------------------------
-    resource function get optimizer() returns optimizer:Item[] {
-    // Hardcoded list of items
-    io:println("Optimizer service called");
-    optimizer:Item[] items = [
-        {id: 1, name: "item1", price: 100.0, rating: 4, distance: 10.0, score: 0.0},
-        {id: 2, name: "item2", price: 150.0, rating: 5, distance: 15.0, score: 0.0},
-        {id: 3, name: "item3", price: 120.0, rating: 3, distance: 12.0, score: 0.0},
-        {id: 4, name: "item4", price: 200.0, rating: 4, distance: 8.0, score: 0.0}
-    ];
+//     resource function get optimizer() returns optimizer:Item[] {
+//     // Hardcoded list of items
+//     io:println("Optimizer service called");
+//     optimizer:Item[] items = [
+//         {id: 1, name: "item1", price: 100.0, rating: 4, distance: 10.0, score: 0.0 , userPreference: 0.0},
+//         {id: 2, name: "item2", price: 150.0, rating: 5, distance: 15.0, score: 0.0, userPreference: 0.0},
+//         {id: 3, name: "item3", price: 120.0, rating: 3, distance: 12.0, score: 0.0, userPreference: 0.0},
+//         {id: 4, name: "item4", price: 200.0, rating: 4, distance: 8.0, score: 0.0, userPreference: 0.0}
+//     ];
     
-    return optimizer:rateItems(items);
-}
+//     return optimizer:rateItems(items);
+// }
+
+resource function get optimizer(@http:Query int userId, @http:Query string location) returns json|error|optimizer:ScoredItem[] {
+
+        return optimizer:OptimizeCart(userId,location);
+    }
+
+
 
 
     resource function post userpreference/add(@http:Payload user_preference:UserPreference userPreference) returns db:UserPreference|string|error {
