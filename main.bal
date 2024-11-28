@@ -1,3 +1,4 @@
+import backend.activity;
 import backend.advertisements;
 import backend.auth;
 import backend.cart;
@@ -8,6 +9,7 @@ import backend.file_service;
 import backend.liked_products;
 import backend.locations;
 import backend.opportunities;
+import backend.optimizer;
 import backend.orders;
 import backend.products;
 import backend.reviews;
@@ -15,15 +17,13 @@ import backend.stats;
 import backend.supermarket_items;
 import backend.supermarkets;
 import backend.user;
+import backend.user_preference;
 import backend.user_registration;
 import backend.utils;
-import backend.optimizer;
-import backend.user_preference;
 
 import ballerina/http;
 import ballerina/io;
 import ballerina/persist;
-import backend.activity;
 
 type productQuery record {|
     int category;
@@ -78,7 +78,7 @@ service / on new http:Listener(9090) {
     }
 
     // finalizing the driver signup
-    resource function post update_driver_vehicle_details/[int id](@http:Payload db:NonVerifiedDriver driverUpdate) returns db:NonVerifiedDriver|error {
+    resource function post update_driver_vehicle_details/[int id](@http:Payload db:NonVerifiedDriverOptionalized driverUpdate) returns db:NonVerifiedDriver|error {
         return user_registration:update_driver_signup(driverUpdate, id);
     }
 
@@ -127,6 +127,10 @@ service / on new http:Listener(9090) {
     resource function get drivers/[int id](http:Request req) returns db:DriverWithRelations|http:Unauthorized|error {
         auth:User user = check auth:getUser(req);
         return driver:get_driver(user, id);
+    }
+
+    resource function patch update_driver_profile_picture/[int id](http:Request req) returns string|error {
+        return user_registration:update_driver_profile_picture(req, id);
     }
 
     // ---------------------------------------------- Consumer Resource Functions -----------------------------------------------
@@ -360,7 +364,6 @@ service / on new http:Listener(9090) {
         return file_service:getImage(path);
     };
 
-
     // ---------------------------------------------- Optimizing Algorithm  -----------------------------------------------------------
 //     resource function get optimizer() returns optimizer:Item[] {
 //     // Hardcoded list of items
@@ -384,10 +387,7 @@ resource function get optimizer(@http:Query int userId, @http:Query string locat
 
 
     resource function post userpreference/add(@http:Payload user_preference:UserPreference userPreference) returns db:UserPreference|string|error {
-    return user_preference:calculatePoints(userPreference);
-}
-
-
-    
+        return user_preference:calculatePoints(userPreference);
+    }
 
 }
