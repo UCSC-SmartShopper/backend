@@ -107,11 +107,9 @@ public isolated function sendHeartbeat() {
         } on fail {
             io:println("Failed to send heartbeat");
         }
-        runtime:sleep(30);
+        runtime:sleep(15);
     }
 }
-
-
 
 // --------------------------- Form Data Decoder  ---------------------------
 public function decodedFormData(http:Request req) returns FormData[]|error {

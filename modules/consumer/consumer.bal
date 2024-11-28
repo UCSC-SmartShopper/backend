@@ -13,7 +13,6 @@ public type ConsumerResponse record {|
     Consumer[] results;
 |};
 
-// created a new type Consumer to remove the password field from the User type
 public type Consumer record {|
     *db:ConsumerOptionalized;
     user:User user;

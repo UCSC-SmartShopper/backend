@@ -6,11 +6,10 @@ configurable string authToken = ?;
 
 twilio:ConnectionConfig twilioConfig = {
     auth: {
-        username: accountSid,
-        password: authToken
+        authToken: authToken,
+        accountSid: accountSid
     }
 };
-
 
 twilio:Client twilio = check new (twilioConfig);
 
@@ -21,7 +20,7 @@ public function sendsms() returns error? {
         Body: "visit milindashehan.me"
     };
 
-     twilio:Message response = check twilio->createMessage(messageRequest);
+    twilio:Message response = check twilio->createMessage(messageRequest);
 
     // Print the status of the message from the response
     io:println("Message Status: ", response);

@@ -14,11 +14,9 @@ public enum NonVerifiedDriverStatus {
 
 public enum OrderStatus {
     ToPay,
-    Placed,
-    Prepared,
     Processing,
-    Ready,
-    Delivered,
+    Prepared,
+    Completed,
     Cancelled
 }
 
@@ -464,25 +462,29 @@ public type OrderItemsUpdate record {|
 public type Order record {|
     readonly int id;
     int consumerId;
-    OrderStatus status;
-    string shippingAddress;
     string shippingMethod;
-    string location;
+    string shippingAddress;
+    string shippingLocation;
 
+    float subTotal;
     float deliveryFee;
+    float totalCost;
     time:Civil orderPlacedOn;
 
+    OrderStatus status;
 |};
 
 public type OrderOptionalized record {|
     int id?;
     int consumerId?;
-    OrderStatus status?;
-    string shippingAddress?;
     string shippingMethod?;
-    string location?;
+    string shippingAddress?;
+    string shippingLocation?;
+    float subTotal?;
     float deliveryFee?;
+    float totalCost?;
     time:Civil orderPlacedOn?;
+    OrderStatus status?;
 |};
 
 public type OrderWithRelations record {|
@@ -496,22 +498,26 @@ public type OrderTargetType typedesc<OrderWithRelations>;
 
 public type OrderInsert record {|
     int consumerId;
-    OrderStatus status;
-    string shippingAddress;
     string shippingMethod;
-    string location;
+    string shippingAddress;
+    string shippingLocation;
+    float subTotal;
     float deliveryFee;
+    float totalCost;
     time:Civil orderPlacedOn;
+    OrderStatus status;
 |};
 
 public type OrderUpdate record {|
     int consumerId?;
-    OrderStatus status?;
-    string shippingAddress?;
     string shippingMethod?;
-    string location?;
+    string shippingAddress?;
+    string shippingLocation?;
+    float subTotal?;
     float deliveryFee?;
+    float totalCost?;
     time:Civil orderPlacedOn?;
+    OrderStatus status?;
 |};
 
 public type SupermarketOrder record {|
@@ -592,6 +598,7 @@ public type Opportunity record {|
     string deliveryLocation;
 
     string status;
+    byte[] waypoints;
     int _orderId;
     int driverId;
     time:Civil orderPlacedOn;
@@ -606,6 +613,7 @@ public type OpportunityOptionalized record {|
     string startLocation?;
     string deliveryLocation?;
     string status?;
+    byte[] waypoints?;
     int _orderId?;
     int driverId?;
     time:Civil orderPlacedOn?;
@@ -628,6 +636,7 @@ public type OpportunityInsert record {|
     string startLocation;
     string deliveryLocation;
     string status;
+    byte[] waypoints;
     int _orderId;
     int driverId;
     time:Civil orderPlacedOn;
@@ -641,6 +650,7 @@ public type OpportunityUpdate record {|
     string startLocation?;
     string deliveryLocation?;
     string status?;
+    byte[] waypoints?;
     int _orderId?;
     int driverId?;
     time:Civil orderPlacedOn?;
@@ -830,6 +840,34 @@ public type LikedProductInsert record {|
 public type LikedProductUpdate record {|
     int userId?;
     int productId?;
+|};
+
+public type Activity record {|
+    readonly int id;
+    int userId;
+    string description;
+    time:Civil dateTime;
+|};
+
+public type ActivityOptionalized record {|
+    int id?;
+    int userId?;
+    string description?;
+    time:Civil dateTime?;
+|};
+
+public type ActivityTargetType typedesc<ActivityOptionalized>;
+
+public type ActivityInsert record {|
+    int userId;
+    string description;
+    time:Civil dateTime;
+|};
+
+public type ActivityUpdate record {|
+    int userId?;
+    string description?;
+    time:Civil dateTime?;
 |};
 
 public type Files record {|
