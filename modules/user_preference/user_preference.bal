@@ -12,12 +12,12 @@ public type UserPreference record {|
 |};
 
 map<int> preferenceWeights = {
-    "Clicks": 1,
+    "Cart": 3,
     "Purchases": 5,
-    "Favorites": 4,
-    "Search history": 2,
-    "Time spent on items": 3,
-    "Ratings or Reviews": 5
+    // "Favorites": 4,
+    // "Search history": 2,
+    // "Time spent on items": 3,
+    "Ratings": 4
 };
 
 
