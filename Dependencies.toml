@@ -5,7 +5,7 @@
 
 [ballerina]
 dependencies-toml-version = "2"
-distribution-version = "2201.9.2"
+distribution-version = "2201.10.3"
 
 [[package]]
 org = "ballerina"
@@ -261,7 +261,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "observe"
-version = "1.2.3"
+version = "1.3.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
 ]
@@ -446,6 +446,7 @@ dependencies = [
 ]
 modules = [
 	{org = "djaya", packageName = "backend", moduleName = "backend"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.activity"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.advertisements"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.auth"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.cache_module"},
@@ -474,8 +475,3 @@ modules = [
 	{org = "djaya", packageName = "backend", moduleName = "backend.utils"}
 ]
 
-[[tool]]
-id = "persist"
-org = "ballerina"
-name = "tool_persist"
-version = "0.0.0"
