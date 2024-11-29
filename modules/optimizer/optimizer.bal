@@ -2,6 +2,7 @@
 import ballerina/io;
 import backend.cart;
 import backend.supermarket_items;
+import backend.distanceCalculation;
 import backend.db;
 import backend.connection;
 import ballerina/persist;
@@ -32,7 +33,7 @@ public function get_supermarket_items_by_product_id( int productId) returns supe
     return {count: supermarketItem.length(), next: "null", results: supermarketItem};
 }
 
-public function rateItems(supermarket_items:SupermarketItemResponse items, string location, int? quantity) returns ScoredItem[] {
+public function rateItems(supermarket_items:SupermarketItemResponse items, string location, int? quantity) returns ScoredItem[]|error {
     float priceWeight = 0.4;
     float distanceWeight = 0.2;
     float userPreferenceWeight = 0.1;
@@ -49,8 +50,8 @@ public function rateItems(supermarket_items:SupermarketItemResponse items, strin
 
         io:println("similar item from other supermarkets Items : ", item);
 
-        var supermarketLocation = item.productId;
-        var locationSuperMarket = item.supermarket?.location;
+
+        distance = check distanceCalculation:calculateShortestDistance(item.supermarketId ?: 0 , location);
 
         if (item.price > maxPrice) {
             maxPrice = <float>item.price;
@@ -114,8 +115,8 @@ public function OptimizeCart(int userId, string location) returns json|error {
 
             var similarItemsResult = check get_supermarket_items_by_product_id(cartItem.productId ?: 0);
             
-            ScoredItem[] scoredItems = rateItems(similarItemsResult, location, quantity);
-            ScoredItem[] sortedItems = from var e in scoredItems
+            ScoredItem[]|error scoredItems = rateItems(similarItemsResult, location, quantity);
+            ScoredItem[] sortedItems = from var e in check scoredItems
                                        order by e.score descending
                                        select e;
             ScoredItem bestItem = sortedItems[0];
