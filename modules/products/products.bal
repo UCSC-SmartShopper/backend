@@ -154,7 +154,7 @@ public function getAllProducts() returns db:ProductWithRelations[]|error {
     db:ProductWithRelations[] products = check from db:ProductWithRelations product in productStream
         select product;
 
-    // productCache.put("products", products);
+    productCache.put("products", products);
 
     return products;
 }

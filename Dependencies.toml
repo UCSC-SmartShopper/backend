@@ -463,6 +463,7 @@ modules = [
 	{org = "djaya", packageName = "backend", moduleName = "backend.liked_products"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.locations"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.opportunities"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.optimizer"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.orders"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.products"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.reviews"},
@@ -471,6 +472,7 @@ modules = [
 	{org = "djaya", packageName = "backend", moduleName = "backend.supermarket_items"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.supermarkets"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.user"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.user_preference"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.user_registration"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.utils"}
 ]
