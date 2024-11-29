@@ -15,6 +15,7 @@ public type ScoredItem record {|
     int quantity?;
     int productId?;
     int SupermarketId?;
+    db:SupermarketItem supermarketItem?;
 
 |};
 
@@ -84,7 +85,15 @@ public function rateItems(supermarket_items:SupermarketItemResponse items, strin
             score: score,
             supermarketitemId: item.supermarketId,
             quantity: quantity,
-            productId: item.productId
+            productId: item.productId,
+            supermarketItem : {
+                id: item.id ?: 0,
+                
+                price: item.price ?: 0.0,
+                discount: item.discount ?: 0.0,
+                availableQuantity: item.availableQuantity ?: 0,
+                productId: item.productId ?:0 ,
+                supermarketId: item.supermarketId ?: 0}
         });
     }
 
@@ -122,7 +131,15 @@ public function OptimizeCart(int userId, string location) returns json|error {
                 "SupermarketId": bestItem.SupermarketId,
                 "supermarketitemId": bestItem.supermarketitemId,
                 "quantity": bestItem.quantity,
-                "productId": bestItem.productId
+                "productId": bestItem.productId,
+                "supermarketItem": {
+                    "id": bestItem.supermarketItem?.id ?: 0,
+                    "price": bestItem.supermarketItem?.price ?: 0.0,
+                    "discount": bestItem.supermarketItem?.discount ?: 0.0,
+                    "availableQuantity": bestItem.supermarketItem?.availableQuantity ?: 0,
+                    "productId": bestItem.supermarketItem?.productId ?: 0,
+                    "supermarketId": bestItem.supermarketItem?.supermarketId ?: 0
+                }
             });
         }
         json result = resultArray;

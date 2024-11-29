@@ -390,9 +390,9 @@ service / on new http:Listener(9090) {
 // }
 
 resource function get optimizer(@http:Query int userId, @http:Query string location) returns json|error|optimizer:ScoredItem[] {
+    return optimizer:OptimizeCart(userId, location);
+}
 
-        return optimizer:OptimizeCart(userId,location);
-    }
 
 
 
