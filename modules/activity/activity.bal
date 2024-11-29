@@ -8,7 +8,7 @@ import ballerina/time;
 public type ActivityResponse record {|
     int count;
     boolean next;
-    db:Activity[] activities;
+    db:Activity[] results;
 |};
 
 public function getActivities(auth:User user) returns ActivityResponse|persist:Error? {
@@ -18,7 +18,7 @@ public function getActivities(auth:User user) returns ActivityResponse|persist:E
         where activity.userId == user.id
         select activity;
 
-    return {count: activities.length(), next: false, activities: activities};
+    return {count: activities.length(), next: false, results: activities};
 }
 
 public function createActivity(auth:User user, string description) returns error|int {

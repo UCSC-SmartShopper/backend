@@ -149,7 +149,7 @@ service / on new http:Listener(9090) {
             auth:User user = check auth:getUser(req);
             return activity:getActivities(user);
         } on fail {
-            return {count: 0, next: false, activities: []};
+            return {count: 0, next: false, results: []};
         }
     }
 
