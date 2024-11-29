@@ -3,6 +3,7 @@ import backend.db;
 import backend.reviews;
 
 import ballerina/persist;
+import ballerina/io;
 
 type SupermarketsGroupedByName record {|
     string name;
@@ -18,7 +19,14 @@ public type EarningResponse record {|
     int count;
     string next;
     Earning[] results;
-|}; 
+|};
+
+public type SalesResponse record {|
+    int count;
+    string next;
+    db:OrderWithRelations[] results;
+|};
+
 
 public function get_all_supermarket_earnings() returns EarningResponse|error {
 
@@ -60,7 +68,7 @@ public function get_all_supermarket_earnings() returns EarningResponse|error {
             earnings.push({name: supermarket.name, earnings: supermarketEarnings});
         }
 
-        return {count:earnings.length(), next:"", results:earnings};
+        return {count: earnings.length(), next: "", results: earnings};
 
     } on fail {
         return error("Failed to get earnings");
@@ -122,3 +130,48 @@ public function get_feedbacks_by_supermarket_id(int supermarketId) returns revie
     return {count: reviewsWithRelations.length(), next: "", results: reviewsWithRelations};
 
 }
+
+//get_driver_earnings
+public function get_driver_earnings(int driverId) returns float|error {
+    do {
+        db:Client connection = connection:getConnection();
+
+        stream<db:OpportunityWithRelations, persist:Error?> opportunityStream = connection->/opportunities.get();
+        db:OpportunityWithRelations[] opportunities = check from db:OpportunityWithRelations accept_opportunity in opportunityStream
+             where accept_opportunity.status == "Delivered" && accept_opportunity.driverId == driverId
+            select accept_opportunity;
+
+        float driverEarnings = 0.0;
+
+        foreach db:OpportunityWithRelations accept_opportunity in opportunities {
+                driverEarnings += accept_opportunity.deliveryCost ?: 0.0;
+
+        }
+
+        return driverEarnings;
+
+    } on fail {
+        return error("Failed to get earnings");
+    }
+}
+
+//get_all_supermarket_sales
+public function get_all_supermarket_sales() returns SalesResponse|error {
+     do {
+        db:Client connection = connection:getConnection();
+
+        stream<db:OrderWithRelations, persist:Error?> orderStream = connection->/orders.get();
+        db:OrderWithRelations[] orders = check from db:OrderWithRelations _order in orderStream
+            //order by _order.id descending
+            select _order;
+
+            io:println("Orders1",orders);
+
+        return {count: orders.length(), next: "", results: orders};
+
+    } on fail {
+        return error("Failed to get earnings");
+    }
+}
+
+

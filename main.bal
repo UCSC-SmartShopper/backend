@@ -20,6 +20,7 @@ import backend.user;
 import backend.user_preference;
 import backend.user_registration;
 import backend.utils;
+import backend.distanceCalculation;
 
 import ballerina/http;
 import ballerina/io;
@@ -326,11 +327,21 @@ service / on new http:Listener(9090) {
         return stats:get_supermarket_earnings(supermarketId);
     }
 
+
     resource function get stats/feedbacks_by_supermarket_id(int supermarketId) returns reviews:ReviewResponse|error {
         return stats:get_feedbacks_by_supermarket_id(supermarketId);
     }
 
-    //-------------------------------------------- Review Resource Functions----------------------------------------------------
+    resource function get stats/drivers_earnings/[int driverId]() returns float|error {
+        return stats:get_driver_earnings(driverId);
+        
+    }
+    
+    resource function get stats/supermarket_sales() returns stats:SalesResponse|error {
+        return stats:get_all_supermarket_sales();
+    }
+
+    //--------------------------------- Review Resource Functions----------------------------------------------
     resource function get reviews(string reviewType, int targetId) returns reviews:ReviewResponse|error? {
         return reviews:get_reviews(reviewType, targetId);
     }
@@ -389,5 +400,11 @@ resource function get optimizer(@http:Query int userId, @http:Query string locat
     resource function post userpreference/add(@http:Payload user_preference:UserPreference userPreference) returns db:UserPreference|string|error {
         return user_preference:calculatePoints(userPreference);
     }
+
+    // ---------------------------------------------- distance cal Files  -----------------------------------------------------------
+    resource function get distanceCalculation(int[] id, string currentLocation) returns map<float>|error? {
+        return distanceCalculation:distanceCalculation(id, currentLocation);
+    };
+
 
 }
