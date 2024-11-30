@@ -33,13 +33,17 @@ public type payhereRequest record {|
     string hash;
 |};
 
-public function get_order_payment(auth:User authUser, int orderId) returns payhereRequest|error {
+public function get_order_payment(auth:User authUser, int orderId) returns payhereRequest|http:Unauthorized|error {
 
-    consumer:Consumer|http:Unauthorized|error consumer = consumer:get_consumer(authUser, authUser.id);
+    consumer:Consumer|http:Unauthorized|error consumer = consumer:get_consumer(authUser, authUser.consumerId ?: -1);
 
     if !(consumer is consumer:Consumer) {
-        return error("User not found");
+        return consumer;
     }
+
+    decimal amount = 1000.00;
+    string currency = "LKR";
+
 
     payhereRequest payload = {
         merchant_id: merchant_id,
@@ -57,10 +61,10 @@ public function get_order_payment(auth:User authUser, int orderId) returns payhe
         city: "Colombo",
         country: "Sri Lanka",
         items: orderId.toString(),
-        currency: "LKR",
-        amount: 1000.00,
+        currency: currency,
+        amount: amount,
 
-        hash: get_hash(merchant_id, orderId, 1000.00, "LKR")
+        hash: get_hash(merchant_id, orderId, amount, currency)
     
     };
 

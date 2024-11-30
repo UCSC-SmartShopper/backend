@@ -1,4 +1,5 @@
 import backend.activity;
+import backend.addresses;
 import backend.advertisements;
 import backend.auth;
 import backend.cart;
@@ -142,6 +143,22 @@ service / on new http:Listener(9090) {
     resource function get consumers/[int id](http:Request req) returns consumer:Consumer|http:Unauthorized|error {
         auth:User user = check auth:getUser(req);
         return consumer:get_consumer(user, id);
+    }
+
+    // ---------------------------------------------- Consumer Address Resource Functions ---------------------------------------
+    resource function get addresses(http:Request req) returns addresses:AddressesResponse|error {
+        auth:User user = check auth:getUser(req);
+        return addresses:get_all_addresses(user);
+    }
+
+    resource function post addresses(http:Request req, @http:Payload db:AddressInsert consumerAddress) returns string|error {
+        auth:User user = check auth:getUser(req);
+        return addresses:create_consumer_address(user, consumerAddress);
+    }
+    
+    resource function patch addresses/default/[int id](http:Request req) returns string|error {
+        auth:User user = check auth:getUser(req);
+        return addresses:update_consumer_default_address(user, id);
     }
 
     // ---------------------------------------------- Consumer Activity Resource Functions --------------------------------------- 
@@ -346,7 +363,7 @@ service / on new http:Listener(9090) {
     }
 
     //-------------------------------------------- Payment Resource Functions----------------------------------------------------
-    resource function get payments/orders/[int orderId](http:Request req) returns payments:payhereRequest|error {
+    resource function get payments/orders/[int orderId](http:Request req) returns payments:payhereRequest|http:Unauthorized|error {
         auth:User user = check auth:getUser(req);
         return payments:get_order_payment(user, orderId);
     }

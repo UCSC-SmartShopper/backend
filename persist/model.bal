@@ -69,11 +69,11 @@ type NonVerifiedDriver record {|
 type Address record {|
     @sql:Generated
     readonly int id;
-    string addressName;
-    string address;
+    string addressName; // home, work, etc
+    string address; // actual address
     string city;
-    string location;
-    boolean isDefault;
+    string location; // coordinates
+    int priority; // used to sort the addresses and find default address
     Consumer consumer;
 |};
 
