@@ -135,7 +135,7 @@ public isolated client class Client {
                 address: {columnName: "address"},
                 city: {columnName: "city"},
                 location: {columnName: "location"},
-                isDefault: {columnName: "isDefault"},
+                priority: {columnName: "priority"},
                 consumerId: {columnName: "consumerId"},
                 "consumer.id": {relation: {entityName: "consumer", refField: "id"}},
                 "consumer.userId": {relation: {entityName: "consumer", refField: "userId"}}
@@ -465,7 +465,7 @@ public isolated client class Client {
                 "addresses[].address": {relation: {entityName: "addresses", refField: "address"}},
                 "addresses[].city": {relation: {entityName: "addresses", refField: "city"}},
                 "addresses[].location": {relation: {entityName: "addresses", refField: "location"}},
-                "addresses[].isDefault": {relation: {entityName: "addresses", refField: "isDefault"}},
+                "addresses[].priority": {relation: {entityName: "addresses", refField: "priority"}},
                 "addresses[].consumerId": {relation: {entityName: "addresses", refField: "consumerId"}},
                 "opportunity[].id": {relation: {entityName: "opportunity", refField: "id"}},
                 "opportunity[].totalDistance": {relation: {entityName: "opportunity", refField: "totalDistance"}},
