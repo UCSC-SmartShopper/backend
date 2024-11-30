@@ -29,7 +29,11 @@ public function getUserPreferencesByIdandProductId(int userId, int productId) re
         select userPreference;
     check userPreferenceStream.close();
 
-    float scoreTop =<float> userPreferenceList[0].points;
+    if userPreferenceList.length() == 0 {
+        return 0.0;
+    }
+
+    float scoreTop = <float> userPreferenceList[0].points;
     
     return scoreTop;
 }
