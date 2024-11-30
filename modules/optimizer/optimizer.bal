@@ -6,6 +6,7 @@ import backend.distanceCalculation;
 import backend.db;
 import backend.connection;
 import ballerina/persist;
+import backend.user_preference;
 // import ballerina/regex;
 
 
@@ -33,7 +34,7 @@ public function get_supermarket_items_by_product_id( int productId) returns supe
     return {count: supermarketItem.length(), next: "null", results: supermarketItem};
 }
 
-public function rateItems(supermarket_items:SupermarketItemResponse items, string location, int? quantity) returns ScoredItem[]|error {
+public function rateItems(supermarket_items:SupermarketItemResponse items, string location, int? quantity , int userId) returns ScoredItem[]|error {
     float priceWeight = 0.4;
     float distanceWeight = 0.2;
     float userPreferenceWeight = 0.1;
@@ -42,8 +43,8 @@ public function rateItems(supermarket_items:SupermarketItemResponse items, strin
     float maxDistance = 0;
     float maxUserPreference = 0;
 
-    float distance = 5;
-    float userPreference = 0;
+    
+    // float userPreference = 0;
 
     // Calculate maximum values for normalization
     foreach var item in items.results {
@@ -51,7 +52,8 @@ public function rateItems(supermarket_items:SupermarketItemResponse items, strin
         io:println("similar item from other supermarkets Items : ", item);
 
 
-        distance = check distanceCalculation:calculateShortestDistance(item.supermarketId ?: 0 , location);
+        float distance = check distanceCalculation:calculateShortestDistance(item.supermarketId ?: 0 , location);
+        float userPreference = check user_preference:getUserPreferencesByIdandProductId(userId, item.productId ?: 0);
 
         if (item.price > maxPrice) {
             maxPrice = <float>item.price;
@@ -74,7 +76,9 @@ public function rateItems(supermarket_items:SupermarketItemResponse items, strin
 
     foreach var item in items.results {
         float price = <float>item.price;
-        float score = (priceWeight * (1 - price / maxPrice) * <float>(quantity ?: 1)) +
+        float distance = check distanceCalculation:calculateShortestDistance(item.supermarketId ?: 0 , location);
+        float userPreference = check user_preference:getUserPreferencesByIdandProductId(userId, item.productId ?: 0);
+        float score = (priceWeight * (<float>1 - price / maxPrice) * <float>(quantity ?: 1)) +
                       (distanceWeight * (1 - distance / maxDistance)) +
                       (userPreferenceWeight * (1 - userPreference / maxUserPreference));
 
@@ -115,7 +119,7 @@ public function OptimizeCart(int userId, string location) returns json|error {
 
             var similarItemsResult = check get_supermarket_items_by_product_id(cartItem.productId ?: 0);
             
-            ScoredItem[]|error scoredItems = rateItems(similarItemsResult, location, quantity);
+            ScoredItem[]|error scoredItems = rateItems(similarItemsResult, location, quantity , userId);
             ScoredItem[] sortedItems = from var e in check scoredItems
                                        order by e.score descending
                                        select e;
@@ -123,7 +127,6 @@ public function OptimizeCart(int userId, string location) returns json|error {
             bestItems.push(bestItem);
         }
         
-        // Convert best items to JSON format
         json[] resultArray = [];
         foreach var bestItem in bestItems {
             resultArray.push({

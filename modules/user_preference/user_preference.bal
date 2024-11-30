@@ -20,6 +20,20 @@ map<int> preferenceWeights = {
     "Ratings": 4
 };
 
+public function getUserPreferencesByIdandProductId(int userId, int productId) returns error|float {
+    db:Client connection = connection:getConnection();
+
+    stream<db:UserPreference, persist:Error?> userPreferenceStream = connection->/userpreferences;
+    db:UserPreference[] userPreferenceList = check from db:UserPreference userPreference in userPreferenceStream
+        where userPreference.userid == userId && userPreference.referenceid == productId
+        select userPreference;
+    check userPreferenceStream.close();
+
+    float scoreTop =<float> userPreferenceList[0].points;
+    
+    return scoreTop;
+}
+
 
 public function getUserPreferences() returns db:UserPreference[]|error {
     db:Client connection = connection:getConnection();
