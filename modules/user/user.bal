@@ -101,6 +101,18 @@ public function get_user(auth:User user, int id) returns db:User|http:Unauthoriz
     return sanitizedUser;
 }
 
+public function get_user_with_relations(int id) returns db:UserWithRelations|error {
+    db:Client connection = connection:getConnection();
+
+    db:UserWithRelations|persist:Error result = connection->/users/[id]();
+
+    if result is persist:Error {
+        return error("User not found");
+    }
+
+    return result;
+}
+
 public function update_user(auth:User user, db:UserUpdate userUpdate) returns db:User|error {
     db:Client connection = connection:getConnection();
 

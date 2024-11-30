@@ -11,6 +11,7 @@ import backend.locations;
 import backend.opportunities;
 import backend.optimizer;
 import backend.orders;
+import backend.payments;
 import backend.products;
 import backend.reviews;
 import backend.stats;
@@ -342,6 +343,12 @@ service / on new http:Listener(9090) {
     resource function post reviews(http:Request req, @http:Payload reviews:ReviewInsert review) returns int|error? {
         auth:User user = check auth:getUser(req);
         return reviews:create_review(user, review);
+    }
+
+    //-------------------------------------------- Payment Resource Functions----------------------------------------------------
+    resource function get payments/orders/[int orderId](http:Request req) returns payments:payhereRequest|error {
+        auth:User user = check auth:getUser(req);
+        return payments:get_order_payment(user, orderId);
     }
 
     //-------------------------------------------- Location Resource Functions----------------------------------------------------
