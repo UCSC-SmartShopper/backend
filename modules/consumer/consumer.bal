@@ -48,14 +48,10 @@ public function get_all_consumers(string searchText, int month, int page, int _l
     return {count: consumerList.length(), next: "null", results: consumerList};
 }
 
-public function get_consumer(auth:User user, int id) returns Consumer|http:Unauthorized|error {
+public function get_consumer(auth:User user, int id) returns Consumer|error {
     db:Client connection = connection:getConnection();
 
     Consumer|persist:Error result = connection->/consumers/[id](Consumer);
-
-    if result is persist:Error {
-        return error("Consumer not found");
-    }
 
     return result;
 }

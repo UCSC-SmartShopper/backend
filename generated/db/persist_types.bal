@@ -203,7 +203,7 @@ public type Address record {|
     string address;
     string city;
     string location;
-    boolean isDefault;
+    int priority;
     int consumerId;
 |};
 
@@ -213,7 +213,7 @@ public type AddressOptionalized record {|
     string address?;
     string city?;
     string location?;
-    boolean isDefault?;
+    int priority?;
     int consumerId?;
 |};
 
@@ -229,7 +229,7 @@ public type AddressInsert record {|
     string address;
     string city;
     string location;
-    boolean isDefault;
+    int priority;
     int consumerId;
 |};
 
@@ -238,7 +238,7 @@ public type AddressUpdate record {|
     string address?;
     string city?;
     string location?;
-    boolean isDefault?;
+    int priority?;
     int consumerId?;
 |};
 
@@ -896,5 +896,37 @@ public type FilesUpdate record {|
     string name?;
     byte[] data?;
     string file_code?;
+|};
+
+public type UserPreference record {|
+    readonly int id;
+    int userid;
+    int points;
+    int referenceid;
+    time:Civil createdAt;
+|};
+
+public type UserPreferenceOptionalized record {|
+    int id?;
+    int userid?;
+    int points?;
+    int referenceid?;
+    time:Civil createdAt?;
+|};
+
+public type UserPreferenceTargetType typedesc<UserPreferenceOptionalized>;
+
+public type UserPreferenceInsert record {|
+    int userid;
+    int points;
+    int referenceid;
+    time:Civil createdAt;
+|};
+
+public type UserPreferenceUpdate record {|
+    int userid?;
+    int points?;
+    int referenceid?;
+    time:Civil createdAt?;
 |};
 

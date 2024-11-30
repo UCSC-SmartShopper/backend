@@ -1,3 +1,5 @@
+import backend.activity;
+import backend.addresses;
 import backend.advertisements;
 import backend.auth;
 import backend.cart;
@@ -8,13 +10,16 @@ import backend.file_service;
 import backend.liked_products;
 import backend.locations;
 import backend.opportunities;
+import backend.optimizer;
 import backend.orders;
+import backend.payments;
 import backend.products;
 import backend.reviews;
 import backend.stats;
 import backend.supermarket_items;
 import backend.supermarkets;
 import backend.user;
+import backend.user_preference;
 import backend.user_registration;
 import backend.utils;
 import backend.distanceCalculation;
@@ -22,7 +27,6 @@ import backend.distanceCalculation;
 import ballerina/http;
 import ballerina/io;
 import ballerina/persist;
-import backend.activity;
 
 type productQuery record {|
     int category;
@@ -77,7 +81,7 @@ service / on new http:Listener(9090) {
     }
 
     // finalizing the driver signup
-    resource function post update_driver_vehicle_details/[int id](@http:Payload db:NonVerifiedDriver driverUpdate) returns db:NonVerifiedDriver|error {
+    resource function post update_driver_vehicle_details/[int id](@http:Payload db:NonVerifiedDriverOptionalized driverUpdate) returns db:NonVerifiedDriver|error {
         return user_registration:update_driver_signup(driverUpdate, id);
     }
 
@@ -128,6 +132,10 @@ service / on new http:Listener(9090) {
         return driver:get_driver(user, id);
     }
 
+    resource function patch update_driver_profile_picture/[int id](http:Request req) returns string|error {
+        return user_registration:update_driver_profile_picture(req, id);
+    }
+
     // ---------------------------------------------- Consumer Resource Functions -----------------------------------------------
     resource function get consumers(@http:Query string searchText, int month, int page, int _limit) returns consumer:ConsumerResponse|http:Unauthorized|error {
         return consumer:get_all_consumers(searchText, month, page, _limit);
@@ -136,6 +144,22 @@ service / on new http:Listener(9090) {
     resource function get consumers/[int id](http:Request req) returns consumer:Consumer|http:Unauthorized|error {
         auth:User user = check auth:getUser(req);
         return consumer:get_consumer(user, id);
+    }
+
+    // ---------------------------------------------- Consumer Address Resource Functions ---------------------------------------
+    resource function get addresses(http:Request req) returns addresses:AddressesResponse|error {
+        auth:User user = check auth:getUser(req);
+        return addresses:get_all_addresses(user);
+    }
+
+    resource function post addresses(http:Request req, @http:Payload db:AddressInsert consumerAddress) returns string|error {
+        auth:User user = check auth:getUser(req);
+        return addresses:create_consumer_address(user, consumerAddress);
+    }
+    
+    resource function patch addresses/default/[int id](http:Request req) returns string|error {
+        auth:User user = check auth:getUser(req);
+        return addresses:update_consumer_default_address(user, id);
     }
 
     // ---------------------------------------------- Consumer Activity Resource Functions --------------------------------------- 
@@ -349,6 +373,12 @@ service / on new http:Listener(9090) {
         return reviews:create_review(user, review);
     }
 
+    //-------------------------------------------- Payment Resource Functions----------------------------------------------------
+    resource function get payments/orders/[int orderId](http:Request req) returns payments:payhereRequest|http:Unauthorized|error {
+        auth:User user = check auth:getUser(req);
+        return payments:get_order_payment(user, orderId);
+    }
+
     //-------------------------------------------- Location Resource Functions----------------------------------------------------
     resource function post locations/consumer_supermarket_distance(@http:Payload record {string location1; string location2;} payload) returns float|error {
         return locations:get_consumer_supermarket_distance(payload.location1, payload.location2);
@@ -368,6 +398,24 @@ service / on new http:Listener(9090) {
     resource function get images/[string path]() returns byte[]|error {
         return file_service:getImage(path);
     };
+
+    // ---------------------------------------------- Optimizing Algorithm  -----------------------------------------------------------
+    resource function get optimizer() returns optimizer:Item[] {
+        // Hardcoded list of items
+        io:println("Optimizer service called");
+        optimizer:Item[] items = [
+            {id: 1, name: "item1", price: 100.0, rating: 4, distance: 10.0, score: 0.0},
+            {id: 2, name: "item2", price: 150.0, rating: 5, distance: 15.0, score: 0.0},
+            {id: 3, name: "item3", price: 120.0, rating: 3, distance: 12.0, score: 0.0},
+            {id: 4, name: "item4", price: 200.0, rating: 4, distance: 8.0, score: 0.0}
+        ];
+
+        return optimizer:rateItems(items);
+    }
+
+    resource function post userpreference/add(@http:Payload user_preference:UserPreference userPreference) returns db:UserPreference|string|error {
+        return user_preference:calculatePoints(userPreference);
+    }
 
     // ---------------------------------------------- distance cal Files  -----------------------------------------------------------
     resource function get distanceCalculation(int[] id, string currentLocation) returns map<float>|error? {

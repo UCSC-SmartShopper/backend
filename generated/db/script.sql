@@ -21,6 +21,7 @@ DROP TABLE IF EXISTS "Product";
 DROP TABLE IF EXISTS "Activity";
 DROP TABLE IF EXISTS "Advertisement";
 DROP TABLE IF EXISTS "LikedProduct";
+DROP TABLE IF EXISTS "UserPreference";
 DROP TABLE IF EXISTS "Files";
 DROP TABLE IF EXISTS "NonVerifiedDriver";
 
@@ -48,6 +49,15 @@ CREATE TABLE "Files" (
 	"name" VARCHAR(191) NOT NULL,
 	"data" BYTEA NOT NULL,
 	"file_code" VARCHAR(191) NOT NULL,
+	PRIMARY KEY("id")
+);
+
+CREATE TABLE "UserPreference" (
+	"id"  SERIAL,
+	"userid" INT NOT NULL,
+	"points" INT NOT NULL,
+	"referenceid" INT NOT NULL,
+	"createdAt" TIMESTAMP NOT NULL,
 	PRIMARY KEY("id")
 );
 
@@ -238,7 +248,7 @@ CREATE TABLE "Address" (
 	"address" VARCHAR(191) NOT NULL,
 	"city" VARCHAR(191) NOT NULL,
 	"location" VARCHAR(191) NOT NULL,
-	"isDefault" BOOLEAN NOT NULL,
+	"priority" INT NOT NULL,
 	"consumerId" INT NOT NULL,
 	FOREIGN KEY("consumerId") REFERENCES "Consumer"("id"),
 	PRIMARY KEY("id")
