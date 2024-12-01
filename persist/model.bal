@@ -2,6 +2,9 @@ import ballerina/persist as _;
 import ballerina/time;
 import ballerinax/persist.sql;
 
+
+
+
 type User record {|
     @sql:Generated
     readonly int id;
