@@ -325,7 +325,6 @@ public isolated client class Client {
                 "opportunity[].startLocation": {relation: {entityName: "opportunity", refField: "startLocation"}},
                 "opportunity[].deliveryLocation": {relation: {entityName: "opportunity", refField: "deliveryLocation"}},
                 "opportunity[].status": {relation: {entityName: "opportunity", refField: "status"}},
-                "opportunity[].waypoints": {relation: {entityName: "opportunity", refField: "waypoints"}},
                 "opportunity[]._orderId": {relation: {entityName: "opportunity", refField: "_orderId"}},
                 "opportunity[].driverId": {relation: {entityName: "opportunity", refField: "driverId"}},
                 "opportunity[].orderPlacedOn": {relation: {entityName: "opportunity", refField: "orderPlacedOn"}}
@@ -394,7 +393,6 @@ public isolated client class Client {
                 "opportunity.startLocation": {relation: {entityName: "opportunity", refField: "startLocation"}},
                 "opportunity.deliveryLocation": {relation: {entityName: "opportunity", refField: "deliveryLocation"}},
                 "opportunity.status": {relation: {entityName: "opportunity", refField: "status"}},
-                "opportunity.waypoints": {relation: {entityName: "opportunity", refField: "waypoints"}},
                 "opportunity._orderId": {relation: {entityName: "opportunity", refField: "_orderId"}},
                 "opportunity.driverId": {relation: {entityName: "opportunity", refField: "driverId"}},
                 "opportunity.orderPlacedOn": {relation: {entityName: "opportunity", refField: "orderPlacedOn"}}
@@ -417,7 +415,6 @@ public isolated client class Client {
                 startLocation: {columnName: "startLocation"},
                 deliveryLocation: {columnName: "deliveryLocation"},
                 status: {columnName: "status"},
-                waypoints: {columnName: "waypoints"},
                 _orderId: {columnName: "_orderId"},
                 driverId: {columnName: "driverId"},
                 orderPlacedOn: {columnName: "orderPlacedOn"},
@@ -477,7 +474,6 @@ public isolated client class Client {
                 "opportunity[].startLocation": {relation: {entityName: "opportunity", refField: "startLocation"}},
                 "opportunity[].deliveryLocation": {relation: {entityName: "opportunity", refField: "deliveryLocation"}},
                 "opportunity[].status": {relation: {entityName: "opportunity", refField: "status"}},
-                "opportunity[].waypoints": {relation: {entityName: "opportunity", refField: "waypoints"}},
                 "opportunity[]._orderId": {relation: {entityName: "opportunity", refField: "_orderId"}},
                 "opportunity[].driverId": {relation: {entityName: "opportunity", refField: "driverId"}},
                 "opportunity[].orderPlacedOn": {relation: {entityName: "opportunity", refField: "orderPlacedOn"}}
