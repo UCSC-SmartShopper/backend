@@ -2,6 +2,7 @@ import ballerina/http;
 import ballerina/io;
 import ballerina/lang.runtime;
 import ballerina/mime;
+import ballerina/time;
 
 public type FormData record {|
     string name;
@@ -125,4 +126,20 @@ public function decodedFormData(http:Request req) returns FormData[]|error {
         }
     }
     return formData;
+}
+
+// --------------------------- Form Data Encoder  ---------------------------
+public isolated function getCurrentTime() returns time:Civil {
+    time:ZoneOffset colomboOffset = {
+        hours: 5,
+        minutes: 30
+    };
+
+    decimal offsetSeconds = colomboOffset.hours * 3600 + colomboOffset.minutes * 60;
+
+    time:Utc utcTime = time:utcNow();
+    time:Utc colomboTime = time:utcAddSeconds(utcTime, offsetSeconds);
+
+    time:Civil localTime = time:utcToCivil(colomboTime);
+    return localTime;
 }

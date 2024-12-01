@@ -602,7 +602,6 @@ public type Opportunity record {|
     string deliveryLocation;
 
     string status;
-    byte[] waypoints;
     int _orderId;
     int driverId;
     time:Civil orderPlacedOn;
@@ -617,7 +616,6 @@ public type OpportunityOptionalized record {|
     string startLocation?;
     string deliveryLocation?;
     string status?;
-    byte[] waypoints?;
     int _orderId?;
     int driverId?;
     time:Civil orderPlacedOn?;
@@ -640,7 +638,6 @@ public type OpportunityInsert record {|
     string startLocation;
     string deliveryLocation;
     string status;
-    byte[] waypoints;
     int _orderId;
     int driverId;
     time:Civil orderPlacedOn;
@@ -654,7 +651,6 @@ public type OpportunityUpdate record {|
     string startLocation?;
     string deliveryLocation?;
     string status?;
-    byte[] waypoints?;
     int _orderId?;
     int driverId?;
     time:Civil orderPlacedOn?;

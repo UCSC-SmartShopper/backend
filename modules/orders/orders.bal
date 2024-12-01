@@ -5,6 +5,7 @@ import backend.db;
 import backend.errors;
 import backend.locations;
 import backend.supermarkets;
+import backend.utils;
 
 import ballerina/http;
 import ballerina/io;
@@ -98,7 +99,7 @@ public function cartToOrder(CartToOrderRequest cartToOrderRequest) returns int|p
     db:Client connection = connection:getConnection();
     stream<cart:CartItem, persist:Error?> cartItemsStream = connection->/cartitems();
     cart:CartItem[] cartItems = check from cart:CartItem cartItem in cartItemsStream
-        where cartItem.consumerId == consumerId
+        where cartItem.consumerId == consumerId && cartItem.orderId == -1
         select cartItem;
 
     // Calculate the total price of the order and get the supermarket ids
@@ -133,7 +134,7 @@ public function cartToOrder(CartToOrderRequest cartToOrderRequest) returns int|p
         deliveryFee: deliveryFee,
         totalCost: subTotal + deliveryFee,
         
-        orderPlacedOn: time:utcToCivil(time:utcNow())
+        orderPlacedOn: utils:getCurrentTime()
     };
     int[]|persist:Error result = connection->/orders.post([orderInsert]);
 
@@ -142,6 +143,22 @@ public function cartToOrder(CartToOrderRequest cartToOrderRequest) returns int|p
     }
 
     int orderId = result[0];
+
+    // -------------------------- Create the Order Items --------------------------
+    db:OrderItemsInsert[] orderItemInserts = from cart:CartItem cartItem in cartItems
+        select {
+            supermarketId: cartItem.supermarketItem.supermarketId,
+            productId: cartItem.supermarketItem.productId,
+            quantity: cartItem.quantity,
+            price: cartItem.supermarketItem.price,
+            _orderId: orderId
+        };
+
+    int[]|persist:Error orderItemResult = connection->/orderitems.post(orderItemInserts);
+
+    if orderItemResult is persist:Error {
+        return orderItemResult;
+    }
 
     // Update all the cart items of the consumer from the database whre orderId = -1
     _ = check connection->executeNativeSQL(`UPDATE "CartItem" SET "orderId" = ${orderId} WHERE "consumerId" = ${consumerId} AND "orderId" = -1`);
@@ -174,7 +191,7 @@ public function order_payment(int orderId) returns error? {
     db:SupermarketOrderInsert[] supermarketOrderInsert = from int supermarketId in supermarketIdList
         select {
             status: "Processing",
-            qrCode: "",
+            qrCode: "https://support.thinkific.com/hc/article_attachments/360042081334/5d37325ea1ff6.png",
             _orderId: orderId,
             supermarketId: supermarketId
         };
@@ -182,22 +199,6 @@ public function order_payment(int orderId) returns error? {
     int[]|persist:Error supermarketOrderResult = connection->/supermarketorders.post(supermarketOrderInsert);
     if supermarketOrderResult is persist:Error {
         return supermarketOrderResult;
-    }
-
-    // -------------------------- Create the Order Items --------------------------
-    db:OrderItemsInsert[] orderItemInserts = from cart:CartItem cartItem in cartItems
-        select {
-            supermarketId: cartItem.supermarketItem.supermarketId,
-            productId: cartItem.supermarketItem.productId,
-            quantity: cartItem.quantity,
-            price: cartItem.supermarketItem.price,
-            _orderId: orderId
-        };
-
-    int[]|persist:Error orderItemResult = connection->/orderitems.post(orderItemInserts);
-
-    if orderItemResult is persist:Error {
-        return orderItemResult;
     }
 
     // Update the order status to Processing
@@ -260,26 +261,44 @@ function update_order_status_to_prepared(int orderId) returns error? {
                 int[] supermarketIds = from db:SupermarketOrderOptionalized supermarketOrder in superMarketOrders
                     select supermarketOrder.supermarketId ?: -1;
 
-                string[] supermarketLocations = check locations:getOptimizedRoute(supermarketIds, _order.shippingLocation ?: "");
+                locations:OptimizedRoute optimizedRoute = check locations:getOptimizedRoute(supermarketIds, _order.shippingLocation ?: "");
 
                 // Create an opportunity
                 db:OpportunityInsert opportunityInsert = {
-                    totalDistance: 0.0,
-                    tripCost: 0.0,
+                    totalDistance: optimizedRoute.totalDistance,
+                    tripCost: optimizedRoute.deliveryCost - 100,
                     consumerId: _order.consumerId ?: -1,
-                    deliveryCost: _order.deliveryFee ?: 0.0,
+                    deliveryCost: optimizedRoute.deliveryCost,
 
                     startLocation: _order.shippingLocation ?: "",
                     deliveryLocation: _order.shippingAddress ?: "",
-
-                    waypoints: supermarketLocations.toBalString().toBytes(),
+                    
                     status: "Pending",
                     _orderId: orderId,
-                    orderPlacedOn: _order.orderPlacedOn ?: time:utcToCivil(time:utcNow()),
+                    orderPlacedOn: _order.orderPlacedOn ?: utils:getCurrentTime(),
                     driverId: -1
                 };
 
-                _ = check connection->/opportunities.post([opportunityInsert]);
+                int[] listResult = check connection->/opportunities.post([opportunityInsert]);
+
+                if listResult.length() == 0 {
+                    return error("Error creating the opportunity");
+                }
+                int opportunityId = listResult[0];
+
+                // Create opportunity supermarkets
+                db:OpportunitySupermarketInsert[] opportunitySupermarketInserts = [];
+
+                foreach int supermarketId in supermarketIds {
+                    db:OpportunitySupermarketInsert opportunitySupermarketInsert = {
+                        supermarketId: supermarketId,
+                        opportunityId: opportunityId
+                    };
+                    opportunitySupermarketInserts.push(opportunitySupermarketInsert);
+                }
+
+                _ = check connection->/opportunitysupermarkets.post(opportunitySupermarketInserts);
+
             }
         }
     } on fail var e {

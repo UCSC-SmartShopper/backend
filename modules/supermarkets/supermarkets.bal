@@ -2,10 +2,10 @@ import backend.auth;
 import backend.connection;
 import backend.db;
 import backend.errors;
+import backend.utils;
 
 import ballerina/http;
 import ballerina/persist;
-import ballerina/time;
 
 public type SuperMarketNotFound record {|
     *http:NotFound;
@@ -78,9 +78,9 @@ public function register_supermarket(auth:User user, NewSupermarket supermarket)
         role: "Supermarket Manager",
         status: "Active",
         
-        lastLogin: time:utcToCivil(time:utcNow()),
-        createdAt: time:utcToCivil(time:utcNow()),
-        updatedAt: time:utcToCivil(time:utcNow()),
+        lastLogin: utils:getCurrentTime(),
+        createdAt: utils:getCurrentTime(),
+        updatedAt: utils:getCurrentTime(),
         deletedAt: ()
     };
     db:Client connection = connection:getConnection();

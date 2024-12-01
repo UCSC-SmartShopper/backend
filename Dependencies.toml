@@ -468,7 +468,6 @@ modules = [
 	{org = "djaya", packageName = "backend", moduleName = "backend.locations"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.opportunities"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.optimizer"},
-	{org = "djaya", packageName = "backend", moduleName = "backend.order"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.orders"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.payments"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.products"},
