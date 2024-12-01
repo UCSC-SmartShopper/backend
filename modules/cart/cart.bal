@@ -51,7 +51,7 @@ public function addCartItem(int consumerId, db:CartItemInsert cartItem) returns 
     int[]|persist:Error result = connection->/cartitems.post([cartItemInsert]);
 
     if (result is persist:Error) {
-        return error("Error while adding the cart item");
+        return result;
     }
     return result[0];
 }

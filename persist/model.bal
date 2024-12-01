@@ -127,6 +127,7 @@ type CartItem record {|
     int consumerId;
     @sql:UniqueIndex {name: "cart_item_unique_index"}
     int productId;
+    @sql:UniqueIndex {name: "cart_item_unique_index"}
     int orderId; // if the item is in an order, default -1
 |};
 

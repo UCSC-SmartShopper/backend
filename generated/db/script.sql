@@ -266,6 +266,6 @@ CREATE TABLE "OrderItems" (
 );
 
 
-CREATE UNIQUE INDEX "cart_item_unique_index" ON "CartItem" ("consumerId", "productId");
+CREATE UNIQUE INDEX "cart_item_unique_index" ON "CartItem" ("consumerId", "productId", "orderId");
 CREATE UNIQUE INDEX "liked_product_unique_index" ON "LikedProduct" ("userId", "productId");
 CREATE UNIQUE INDEX "file_unique_index" ON "Files" ("file_code");
