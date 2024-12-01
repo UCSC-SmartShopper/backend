@@ -9,6 +9,7 @@ import backend.utils;
 
 import ballerina/http;
 import ballerina/io;
+import ballerina/lang.runtime;
 import ballerina/persist;
 import ballerina/time;
 
@@ -243,6 +244,7 @@ public function supermarket_order_ready(auth:User user, OrderReadyRequest orderR
 function update_order_status_to_prepared(int orderId) returns error? {
     do {
         if (orderId != -1) {
+            runtime:sleep(5);
 
             db:Client connection = connection:getConnection();
             db:OrderWithRelations _order = check connection->/orders/[orderId]();
