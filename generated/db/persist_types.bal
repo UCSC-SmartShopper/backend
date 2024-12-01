@@ -203,7 +203,7 @@ public type Address record {|
     string address;
     string city;
     string location;
-    boolean isDefault;
+    int priority;
     int consumerId;
 |};
 
@@ -213,7 +213,7 @@ public type AddressOptionalized record {|
     string address?;
     string city?;
     string location?;
-    boolean isDefault?;
+    int priority?;
     int consumerId?;
 |};
 
@@ -229,7 +229,7 @@ public type AddressInsert record {|
     string address;
     string city;
     string location;
-    boolean isDefault;
+    int priority;
     int consumerId;
 |};
 
@@ -238,7 +238,7 @@ public type AddressUpdate record {|
     string address?;
     string city?;
     string location?;
-    boolean isDefault?;
+    int priority?;
     int consumerId?;
 |};
 
@@ -387,6 +387,7 @@ public type CartItem record {|
     int quantity;
     int consumerId;
     int productId;
+    int orderId;
 |};
 
 public type CartItemOptionalized record {|
@@ -395,6 +396,7 @@ public type CartItemOptionalized record {|
     int quantity?;
     int consumerId?;
     int productId?;
+    int orderId?;
 |};
 
 public type CartItemWithRelations record {|
@@ -409,6 +411,7 @@ public type CartItemInsert record {|
     int quantity;
     int consumerId;
     int productId;
+    int orderId;
 |};
 
 public type CartItemUpdate record {|
@@ -416,6 +419,7 @@ public type CartItemUpdate record {|
     int quantity?;
     int consumerId?;
     int productId?;
+    int orderId?;
 |};
 
 public type OrderItems record {|
