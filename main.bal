@@ -367,6 +367,9 @@ service / on new http:Listener(9090) {
         auth:User user = check auth:getUser(req);
         return payments:get_order_payment(user, orderId);
     }
+    resource function post payhere_verify(http:Request req) returns string|error  {
+        return payments:payhere_verify(check req.getFormParams());
+    }
 
     //-------------------------------------------- Location Resource Functions----------------------------------------------------
     resource function post locations/consumer_supermarket_distance(@http:Payload record {string location1; string location2;} payload) returns float|error {

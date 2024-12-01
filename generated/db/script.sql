@@ -154,6 +154,7 @@ CREATE TABLE "CartItem" (
 	"quantity" INT NOT NULL,
 	"consumerId" INT NOT NULL,
 	"productId" INT NOT NULL,
+	"orderId" INT NOT NULL,
 	"supermarketitemId" INT NOT NULL,
 	FOREIGN KEY("supermarketitemId") REFERENCES "SupermarketItem"("id"),
 	PRIMARY KEY("id")
