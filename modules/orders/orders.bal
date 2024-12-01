@@ -99,7 +99,7 @@ public function cartToOrder(CartToOrderRequest cartToOrderRequest) returns int|p
     db:Client connection = connection:getConnection();
     stream<cart:CartItem, persist:Error?> cartItemsStream = connection->/cartitems();
     cart:CartItem[] cartItems = check from cart:CartItem cartItem in cartItemsStream
-        where cartItem.consumerId == consumerId
+        where cartItem.consumerId == consumerId && cartItem.orderId == -1
         select cartItem;
 
     // Calculate the total price of the order and get the supermarket ids
