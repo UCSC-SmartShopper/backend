@@ -1,4 +1,5 @@
 import backend.activity;
+import backend.addresses;
 import backend.advertisements;
 import backend.auth;
 import backend.cart;
@@ -11,6 +12,7 @@ import backend.locations;
 import backend.opportunities;
 import backend.optimizer;
 import backend.orders;
+import backend.payments;
 import backend.products;
 import backend.reviews;
 import backend.stats;
@@ -20,6 +22,7 @@ import backend.user;
 import backend.user_preference;
 import backend.user_registration;
 import backend.utils;
+import backend.distanceCalculation;
 
 import ballerina/http;
 import ballerina/io;
@@ -146,6 +149,22 @@ service / on new http:Listener(9090) {
     resource function get consumers/[int id](http:Request req) returns consumer:Consumer|http:Unauthorized|error {
         auth:User user = check auth:getUser(req);
         return consumer:get_consumer(user, id);
+    }
+
+    // ---------------------------------------------- Consumer Address Resource Functions ---------------------------------------
+    resource function get addresses(http:Request req) returns addresses:AddressesResponse|error {
+        auth:User user = check auth:getUser(req);
+        return addresses:get_all_addresses(user);
+    }
+
+    resource function post addresses(http:Request req, @http:Payload db:AddressInsert consumerAddress) returns string|error {
+        auth:User user = check auth:getUser(req);
+        return addresses:create_consumer_address(user, consumerAddress);
+    }
+    
+    resource function patch addresses/default/[int id](http:Request req) returns string|error {
+        auth:User user = check auth:getUser(req);
+        return addresses:update_consumer_default_address(user, id);
     }
 
     // ---------------------------------------------- Consumer Activity Resource Functions --------------------------------------- 
@@ -331,11 +350,21 @@ service / on new http:Listener(9090) {
         return stats:get_supermarket_earnings(supermarketId);
     }
 
+
     resource function get stats/feedbacks_by_supermarket_id(int supermarketId) returns reviews:ReviewResponse|error {
         return stats:get_feedbacks_by_supermarket_id(supermarketId);
     }
 
-    //-------------------------------------------- Review Resource Functions----------------------------------------------------
+    resource function get stats/drivers_earnings/[int driverId]() returns float|error {
+        return stats:get_driver_earnings(driverId);
+        
+    }
+    
+    resource function get stats/supermarket_sales() returns stats:SalesResponse|error {
+        return stats:get_all_supermarket_sales();
+    }
+
+    //--------------------------------- Review Resource Functions----------------------------------------------
     resource function get reviews(string reviewType, int targetId) returns reviews:ReviewResponse|error? {
         return reviews:get_reviews(reviewType, targetId);
     }
@@ -347,6 +376,15 @@ service / on new http:Listener(9090) {
     resource function post reviews(http:Request req, @http:Payload reviews:ReviewInsert review) returns int|error? {
         auth:User user = check auth:getUser(req);
         return reviews:create_review(user, review);
+    }
+
+    //-------------------------------------------- Payment Resource Functions----------------------------------------------------
+    resource function get payments/orders/[int orderId](http:Request req) returns payments:payhereRequest|http:Unauthorized|error {
+        auth:User user = check auth:getUser(req);
+        return payments:get_order_payment(user, orderId);
+    }
+    resource function post payhere_verify(http:Request req) returns string|error  {
+        return payments:payhere_verify(check req.getFormParams());
     }
 
     //-------------------------------------------- Location Resource Functions----------------------------------------------------
@@ -370,21 +408,35 @@ service / on new http:Listener(9090) {
     };
 
     // ---------------------------------------------- Optimizing Algorithm  -----------------------------------------------------------
-    resource function get optimizer() returns optimizer:Item[] {
-        // Hardcoded list of items
-        io:println("Optimizer service called");
-        optimizer:Item[] items = [
-            {id: 1, name: "item1", price: 100.0, rating: 4, distance: 10.0, score: 0.0},
-            {id: 2, name: "item2", price: 150.0, rating: 5, distance: 15.0, score: 0.0},
-            {id: 3, name: "item3", price: 120.0, rating: 3, distance: 12.0, score: 0.0},
-            {id: 4, name: "item4", price: 200.0, rating: 4, distance: 8.0, score: 0.0}
-        ];
+//     resource function get optimizer() returns optimizer:Item[] {
+//     // Hardcoded list of items
+//     io:println("Optimizer service called");
+//     optimizer:Item[] items = [
+//         {id: 1, name: "item1", price: 100.0, rating: 4, distance: 10.0, score: 0.0 , userPreference: 0.0},
+//         {id: 2, name: "item2", price: 150.0, rating: 5, distance: 15.0, score: 0.0, userPreference: 0.0},
+//         {id: 3, name: "item3", price: 120.0, rating: 3, distance: 12.0, score: 0.0, userPreference: 0.0},
+//         {id: 4, name: "item4", price: 200.0, rating: 4, distance: 8.0, score: 0.0, userPreference: 0.0}
+//     ];
+    
+//     return optimizer:rateItems(items);
+// }
 
-        return optimizer:rateItems(items);
-    }
+resource function get optimizer(@http:Query int userId, @http:Query string location) returns json|error|optimizer:ScoredItem[] {
+    return optimizer:OptimizeCart(userId, location);
+}
+
+
+
+
 
     resource function post userpreference/add(@http:Payload user_preference:UserPreference userPreference) returns db:UserPreference|string|error {
         return user_preference:calculatePoints(userPreference);
     }
+
+    // ---------------------------------------------- distance cal Files  -----------------------------------------------------------
+    resource function get distanceCalculation(int[] id, string currentLocation) returns map<float>|error? {
+        return distanceCalculation:distanceCalculation(id, currentLocation);
+    };
+
 
 }

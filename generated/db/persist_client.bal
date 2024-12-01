@@ -135,7 +135,7 @@ public isolated client class Client {
                 address: {columnName: "address"},
                 city: {columnName: "city"},
                 location: {columnName: "location"},
-                isDefault: {columnName: "isDefault"},
+                priority: {columnName: "priority"},
                 consumerId: {columnName: "consumerId"},
                 "consumer.id": {relation: {entityName: "consumer", refField: "id"}},
                 "consumer.userId": {relation: {entityName: "consumer", refField: "userId"}}
@@ -238,7 +238,8 @@ public isolated client class Client {
                 "cartItem[].supermarketitemId": {relation: {entityName: "cartItem", refField: "supermarketitemId"}},
                 "cartItem[].quantity": {relation: {entityName: "cartItem", refField: "quantity"}},
                 "cartItem[].consumerId": {relation: {entityName: "cartItem", refField: "consumerId"}},
-                "cartItem[].productId": {relation: {entityName: "cartItem", refField: "productId"}}
+                "cartItem[].productId": {relation: {entityName: "cartItem", refField: "productId"}},
+                "cartItem[].orderId": {relation: {entityName: "cartItem", refField: "orderId"}}
             },
             keyFields: ["id"],
             joinMetadata: {
@@ -256,6 +257,7 @@ public isolated client class Client {
                 quantity: {columnName: "quantity"},
                 consumerId: {columnName: "consumerId"},
                 productId: {columnName: "productId"},
+                orderId: {columnName: "orderId"},
                 "supermarketItem.id": {relation: {entityName: "supermarketItem", refField: "id"}},
                 "supermarketItem.productId": {relation: {entityName: "supermarketItem", refField: "productId"}},
                 "supermarketItem.supermarketId": {relation: {entityName: "supermarketItem", refField: "supermarketId"}},
@@ -465,7 +467,7 @@ public isolated client class Client {
                 "addresses[].address": {relation: {entityName: "addresses", refField: "address"}},
                 "addresses[].city": {relation: {entityName: "addresses", refField: "city"}},
                 "addresses[].location": {relation: {entityName: "addresses", refField: "location"}},
-                "addresses[].isDefault": {relation: {entityName: "addresses", refField: "isDefault"}},
+                "addresses[].priority": {relation: {entityName: "addresses", refField: "priority"}},
                 "addresses[].consumerId": {relation: {entityName: "addresses", refField: "consumerId"}},
                 "opportunity[].id": {relation: {entityName: "opportunity", refField: "id"}},
                 "opportunity[].totalDistance": {relation: {entityName: "opportunity", refField: "totalDistance"}},

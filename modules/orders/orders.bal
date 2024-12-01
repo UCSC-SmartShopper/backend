@@ -10,6 +10,7 @@ import ballerina/http;
 import ballerina/io;
 import ballerina/persist;
 import ballerina/time;
+import backend.utils;
 
 public type CartToOrderRequest record {
     int consumerId;
@@ -108,7 +109,6 @@ public function cartToOrder(CartToOrderRequest cartToOrderRequest) returns int|p
         supermarketIdMap[item.supermarketItem.supermarketId.toBalString()] = item.supermarketItem.supermarketId;
         subTotal = subTotal + (item.supermarketItem.price * item.quantity);
     }
-    int[] supermarketIdList = supermarketIdMap.toArray();
 
     // ------------------ Calculate the delivery fee ------------------
     float deliveryFee = 0.0;
@@ -125,7 +125,7 @@ public function cartToOrder(CartToOrderRequest cartToOrderRequest) returns int|p
     // -------------------------- Create the Order --------------------------
     db:OrderInsert orderInsert = {
         consumerId: consumerId,
-        status: "Processing",
+        status: "ToPay",
         shippingAddress: shippingAddress,
         shippingLocation: shippingLocation,
         shippingMethod: shippingMethod,
@@ -134,7 +134,7 @@ public function cartToOrder(CartToOrderRequest cartToOrderRequest) returns int|p
         deliveryFee: deliveryFee,
         totalCost: subTotal + deliveryFee,
         
-        orderPlacedOn: time:utcToCivil(time:utcNow())
+        orderPlacedOn: utils:getCurrentTime()
     };
     int[]|persist:Error result = connection->/orders.post([orderInsert]);
 
@@ -143,6 +143,33 @@ public function cartToOrder(CartToOrderRequest cartToOrderRequest) returns int|p
     }
 
     int orderId = result[0];
+
+    // Update all the cart items of the consumer from the database whre orderId = -1
+    _ = check connection->executeNativeSQL(`UPDATE "CartItem" SET "orderId" = ${orderId} WHERE "consumerId" = ${consumerId} AND "orderId" = -1`);
+
+    return orderId;
+}
+
+// When the consumer pays for the order
+// Payment Resource will call this function
+// This function will create supermarket orders for each supermarket
+// This function will create supermarket orders for each supermarket
+// and update the order status to Processing
+public function order_payment(int orderId) returns error? {
+
+    // Cart Items for this order
+    db:Client connection = connection:getConnection();
+    stream<cart:CartItem, persist:Error?> cartItemsStream = connection->/cartitems();
+    cart:CartItem[] cartItems = check from cart:CartItem cartItem in cartItemsStream
+        where cartItem.orderId == orderId
+        select cartItem;
+
+    // Get the supermarket ids belongs to the cart items
+    map<int> supermarketIdMap = {};
+    foreach cart:CartItem item in cartItems {
+        supermarketIdMap[item.supermarketItem.supermarketId.toBalString()] = item.supermarketItem.supermarketId;
+    }
+    int[] supermarketIdList = supermarketIdMap.toArray();
 
     // -------------------------- Create Supermarker Orders --------------------------
     db:SupermarketOrderInsert[] supermarketOrderInsert = from int supermarketId in supermarketIdList
@@ -174,10 +201,11 @@ public function cartToOrder(CartToOrderRequest cartToOrderRequest) returns int|p
         return orderItemResult;
     }
 
-    // Remove all the cart items of the consumer from the database
-    _ = check connection->executeNativeSQL(`DELETE FROM "CartItem" WHERE "consumerId" = ${consumerId}`);
-
-    return orderId;
+    // Update the order status to Processing
+    db:OrderUpdate orderUpdate = {
+        status: "Processing"
+    };
+    _ = check connection->/orders/[orderId].put(orderUpdate);
 }
 
 public function supermarket_order_ready(auth:User user, OrderReadyRequest orderReadyRequest) returns db:SupermarketOrderWithRelations|OrderNotFound|http:Unauthorized|error {
@@ -248,7 +276,7 @@ function update_order_status_to_prepared(int orderId) returns error? {
                     waypoints: supermarketLocations.toBalString().toBytes(),
                     status: "Pending",
                     _orderId: orderId,
-                    orderPlacedOn: _order.orderPlacedOn ?: time:utcToCivil(time:utcNow()),
+                    orderPlacedOn: _order.orderPlacedOn ?: utils:getCurrentTime(),
                     driverId: -1
                 };
 

@@ -191,8 +191,8 @@ public function checkOtpMatching(OtpMappingRequest otpMappingRequest) returns st
         status: "Active",
         profilePic: "",
         lastLogin: (),
-        createdAt: time:utcToCivil(time:utcNow()),
-        updatedAt: time:utcToCivil(time:utcNow()),
+        createdAt: utils:getCurrentTime(),
+        updatedAt: utils:getCurrentTime(),
         deletedAt: ()
     };
 
@@ -242,7 +242,7 @@ public function driver_otp_genaration(DriverPersonalDetails driverPersonalDetail
         password: "",
         status: "OTPPending",
 
-        createdAt: time:utcToCivil(time:utcNow())
+        createdAt: utils:getCurrentTime()
     };
 
     db:Client connection = connection:getConnection();
@@ -355,8 +355,8 @@ public function accept_driver_request(auth:User user, int driverRequestId) retur
         profilePic: "",
 
         lastLogin: (),
-        createdAt: time:utcToCivil(time:utcNow()),
-        updatedAt: time:utcToCivil(time:utcNow()),
+        createdAt: utils:getCurrentTime(),
+        updatedAt: utils:getCurrentTime(),
         deletedAt: ()
     };
 

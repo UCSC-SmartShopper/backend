@@ -154,6 +154,7 @@ CREATE TABLE "CartItem" (
 	"quantity" INT NOT NULL,
 	"consumerId" INT NOT NULL,
 	"productId" INT NOT NULL,
+	"orderId" INT NOT NULL,
 	"supermarketitemId" INT NOT NULL,
 	FOREIGN KEY("supermarketitemId") REFERENCES "SupermarketItem"("id"),
 	PRIMARY KEY("id")
@@ -248,7 +249,7 @@ CREATE TABLE "Address" (
 	"address" VARCHAR(191) NOT NULL,
 	"city" VARCHAR(191) NOT NULL,
 	"location" VARCHAR(191) NOT NULL,
-	"isDefault" BOOLEAN NOT NULL,
+	"priority" INT NOT NULL,
 	"consumerId" INT NOT NULL,
 	FOREIGN KEY("consumerId") REFERENCES "Consumer"("id"),
 	PRIMARY KEY("id")

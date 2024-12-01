@@ -2,6 +2,9 @@ import ballerina/persist as _;
 import ballerina/time;
 import ballerinax/persist.sql;
 
+
+
+
 type User record {|
     @sql:Generated
     readonly int id;
@@ -69,11 +72,11 @@ type NonVerifiedDriver record {|
 type Address record {|
     @sql:Generated
     readonly int id;
-    string addressName;
-    string address;
+    string addressName; // home, work, etc
+    string address; // actual address
     string city;
-    string location;
-    boolean isDefault;
+    string location; // coordinates
+    int priority; // used to sort the addresses and find default address
     Consumer consumer;
 |};
 
@@ -124,6 +127,7 @@ type CartItem record {|
     int consumerId;
     @sql:UniqueIndex {name: "cart_item_unique_index"}
     int productId;
+    int orderId; // if the item is in an order, default -1
 |};
 
 type OrderItems record {|
