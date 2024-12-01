@@ -93,6 +93,11 @@ service / on new http:Listener(9090) {
         return user_registration:get_all_driver_requests(user);
     }
 
+    resource function get driver_requests/[int id](http:Request req) returns db:NonVerifiedDriver|http:Unauthorized|error {
+     
+        return user_registration:get_driver_request( id);
+    }
+
     // ---------------------------------------------- User Resource Functions ------------------------------------------------
     resource function get users(http:Request req) returns user:UserResponse|http:Unauthorized|error {
         auth:User user = check auth:getUser(req);
