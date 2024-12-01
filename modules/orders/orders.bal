@@ -144,6 +144,22 @@ public function cartToOrder(CartToOrderRequest cartToOrderRequest) returns int|p
 
     int orderId = result[0];
 
+    // -------------------------- Create the Order Items --------------------------
+    db:OrderItemsInsert[] orderItemInserts = from cart:CartItem cartItem in cartItems
+        select {
+            supermarketId: cartItem.supermarketItem.supermarketId,
+            productId: cartItem.supermarketItem.productId,
+            quantity: cartItem.quantity,
+            price: cartItem.supermarketItem.price,
+            _orderId: orderId
+        };
+
+    int[]|persist:Error orderItemResult = connection->/orderitems.post(orderItemInserts);
+
+    if orderItemResult is persist:Error {
+        return orderItemResult;
+    }
+
     // Update all the cart items of the consumer from the database whre orderId = -1
     _ = check connection->executeNativeSQL(`UPDATE "CartItem" SET "orderId" = ${orderId} WHERE "consumerId" = ${consumerId} AND "orderId" = -1`);
 
@@ -183,22 +199,6 @@ public function order_payment(int orderId) returns error? {
     int[]|persist:Error supermarketOrderResult = connection->/supermarketorders.post(supermarketOrderInsert);
     if supermarketOrderResult is persist:Error {
         return supermarketOrderResult;
-    }
-
-    // -------------------------- Create the Order Items --------------------------
-    db:OrderItemsInsert[] orderItemInserts = from cart:CartItem cartItem in cartItems
-        select {
-            supermarketId: cartItem.supermarketItem.supermarketId,
-            productId: cartItem.supermarketItem.productId,
-            quantity: cartItem.quantity,
-            price: cartItem.supermarketItem.price,
-            _orderId: orderId
-        };
-
-    int[]|persist:Error orderItemResult = connection->/orderitems.post(orderItemInserts);
-
-    if orderItemResult is persist:Error {
-        return orderItemResult;
     }
 
     // Update the order status to Processing
@@ -279,7 +279,26 @@ function update_order_status_to_prepared(int orderId) returns error? {
                     driverId: -1
                 };
 
-                _ = check connection->/opportunities.post([opportunityInsert]);
+                int[] listResult = check connection->/opportunities.post([opportunityInsert]);
+
+                if listResult.length() == 0 {
+                    return error("Error creating the opportunity");
+                }
+                int opportunityId = listResult[0];
+
+                // Create opportunity supermarkets
+                db:OpportunitySupermarketInsert[] opportunitySupermarketInserts = [];
+
+                foreach int supermarketId in supermarketIds {
+                    db:OpportunitySupermarketInsert opportunitySupermarketInsert = {
+                        supermarketId: supermarketId,
+                        opportunityId: opportunityId
+                    };
+                    opportunitySupermarketInserts.push(opportunitySupermarketInsert);
+                }
+
+                _ = check connection->/opportunitysupermarkets.post(opportunitySupermarketInserts);
+
             }
         }
     } on fail var e {
