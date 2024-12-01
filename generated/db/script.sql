@@ -224,7 +224,6 @@ CREATE TABLE "Opportunity" (
 	"startLocation" VARCHAR(191) NOT NULL,
 	"deliveryLocation" VARCHAR(191) NOT NULL,
 	"status" VARCHAR(191) NOT NULL,
-	"waypoints" BYTEA NOT NULL,
 	"driverId" INT NOT NULL,
 	"orderPlacedOn" TIMESTAMP NOT NULL,
 	"consumerId" INT NOT NULL,

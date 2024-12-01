@@ -14,3 +14,4 @@ target/
 Config.toml
 rsa.key
 rsa.pub
+.vscode/

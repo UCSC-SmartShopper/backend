@@ -2,10 +2,10 @@ import backend.auth;
 import backend.connection;
 import backend.db;
 import backend.errors;
+import backend.utils;
 
 import ballerina/http;
 import ballerina/persist;
-import backend.utils;
 
 public type SuperMarketNotFound record {|
     *http:NotFound;

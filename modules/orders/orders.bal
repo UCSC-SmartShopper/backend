@@ -5,12 +5,12 @@ import backend.db;
 import backend.errors;
 import backend.locations;
 import backend.supermarkets;
+import backend.utils;
 
 import ballerina/http;
 import ballerina/io;
 import ballerina/persist;
 import ballerina/time;
-import backend.utils;
 
 public type CartToOrderRequest record {
     int consumerId;
@@ -175,7 +175,7 @@ public function order_payment(int orderId) returns error? {
     db:SupermarketOrderInsert[] supermarketOrderInsert = from int supermarketId in supermarketIdList
         select {
             status: "Processing",
-            qrCode: "",
+            qrCode: "https://support.thinkific.com/hc/article_attachments/360042081334/5d37325ea1ff6.png",
             _orderId: orderId,
             supermarketId: supermarketId
         };
@@ -261,19 +261,18 @@ function update_order_status_to_prepared(int orderId) returns error? {
                 int[] supermarketIds = from db:SupermarketOrderOptionalized supermarketOrder in superMarketOrders
                     select supermarketOrder.supermarketId ?: -1;
 
-                string[] supermarketLocations = check locations:getOptimizedRoute(supermarketIds, _order.shippingLocation ?: "");
+                locations:OptimizedRoute optimizedRoute = check locations:getOptimizedRoute(supermarketIds, _order.shippingLocation ?: "");
 
                 // Create an opportunity
                 db:OpportunityInsert opportunityInsert = {
-                    totalDistance: 0.0,
-                    tripCost: 0.0,
+                    totalDistance: optimizedRoute.totalDistance,
+                    tripCost: optimizedRoute.deliveryCost - 100,
                     consumerId: _order.consumerId ?: -1,
-                    deliveryCost: _order.deliveryFee ?: 0.0,
+                    deliveryCost: optimizedRoute.deliveryCost,
 
                     startLocation: _order.shippingLocation ?: "",
                     deliveryLocation: _order.shippingAddress ?: "",
-
-                    waypoints: supermarketLocations.toBalString().toBytes(),
+                    
                     status: "Pending",
                     _orderId: orderId,
                     orderPlacedOn: _order.orderPlacedOn ?: utils:getCurrentTime(),

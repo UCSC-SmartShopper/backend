@@ -203,7 +203,7 @@ type Opportunity record {|
     OpportunitySupermarket[] opportunitysupermarket;
     string status;
 
-    byte[] waypoints; // strore the supermarket ids and locations
+    // byte[] waypoints; // strore the supermarket ids and locations
 
     Order _order;
     int driverId;
