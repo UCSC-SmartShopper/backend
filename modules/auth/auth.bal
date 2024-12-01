@@ -7,7 +7,7 @@ import ballerina/http;
 import ballerina/io;
 import ballerina/jwt;
 import ballerina/persist;
-import ballerina/time;
+import backend.utils;
 
 public type Credentials record {|
     string email_or_number;
@@ -180,7 +180,7 @@ function getDriverId(int userId) returns int {
 isolated function updateUserLastLogin(int userId) {
     do {
         db:Client connection = connection:getConnection();
-        _ = check connection->/users/[userId].put({lastLogin: time:utcToCivil(time:utcNow())});
+        _ = check connection->/users/[userId].put({lastLogin: utils:getCurrentTime()});
     } on fail {
         io:println("Error updating last login");
 

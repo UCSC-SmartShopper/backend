@@ -3,17 +3,16 @@ import backend.db;
 
 import ballerina/persist;
 
+// Non optimized version of the cart item
 public type CartItem record {|
-    int id;
+    *db:CartItem;
     db:SupermarketItem supermarketItem;
-    int quantity;
-    int consumerId?;
 |};
 
-public type CartItemInsert record {|
-    int supermarketitemId;
-    int quantity;
-|};
+// public type CartItemInsert record {|
+//     int supermarketitemId;
+//     int quantity;
+// |};
 
 public type CartItemResponse record {|
     int count;
@@ -29,7 +28,7 @@ public function getCartItems(int consumerId) returns CartItemResponse|error {
     db:Client connection = connection:getConnection();
     stream<db:CartItemWithRelations, persist:Error?> CartItemsStream = connection->/cartitems();
     db:CartItemWithRelations[] CartItems = check from db:CartItemWithRelations CartItem in CartItemsStream
-        where CartItem.consumerId == consumerId
+        where CartItem.consumerId == consumerId && CartItem.orderId == -1
         order by CartItem.id descending
         select CartItem;
 
@@ -46,12 +45,13 @@ public function addCartItem(int consumerId, db:CartItemInsert cartItem) returns 
         supermarketitemId: cartItem.supermarketitemId,
         quantity: cartItem.quantity,
         consumerId: consumerId,
-        productId: cartItem.productId
+        productId: cartItem.productId,
+        orderId: -1
     };
     int[]|persist:Error result = connection->/cartitems.post([cartItemInsert]);
 
     if (result is persist:Error) {
-        return error("Error while adding the cart item");
+        return result;
     }
     return result[0];
 }

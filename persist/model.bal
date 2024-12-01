@@ -2,6 +2,9 @@ import ballerina/persist as _;
 import ballerina/time;
 import ballerinax/persist.sql;
 
+
+
+
 type User record {|
     @sql:Generated
     readonly int id;
@@ -124,6 +127,8 @@ type CartItem record {|
     int consumerId;
     @sql:UniqueIndex {name: "cart_item_unique_index"}
     int productId;
+    @sql:UniqueIndex {name: "cart_item_unique_index"}
+    int orderId; // if the item is in an order, default -1
 |};
 
 type OrderItems record {|
@@ -199,7 +204,7 @@ type Opportunity record {|
     OpportunitySupermarket[] opportunitysupermarket;
     string status;
 
-    byte[] waypoints; // strore the supermarket ids and locations
+    // byte[] waypoints; // strore the supermarket ids and locations
 
     Order _order;
     int driverId;

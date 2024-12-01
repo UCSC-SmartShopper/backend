@@ -461,6 +461,7 @@ modules = [
 	{org = "djaya", packageName = "backend", moduleName = "backend.connection"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.consumer"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.db"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.distanceCalculation"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.driver"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.email_service"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.errors"},

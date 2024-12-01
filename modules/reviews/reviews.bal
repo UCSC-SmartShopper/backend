@@ -3,7 +3,7 @@ import backend.connection;
 import backend.db;
 
 import ballerina/persist;
-import ballerina/time;
+import backend.utils;
 
 public type ReviewInsert record {|
     string reviewType;
@@ -50,7 +50,7 @@ public function create_review(auth:User user, ReviewInsert review) returns int|e
         title: review.title,
         content: review.content,
         rating: review.rating,
-        createdAt: time:utcToCivil(time:utcNow())
+        createdAt: utils:getCurrentTime()
     };
 
     db:Client connection = connection:getConnection();

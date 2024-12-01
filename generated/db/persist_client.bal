@@ -238,7 +238,8 @@ public isolated client class Client {
                 "cartItem[].supermarketitemId": {relation: {entityName: "cartItem", refField: "supermarketitemId"}},
                 "cartItem[].quantity": {relation: {entityName: "cartItem", refField: "quantity"}},
                 "cartItem[].consumerId": {relation: {entityName: "cartItem", refField: "consumerId"}},
-                "cartItem[].productId": {relation: {entityName: "cartItem", refField: "productId"}}
+                "cartItem[].productId": {relation: {entityName: "cartItem", refField: "productId"}},
+                "cartItem[].orderId": {relation: {entityName: "cartItem", refField: "orderId"}}
             },
             keyFields: ["id"],
             joinMetadata: {
@@ -256,6 +257,7 @@ public isolated client class Client {
                 quantity: {columnName: "quantity"},
                 consumerId: {columnName: "consumerId"},
                 productId: {columnName: "productId"},
+                orderId: {columnName: "orderId"},
                 "supermarketItem.id": {relation: {entityName: "supermarketItem", refField: "id"}},
                 "supermarketItem.productId": {relation: {entityName: "supermarketItem", refField: "productId"}},
                 "supermarketItem.supermarketId": {relation: {entityName: "supermarketItem", refField: "supermarketId"}},
@@ -323,7 +325,6 @@ public isolated client class Client {
                 "opportunity[].startLocation": {relation: {entityName: "opportunity", refField: "startLocation"}},
                 "opportunity[].deliveryLocation": {relation: {entityName: "opportunity", refField: "deliveryLocation"}},
                 "opportunity[].status": {relation: {entityName: "opportunity", refField: "status"}},
-                "opportunity[].waypoints": {relation: {entityName: "opportunity", refField: "waypoints"}},
                 "opportunity[]._orderId": {relation: {entityName: "opportunity", refField: "_orderId"}},
                 "opportunity[].driverId": {relation: {entityName: "opportunity", refField: "driverId"}},
                 "opportunity[].orderPlacedOn": {relation: {entityName: "opportunity", refField: "orderPlacedOn"}}
@@ -392,7 +393,6 @@ public isolated client class Client {
                 "opportunity.startLocation": {relation: {entityName: "opportunity", refField: "startLocation"}},
                 "opportunity.deliveryLocation": {relation: {entityName: "opportunity", refField: "deliveryLocation"}},
                 "opportunity.status": {relation: {entityName: "opportunity", refField: "status"}},
-                "opportunity.waypoints": {relation: {entityName: "opportunity", refField: "waypoints"}},
                 "opportunity._orderId": {relation: {entityName: "opportunity", refField: "_orderId"}},
                 "opportunity.driverId": {relation: {entityName: "opportunity", refField: "driverId"}},
                 "opportunity.orderPlacedOn": {relation: {entityName: "opportunity", refField: "orderPlacedOn"}}
@@ -415,7 +415,6 @@ public isolated client class Client {
                 startLocation: {columnName: "startLocation"},
                 deliveryLocation: {columnName: "deliveryLocation"},
                 status: {columnName: "status"},
-                waypoints: {columnName: "waypoints"},
                 _orderId: {columnName: "_orderId"},
                 driverId: {columnName: "driverId"},
                 orderPlacedOn: {columnName: "orderPlacedOn"},
@@ -475,7 +474,6 @@ public isolated client class Client {
                 "opportunity[].startLocation": {relation: {entityName: "opportunity", refField: "startLocation"}},
                 "opportunity[].deliveryLocation": {relation: {entityName: "opportunity", refField: "deliveryLocation"}},
                 "opportunity[].status": {relation: {entityName: "opportunity", refField: "status"}},
-                "opportunity[].waypoints": {relation: {entityName: "opportunity", refField: "waypoints"}},
                 "opportunity[]._orderId": {relation: {entityName: "opportunity", refField: "_orderId"}},
                 "opportunity[].driverId": {relation: {entityName: "opportunity", refField: "driverId"}},
                 "opportunity[].orderPlacedOn": {relation: {entityName: "opportunity", refField: "orderPlacedOn"}}
