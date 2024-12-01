@@ -1,8 +1,8 @@
 import ballerina/io;
 import backend.db;
 import backend.connection;
-import ballerina/time;
 import ballerina/persist;
+import backend.utils;
 
 public type UserPreference record {|
     int userid;
@@ -85,7 +85,7 @@ public function createUserPreference(UserPreference userPreference, int updatedP
         userid: userPreference.userid,
         referenceid: userPreference.referenceid, 
         points: updatedPoints,
-        createdAt: time:utcToCivil(time:utcNow())
+        createdAt: utils:getCurrentTime()
     };
     io:println("Insert Record: ", userPreferenceInsert);
 

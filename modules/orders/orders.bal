@@ -10,6 +10,7 @@ import ballerina/http;
 import ballerina/io;
 import ballerina/persist;
 import ballerina/time;
+import backend.utils;
 
 public type CartToOrderRequest record {
     int consumerId;
@@ -133,7 +134,7 @@ public function cartToOrder(CartToOrderRequest cartToOrderRequest) returns int|p
         deliveryFee: deliveryFee,
         totalCost: subTotal + deliveryFee,
         
-        orderPlacedOn: time:utcToCivil(time:utcNow())
+        orderPlacedOn: utils:getCurrentTime()
     };
     int[]|persist:Error result = connection->/orders.post([orderInsert]);
 
@@ -275,7 +276,7 @@ function update_order_status_to_prepared(int orderId) returns error? {
                     waypoints: supermarketLocations.toBalString().toBytes(),
                     status: "Pending",
                     _orderId: orderId,
-                    orderPlacedOn: _order.orderPlacedOn ?: time:utcToCivil(time:utcNow()),
+                    orderPlacedOn: _order.orderPlacedOn ?: utils:getCurrentTime(),
                     driverId: -1
                 };
 

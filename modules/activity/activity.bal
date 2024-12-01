@@ -3,7 +3,7 @@ import backend.connection;
 import backend.db;
 
 import ballerina/persist;
-import ballerina/time;
+import backend.utils;
 
 public type ActivityResponse record {|
     int count;
@@ -24,7 +24,7 @@ public function getActivities(auth:User user) returns ActivityResponse|persist:E
 public function createActivity(auth:User user, string description) returns error|int {
     db:Client connection = connection:getConnection();
 
-    db:ActivityInsert activityInsert = {userId: user.id, description: description, dateTime: time:utcToCivil(time:utcNow())};
+    db:ActivityInsert activityInsert = {userId: user.id, description: description, dateTime: utils:getCurrentTime()};
     int[]|persist:Error result = connection->/activities.post([activityInsert]);
 
     if result is persist:Error || result.length() == 0 {
