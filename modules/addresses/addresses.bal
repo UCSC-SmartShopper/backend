@@ -4,6 +4,7 @@ import backend.db;
 
 import ballerina/persist;
 import ballerina/time;
+import backend.activity;
 
 public type AddressesResponse record {|
     int count;
@@ -63,7 +64,8 @@ public function create_consumer_address(auth:User user, db:AddressInsert address
     if result is persist:Error {
         return result;
     }
-
+    //create activity
+    _  = start activity:createActivity(consumerId, "Create consumer " + address.addressName + " address");
     return "Address created successfully";
 }
 
@@ -86,6 +88,8 @@ public function update_consumer_default_address(auth:User user, int id) returns 
     if result is persist:Error {
         return result;
     }
-
+    //create activity
+    int consumerId = user.consumerId ?: -1;
+    _  = start activity:createActivity(consumerId, "Update consumer " + address.addressName + " address");
     return "Default address updated successfully";
 }

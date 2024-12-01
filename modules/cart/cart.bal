@@ -2,6 +2,7 @@ import backend.connection;
 import backend.db;
 
 import ballerina/persist;
+import backend.activity;
 
 // Non optimized version of the cart item
 public type CartItem record {|
@@ -53,6 +54,8 @@ public function addCartItem(int consumerId, db:CartItemInsert cartItem) returns 
     if (result is persist:Error) {
         return result;
     }
+    //create activity
+    _  = start activity:createActivity(consumerId, "Added item to cart.");
     return result[0];
 }
 
@@ -71,6 +74,8 @@ public function updateCartItem(int consumerId, db:CartItem cartItem) returns db:
     if result is persist:Error {
         return error("Error while updating the cart item");
     }
+    //create activity
+    _  = start activity:createActivity(consumerId, "Updated cart item.");
     return result;
 }
 
@@ -84,6 +89,8 @@ public function removeCartItem(int consumerId, int id) returns db:CartItem|error
     if result is persist:Error {
         return error("Error while deleting the cart item");
     }
+    //create activity
+    _  = start activity:createActivity(consumerId, "Deleted cart item.");
     return result;
 
 }

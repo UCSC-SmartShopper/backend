@@ -94,7 +94,12 @@ public function get_delivery_cost(string[] supermarketLocations, string delivery
 isolated map<float> distanceMap = {};
 
 public function getOptimizedRoute(int[] supermarketIds, string homeLocation) returns OptimizedRoute|error {
-
+    if supermarketIds.length() == 0 {
+        return error("No supermarkets found");
+    }
+    if homeLocation == "" {
+        return error("Invalid home location");
+    }
     // supermarket id -> supermarket location
     map<string> locationMap = {};
     supermarkets:SupermarketResponse supermarketList = check supermarkets:get_supermarkets();

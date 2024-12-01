@@ -4,6 +4,7 @@ import backend.db;
 
 import ballerina/persist;
 import backend.utils;
+import backend.activity;
 
 public type ReviewInsert record {|
     string reviewType;
@@ -61,7 +62,9 @@ public function create_review(auth:User user, ReviewInsert review) returns int|e
     if (result.length() > 0) {
         return result[0];
     }
-
+    //create activity
+    int consumerId = user.consumerId ?: -1;
+    _  = start activity:createActivity(consumerId, "Added review to " + review.reviewType + "with" + review.rating.toString() + "rating");
     return -1;
 }
 

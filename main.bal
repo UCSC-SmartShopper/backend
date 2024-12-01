@@ -172,11 +172,6 @@ service / on new http:Listener(9090) {
         }
     }
 
-    resource function post activities(http:Request req, @http:Payload record {string description;} payload) returns int|error {
-        auth:User user = check auth:getUser(req);
-        return activity:createActivity(user, payload.description);
-    }
-
     // ---------------------------------------------- Products Resource Functions -----------------------------------------------
     resource function get products(
             string category,
