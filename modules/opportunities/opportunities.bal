@@ -32,7 +32,7 @@ function createOpportunityNotFound(int id) returns OpportunityNotFound {
 
 public function getOpportunities(auth:User user, string status,int _limit) returns OpportunityResponse|http:Unauthorized|error {
 
-    string[] authorizedRoles = ["Driver", "Courier Company Manager"];
+    string[] authorizedRoles = ["Driver", "Courier Company Manager", "Admin"];
 
     if (!authorizedRoles.some((role) => role == user.role)) {
         return http:UNAUTHORIZED;
