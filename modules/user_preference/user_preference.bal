@@ -1,8 +1,8 @@
 import ballerina/io;
 import backend.db;
 import backend.connection;
-import ballerina/time;
 import ballerina/persist;
+import backend.utils;
 
 public type UserPreference record {|
     int userid;
@@ -12,13 +12,31 @@ public type UserPreference record {|
 |};
 
 map<int> preferenceWeights = {
-    "Clicks": 1,
+    "Cart": 3,
     "Purchases": 5,
-    "Favorites": 4,
-    "Search history": 2,
-    "Time spent on items": 3,
-    "Ratings or Reviews": 5
+    // "Favorites": 4,
+    // "Search history": 2,
+    // "Time spent on items": 3,
+    "Ratings": 4
 };
+
+public function getUserPreferencesByIdandProductId(int userId, int productId) returns error|float {
+    db:Client connection = connection:getConnection();
+
+    stream<db:UserPreference, persist:Error?> userPreferenceStream = connection->/userpreferences;
+    db:UserPreference[] userPreferenceList = check from db:UserPreference userPreference in userPreferenceStream
+        where userPreference.userid == userId && userPreference.referenceid == productId
+        select userPreference;
+    check userPreferenceStream.close();
+
+    if userPreferenceList.length() == 0 {
+        return 0.0;
+    }
+
+    float scoreTop = <float> userPreferenceList[0].points;
+    
+    return scoreTop;
+}
 
 
 public function getUserPreferences() returns db:UserPreference[]|error {
@@ -67,7 +85,7 @@ public function createUserPreference(UserPreference userPreference, int updatedP
         userid: userPreference.userid,
         referenceid: userPreference.referenceid, 
         points: updatedPoints,
-        createdAt: time:utcToCivil(time:utcNow())
+        createdAt: utils:getCurrentTime()
     };
     io:println("Insert Record: ", userPreferenceInsert);
 

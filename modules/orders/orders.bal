@@ -5,9 +5,11 @@ import backend.db;
 import backend.errors;
 import backend.locations;
 import backend.supermarkets;
+import backend.utils;
 
 import ballerina/http;
 import ballerina/io;
+import ballerina/lang.runtime;
 import ballerina/persist;
 import ballerina/time;
 
@@ -98,7 +100,7 @@ public function cartToOrder(CartToOrderRequest cartToOrderRequest) returns int|p
     db:Client connection = connection:getConnection();
     stream<cart:CartItem, persist:Error?> cartItemsStream = connection->/cartitems();
     cart:CartItem[] cartItems = check from cart:CartItem cartItem in cartItemsStream
-        where cartItem.consumerId == consumerId
+        where cartItem.consumerId == consumerId && cartItem.orderId == -1
         select cartItem;
 
     // Calculate the total price of the order and get the supermarket ids
@@ -108,7 +110,6 @@ public function cartToOrder(CartToOrderRequest cartToOrderRequest) returns int|p
         supermarketIdMap[item.supermarketItem.supermarketId.toBalString()] = item.supermarketItem.supermarketId;
         subTotal = subTotal + (item.supermarketItem.price * item.quantity);
     }
-    int[] supermarketIdList = supermarketIdMap.toArray();
 
     // ------------------ Calculate the delivery fee ------------------
     float deliveryFee = 0.0;
@@ -125,7 +126,7 @@ public function cartToOrder(CartToOrderRequest cartToOrderRequest) returns int|p
     // -------------------------- Create the Order --------------------------
     db:OrderInsert orderInsert = {
         consumerId: consumerId,
-        status: "Processing",
+        status: "ToPay",
         shippingAddress: shippingAddress,
         shippingLocation: shippingLocation,
         shippingMethod: shippingMethod,
@@ -134,7 +135,7 @@ public function cartToOrder(CartToOrderRequest cartToOrderRequest) returns int|p
         deliveryFee: deliveryFee,
         totalCost: subTotal + deliveryFee,
         
-        orderPlacedOn: time:utcToCivil(time:utcNow())
+        orderPlacedOn: utils:getCurrentTime()
     };
     int[]|persist:Error result = connection->/orders.post([orderInsert]);
 
@@ -143,20 +144,6 @@ public function cartToOrder(CartToOrderRequest cartToOrderRequest) returns int|p
     }
 
     int orderId = result[0];
-
-    // -------------------------- Create Supermarker Orders --------------------------
-    db:SupermarketOrderInsert[] supermarketOrderInsert = from int supermarketId in supermarketIdList
-        select {
-            status: "Processing",
-            qrCode: "",
-            _orderId: orderId,
-            supermarketId: supermarketId
-        };
-
-    int[]|persist:Error supermarketOrderResult = connection->/supermarketorders.post(supermarketOrderInsert);
-    if supermarketOrderResult is persist:Error {
-        return supermarketOrderResult;
-    }
 
     // -------------------------- Create the Order Items --------------------------
     db:OrderItemsInsert[] orderItemInserts = from cart:CartItem cartItem in cartItems
@@ -174,10 +161,52 @@ public function cartToOrder(CartToOrderRequest cartToOrderRequest) returns int|p
         return orderItemResult;
     }
 
-    // Remove all the cart items of the consumer from the database
-    _ = check connection->executeNativeSQL(`DELETE FROM "CartItem" WHERE "consumerId" = ${consumerId}`);
+    // Update all the cart items of the consumer from the database whre orderId = -1
+    _ = check connection->executeNativeSQL(`UPDATE "CartItem" SET "orderId" = ${orderId} WHERE "consumerId" = ${consumerId} AND "orderId" = -1`);
 
     return orderId;
+}
+
+// When the consumer pays for the order
+// Payment Resource will call this function
+// This function will create supermarket orders for each supermarket
+// This function will create supermarket orders for each supermarket
+// and update the order status to Processing
+public function order_payment(int orderId) returns error? {
+
+    // Cart Items for this order
+    db:Client connection = connection:getConnection();
+    stream<cart:CartItem, persist:Error?> cartItemsStream = connection->/cartitems();
+    cart:CartItem[] cartItems = check from cart:CartItem cartItem in cartItemsStream
+        where cartItem.orderId == orderId
+        select cartItem;
+
+    // Get the supermarket ids belongs to the cart items
+    map<int> supermarketIdMap = {};
+    foreach cart:CartItem item in cartItems {
+        supermarketIdMap[item.supermarketItem.supermarketId.toBalString()] = item.supermarketItem.supermarketId;
+    }
+    int[] supermarketIdList = supermarketIdMap.toArray();
+
+    // -------------------------- Create Supermarker Orders --------------------------
+    db:SupermarketOrderInsert[] supermarketOrderInsert = from int supermarketId in supermarketIdList
+        select {
+            status: "Processing",
+            qrCode: "https://support.thinkific.com/hc/article_attachments/360042081334/5d37325ea1ff6.png",
+            _orderId: orderId,
+            supermarketId: supermarketId
+        };
+
+    int[]|persist:Error supermarketOrderResult = connection->/supermarketorders.post(supermarketOrderInsert);
+    if supermarketOrderResult is persist:Error {
+        return supermarketOrderResult;
+    }
+
+    // Update the order status to Processing
+    db:OrderUpdate orderUpdate = {
+        status: "Processing"
+    };
+    _ = check connection->/orders/[orderId].put(orderUpdate);
 }
 
 public function supermarket_order_ready(auth:User user, OrderReadyRequest orderReadyRequest) returns db:SupermarketOrderWithRelations|OrderNotFound|http:Unauthorized|error {
@@ -215,6 +244,7 @@ public function supermarket_order_ready(auth:User user, OrderReadyRequest orderR
 function update_order_status_to_prepared(int orderId) returns error? {
     do {
         if (orderId != -1) {
+            runtime:sleep(5);
 
             db:Client connection = connection:getConnection();
             db:OrderWithRelations _order = check connection->/orders/[orderId]();
@@ -233,26 +263,44 @@ function update_order_status_to_prepared(int orderId) returns error? {
                 int[] supermarketIds = from db:SupermarketOrderOptionalized supermarketOrder in superMarketOrders
                     select supermarketOrder.supermarketId ?: -1;
 
-                string[] supermarketLocations = check locations:getOptimizedRoute(supermarketIds, _order.shippingLocation ?: "");
+                locations:OptimizedRoute optimizedRoute = check locations:getOptimizedRoute(supermarketIds, _order.shippingLocation ?: "");
 
                 // Create an opportunity
                 db:OpportunityInsert opportunityInsert = {
-                    totalDistance: 0.0,
-                    tripCost: 0.0,
+                    totalDistance: optimizedRoute.totalDistance,
+                    tripCost: optimizedRoute.deliveryCost - 100,
                     consumerId: _order.consumerId ?: -1,
-                    deliveryCost: _order.deliveryFee ?: 0.0,
+                    deliveryCost: optimizedRoute.deliveryCost,
 
                     startLocation: _order.shippingLocation ?: "",
                     deliveryLocation: _order.shippingAddress ?: "",
-
-                    waypoints: supermarketLocations.toBalString().toBytes(),
+                    
                     status: "Pending",
                     _orderId: orderId,
-                    orderPlacedOn: _order.orderPlacedOn ?: time:utcToCivil(time:utcNow()),
+                    orderPlacedOn: _order.orderPlacedOn ?: utils:getCurrentTime(),
                     driverId: -1
                 };
 
-                _ = check connection->/opportunities.post([opportunityInsert]);
+                int[] listResult = check connection->/opportunities.post([opportunityInsert]);
+
+                if listResult.length() == 0 {
+                    return error("Error creating the opportunity");
+                }
+                int opportunityId = listResult[0];
+
+                // Create opportunity supermarkets
+                db:OpportunitySupermarketInsert[] opportunitySupermarketInserts = [];
+
+                foreach int supermarketId in supermarketIds {
+                    db:OpportunitySupermarketInsert opportunitySupermarketInsert = {
+                        supermarketId: supermarketId,
+                        opportunityId: opportunityId
+                    };
+                    opportunitySupermarketInserts.push(opportunitySupermarketInsert);
+                }
+
+                _ = check connection->/opportunitysupermarkets.post(opportunitySupermarketInserts);
+
             }
         }
     } on fail var e {

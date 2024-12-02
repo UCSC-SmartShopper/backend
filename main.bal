@@ -5,6 +5,7 @@ import backend.auth;
 import backend.cart;
 import backend.consumer;
 import backend.db;
+import backend.distanceCalculation;
 import backend.driver;
 import backend.file_service;
 import backend.liked_products;
@@ -22,7 +23,6 @@ import backend.user;
 import backend.user_preference;
 import backend.user_registration;
 import backend.utils;
-import backend.distanceCalculation;
 
 import ballerina/http;
 import ballerina/io;
@@ -46,7 +46,7 @@ type productQuery record {|
 }
 service / on new http:Listener(9090) {
 
-    function init() {
+    function init() returns error? {
         io:println("Service started on port 9090");
         _ = start utils:sendHeartbeat();
     }
@@ -156,7 +156,7 @@ service / on new http:Listener(9090) {
         auth:User user = check auth:getUser(req);
         return addresses:create_consumer_address(user, consumerAddress);
     }
-    
+
     resource function patch addresses/default/[int id](http:Request req) returns string|error {
         auth:User user = check auth:getUser(req);
         return addresses:update_consumer_default_address(user, id);
@@ -345,16 +345,15 @@ service / on new http:Listener(9090) {
         return stats:get_supermarket_earnings(supermarketId);
     }
 
-
     resource function get stats/feedbacks_by_supermarket_id(int supermarketId) returns reviews:ReviewResponse|error {
         return stats:get_feedbacks_by_supermarket_id(supermarketId);
     }
 
     resource function get stats/drivers_earnings/[int driverId]() returns float|error {
         return stats:get_driver_earnings(driverId);
-        
+
     }
-    
+
     resource function get stats/supermarket_sales() returns stats:SalesResponse|error {
         return stats:get_all_supermarket_sales();
     }
@@ -379,6 +378,10 @@ service / on new http:Listener(9090) {
         return payments:get_order_payment(user, orderId);
     }
 
+    resource function post payhere_verify(http:Request req) returns string|error {
+        return payments:payhere_verify(check req.getFormParams());
+    }
+
     //-------------------------------------------- Location Resource Functions----------------------------------------------------
     resource function post locations/consumer_supermarket_distance(@http:Payload record {string location1; string location2;} payload) returns float|error {
         return locations:get_consumer_supermarket_distance(payload.location1, payload.location2);
@@ -386,6 +389,10 @@ service / on new http:Listener(9090) {
 
     resource function post locations/delivery_cost(@http:Payload record {string[] supermarketLocations; string deliveryLocation;} payload) returns float|error {
         return locations:get_delivery_cost(payload.supermarketLocations, payload.deliveryLocation);
+    }
+
+    resource function post locations/optimize_route(@http:Payload record {int[] supermarketIds; string homeLocation;} payload) returns locations:OptimizedRoute|error {
+        return locations:getOptimizedRoute(payload.supermarketIds, payload.homeLocation);
     }
 
     //-------------------------------------------- Heartbeat Resource Functions----------------------------------------------------
@@ -400,17 +407,21 @@ service / on new http:Listener(9090) {
     };
 
     // ---------------------------------------------- Optimizing Algorithm  -----------------------------------------------------------
-    resource function get optimizer() returns optimizer:Item[] {
-        // Hardcoded list of items
-        io:println("Optimizer service called");
-        optimizer:Item[] items = [
-            {id: 1, name: "item1", price: 100.0, rating: 4, distance: 10.0, score: 0.0},
-            {id: 2, name: "item2", price: 150.0, rating: 5, distance: 15.0, score: 0.0},
-            {id: 3, name: "item3", price: 120.0, rating: 3, distance: 12.0, score: 0.0},
-            {id: 4, name: "item4", price: 200.0, rating: 4, distance: 8.0, score: 0.0}
-        ];
+    //     resource function get optimizer() returns optimizer:Item[] {
+    //     // Hardcoded list of items
+    //     io:println("Optimizer service called");
+    //     optimizer:Item[] items = [
+    //         {id: 1, name: "item1", price: 100.0, rating: 4, distance: 10.0, score: 0.0 , userPreference: 0.0},
+    //         {id: 2, name: "item2", price: 150.0, rating: 5, distance: 15.0, score: 0.0, userPreference: 0.0},
+    //         {id: 3, name: "item3", price: 120.0, rating: 3, distance: 12.0, score: 0.0, userPreference: 0.0},
+    //         {id: 4, name: "item4", price: 200.0, rating: 4, distance: 8.0, score: 0.0, userPreference: 0.0}
+    //     ];
 
-        return optimizer:rateItems(items);
+    //     return optimizer:rateItems(items);
+    // }
+
+    resource function get optimizer(@http:Query int userId, @http:Query string location) returns json|error|optimizer:ScoredItem[] {
+        return optimizer:OptimizeCart(userId, location);
     }
 
     resource function post userpreference/add(@http:Payload user_preference:UserPreference userPreference) returns db:UserPreference|string|error {
@@ -421,6 +432,5 @@ service / on new http:Listener(9090) {
     resource function get distanceCalculation(int[] id, string currentLocation) returns map<float>|error? {
         return distanceCalculation:distanceCalculation(id, currentLocation);
     };
-
 
 }
