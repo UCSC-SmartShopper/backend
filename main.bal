@@ -17,6 +17,7 @@ import backend.payments;
 import backend.products;
 import backend.reviews;
 import backend.stats;
+import backend.supermarketStats;
 import backend.supermarket_items;
 import backend.supermarkets;
 import backend.user;
@@ -96,6 +97,11 @@ service / on new http:Listener(9090) {
         return user_registration:get_all_driver_requests(user);
     }
 
+    resource function get driver_requests/[int id](http:Request req) returns db:NonVerifiedDriver|http:Unauthorized|error {
+
+        return user_registration:get_driver_request(id);
+    }
+
     // ---------------------------------------------- User Resource Functions ------------------------------------------------
     resource function get users(http:Request req) returns user:UserResponse|http:Unauthorized|error {
         auth:User user = check auth:getUser(req);
@@ -169,7 +175,7 @@ service / on new http:Listener(9090) {
 
     resource function patch addresses/[int id](http:Request req, @http:Payload db:AddressUpdate consumerAddress) returns string|error {
         auth:User user = check auth:getUser(req);
-        return addresses:update_consumer_address(user, id,consumerAddress);
+        return addresses:update_consumer_address(user, id, consumerAddress);
     }
 
     resource function delete addresses/[int id](http:Request req) returns string|error {
@@ -324,6 +330,10 @@ service / on new http:Listener(9090) {
         return orders:supermarket_order_ready(user, orderReadyRequest);
     }
 
+    resource function get allOrders(http:Request req) returns orders:OrderResponse|error {
+        return orders:getAllOrders();
+    }
+
     //---------------------------------Advertisement Resource Functions---------------------------------------------------------
 
     resource function get advertisements() returns db:Advertisement[]|error? {
@@ -441,6 +451,19 @@ service / on new http:Listener(9090) {
     // ---------------------------------------------- distance cal Files  -----------------------------------------------------------
     resource function get distanceCalculation(int[] id, string currentLocation) returns map<float>|error? {
         return distanceCalculation:distanceCalculation(id, currentLocation);
+    };
+
+    // ---------------------------------------------- Supermarket Stats Files  -----------------------------------------------------------
+    resource function get supermarket_earnings_stats(int supermarketId, int month) returns json|error {
+        return supermarketStats:get_supermarket_earnings_by_month(supermarketId, month);
+    };
+
+    resource function get supermarket_order_stats(int supermarketId, int month) returns json|error {
+        return supermarketStats:get_supermarket_Order_stat(supermarketId, month);
+    };
+
+    resource function get get_supermarket_monthly_earnings(int supermarketId) returns json|error {
+        return supermarketStats:get_supermarket_monthly_earnings(supermarketId);
     };
 
 }

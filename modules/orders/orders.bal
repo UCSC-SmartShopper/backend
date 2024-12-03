@@ -270,7 +270,7 @@ function update_order_status_to_prepared(int orderId) returns error? {
                 // Create an opportunity
                 db:OpportunityInsert opportunityInsert = {
                     totalDistance: optimizedRoute.totalDistance,
-                    tripCost: optimizedRoute.deliveryCost - 100,
+                    tripCost: optimizedRoute.deliveryCost,
                     consumerId: _order.consumerId ?: -1,
                     deliveryCost: optimizedRoute.deliveryCost,
 
@@ -308,4 +308,15 @@ function update_order_status_to_prepared(int orderId) returns error? {
     } on fail var e {
         io:println(e);
     }
+}
+
+public function getAllOrders() returns OrderResponse|error {
+    db:Client connection = connection:getConnection();
+
+    stream<db:OrderWithRelations, persist:Error?> orderStream = connection->/orders.get();
+    db:OrderWithRelations[] orderList = check from db:OrderWithRelations _order in orderStream
+        order by _order.id descending
+        select _order;
+
+    return {count: orderList.length(), next: "null", results: orderList};
 }
