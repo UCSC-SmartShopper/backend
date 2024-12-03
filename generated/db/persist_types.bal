@@ -16,6 +16,7 @@ public enum OrderStatus {
     ToPay,
     Processing,
     Prepared,
+    Picked,
     Completed,
     Cancelled
 }

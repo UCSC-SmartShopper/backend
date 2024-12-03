@@ -3,6 +3,7 @@ import backend.connection;
 import backend.db;
 
 import ballerina/persist;
+import backend.activity;
 
 public type LikedProductResponse record {|
     int count;
@@ -30,6 +31,9 @@ public function create_liked_product(auth:User user, int productId) returns erro
     if result is persist:Error || result.length() == 0 {
         return error("Error while adding the liked product");
     }
+    // Create activity
+    int consumerId = user.consumerId ?: -1;
+    _ = start activity:createActivity(consumerId, "Added item to favorite products");
     return result[0];
 }
 
@@ -47,6 +51,9 @@ public function delete_liked_product(auth:User user, int id) returns string|erro
     if result is persist:Error {
         return error("Error while deleting the liked product");
     }
+    // Create activity
+    int consumerId = user.consumerId ?: -1;
+    _ = start activity:createActivity(consumerId, "Deleted item in favorite products");
     return "Liked product deleted successfully";
 }
 

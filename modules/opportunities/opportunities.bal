@@ -30,7 +30,7 @@ function createOpportunityNotFound(int id) returns OpportunityNotFound {
     };
 }
 
-public function getOpportunities(auth:User user, string status,int _limit) returns OpportunityResponse|http:Unauthorized|error {
+public function getOpportunities(auth:User user, string status, int _limit) returns OpportunityResponse|http:Unauthorized|error {
 
     string[] authorizedRoles = ["Driver", "Courier Company Manager"];
 
@@ -56,7 +56,7 @@ public function getOpportunities(auth:User user, string status,int _limit) retur
             // Show all opportunities belonging to the driver
             // Show all pending opportunities
             opportunities = opportunities.filter(
-                (opportunity) => opportunity.driverId == user.driverId|| status == "Pending"
+                (opportunity) => opportunity.driverId == user.driverId || status == "Pending"
                 );
         }
 
@@ -91,6 +91,13 @@ public function accept_opportunity(auth:User user, int id) returns db:Opportunit
     if updatedOpportunity is persist:Error {
         return error("Accepting opportunity failed");
     }
+
+    // Update Order status
+    db:OrderUpdate orderUpdate = {status: "Picked"};
+    db:Order|persist:Error updatedOrder = connection->/orders/[updatedOpportunity._orderId].put(orderUpdate);
+    if updatedOrder is persist:Error {
+        return error("Updating order status failed");
+    }
     return updatedOpportunity;
 }
 
@@ -103,6 +110,12 @@ public function complete_delivery(auth:User user, int id) returns db:Opportunity
     if updatedOpportunity is persist:Error {
         return error("Completing delivery failed");
     }
+
+    // Update Order status
+    db:OrderUpdate orderUpdate = {status: "Completed"};
+    db:Order|persist:Error updatedOrder = connection->/orders/[updatedOpportunity._orderId].put(orderUpdate);
+    if updatedOrder is persist:Error {
+        return error("Updating order status failed");
+    }
     return updatedOpportunity;
 }
-

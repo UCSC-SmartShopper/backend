@@ -1,3 +1,4 @@
+import backend.activity;
 import backend.auth;
 import backend.connection;
 import backend.db;
@@ -22,6 +23,20 @@ public function get_all_addresses(auth:User user) returns AddressesResponse|erro
         select address;
 
     return {count: addressList.length(), next: false, results: addressList};
+}
+
+// get address by id
+public function get_address_by_id(auth:User user, int id) returns db:Address|error {
+
+    db:Client connection = connection:getConnection();
+    db:Address address = check connection->/addresses/[id]();
+
+    // Authorization
+    if address.consumerId != user.consumerId {
+        return error("Unauthorized access");
+    }
+
+    return address;
 }
 
 public function create_consumer_address(auth:User user, db:AddressInsert address) returns string|error {
@@ -63,7 +78,8 @@ public function create_consumer_address(auth:User user, db:AddressInsert address
     if result is persist:Error {
         return result;
     }
-
+    //create activity
+    _ = start activity:createActivity(consumerId, "Create consumer " + address.addressName + " address");
     return "Address created successfully";
 }
 
@@ -86,6 +102,57 @@ public function update_consumer_default_address(auth:User user, int id) returns 
     if result is persist:Error {
         return result;
     }
-
+    //create activity
+    int consumerId = user.consumerId ?: -1;
+    _ = start activity:createActivity(consumerId, "Update consumer " + address.addressName + " address");
     return "Default address updated successfully";
+}
+
+public function update_consumer_address(auth:User user, int id, db:AddressUpdate AddressUpdateRequest) returns string|error {
+
+    db:Client connection = connection:getConnection();
+    db:Address address = check connection->/addresses/[id]();
+
+    // Authorization
+    if address.consumerId != user.consumerId {
+        return error("Unauthorized access");
+    }
+
+    db:AddressUpdate addressUpdate = {
+        addressName: AddressUpdateRequest.addressName,
+        address: AddressUpdateRequest.address,
+        city: AddressUpdateRequest.city,
+        location: AddressUpdateRequest.location
+};
+
+    db:Address|persist:Error result = connection->/addresses/[id].put(addressUpdate);
+
+    if result is persist:Error {
+        return result;
+    }
+    //create activity
+    int consumerId = user.consumerId ?: -1;
+    _ = start activity:createActivity(consumerId, "Update consumer " + address.addressName + " address");
+    return "Address updated successfully";
+}
+
+public function delete_consumer_address(auth:User user, int id) returns string|error {
+
+    db:Client connection = connection:getConnection();
+    db:Address address = check connection->/addresses/[id]();
+
+    // Authorization
+    if address.consumerId != user.consumerId {
+        return error("Unauthorized access");
+    }
+
+    db:Address|persist:Error result = connection->/addresses/[id].delete();
+
+    if result is persist:Error {
+        return result;
+    }
+    //create activity
+    int consumerId = user.consumerId ?: -1;
+    _ = start activity:createActivity(consumerId, "Delete consumer " + address.addressName + " address");
+    return "Address deleted successfully";
 }

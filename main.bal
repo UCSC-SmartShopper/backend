@@ -152,6 +152,11 @@ service / on new http:Listener(9090) {
         return addresses:get_all_addresses(user);
     }
 
+    resource function get addresses/[int id](http:Request req) returns db:Address|error {
+        auth:User user = check auth:getUser(req);
+        return addresses:get_address_by_id(user, id);
+    }
+
     resource function post addresses(http:Request req, @http:Payload db:AddressInsert consumerAddress) returns string|error {
         auth:User user = check auth:getUser(req);
         return addresses:create_consumer_address(user, consumerAddress);
@@ -162,19 +167,24 @@ service / on new http:Listener(9090) {
         return addresses:update_consumer_default_address(user, id);
     }
 
+    resource function patch addresses/[int id](http:Request req, @http:Payload db:AddressUpdate consumerAddress) returns string|error {
+        auth:User user = check auth:getUser(req);
+        return addresses:update_consumer_address(user, id,consumerAddress);
+    }
+
+    resource function delete addresses/[int id](http:Request req) returns string|error {
+        auth:User user = check auth:getUser(req);
+        return addresses:delete_consumer_address(user, id);
+    }
+
     // ---------------------------------------------- Consumer Activity Resource Functions --------------------------------------- 
     resource function get activities(http:Request req) returns activity:ActivityResponse|error? {
         do {
             auth:User user = check auth:getUser(req);
             return activity:getActivities(user);
         } on fail {
-            return {count: 0, next: false, activities: []};
+            return {count: 0, next: false, results: []};
         }
-    }
-
-    resource function post activities(http:Request req, @http:Payload record {string description;} payload) returns int|error {
-        auth:User user = check auth:getUser(req);
-        return activity:createActivity(user, payload.description);
     }
 
     // ---------------------------------------------- Products Resource Functions -----------------------------------------------
