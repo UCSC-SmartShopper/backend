@@ -17,6 +17,7 @@ import backend.payments;
 import backend.products;
 import backend.reviews;
 import backend.stats;
+import backend.supermarketStats;
 import backend.supermarket_items;
 import backend.supermarkets;
 import backend.user;
@@ -27,7 +28,6 @@ import backend.utils;
 import ballerina/http;
 import ballerina/io;
 import ballerina/persist;
-import backend.supermarketStats;
 
 type productQuery record {|
     int category;
@@ -98,8 +98,8 @@ service / on new http:Listener(9090) {
     }
 
     resource function get driver_requests/[int id](http:Request req) returns db:NonVerifiedDriver|http:Unauthorized|error {
-     
-        return user_registration:get_driver_request( id);
+
+        return user_registration:get_driver_request(id);
     }
 
     // ---------------------------------------------- User Resource Functions ------------------------------------------------
@@ -175,7 +175,7 @@ service / on new http:Listener(9090) {
 
     resource function patch addresses/[int id](http:Request req, @http:Payload db:AddressUpdate consumerAddress) returns string|error {
         auth:User user = check auth:getUser(req);
-        return addresses:update_consumer_address(user, id,consumerAddress);
+        return addresses:update_consumer_address(user, id, consumerAddress);
     }
 
     resource function delete addresses/[int id](http:Request req) returns string|error {
@@ -462,10 +462,8 @@ service / on new http:Listener(9090) {
         return supermarketStats:get_supermarket_Order_stat(supermarketId, month);
     };
 
-     resource function get get_supermarket_monthly_earnings(int supermarketId) returns json|error {
+    resource function get get_supermarket_monthly_earnings(int supermarketId) returns json|error {
         return supermarketStats:get_supermarket_monthly_earnings(supermarketId);
     };
-
-    
 
 }
