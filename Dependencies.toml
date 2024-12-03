@@ -5,7 +5,7 @@
 
 [ballerina]
 dependencies-toml-version = "2"
-distribution-version = "2201.10.0"
+distribution-version = "2201.10.3"
 
 [[package]]
 org = "ballerina"
@@ -113,7 +113,7 @@ modules = [
 [[package]]
 org = "ballerina"
 name = "io"
-version = "1.6.1"
+version = "1.6.2"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "lang.value"}
@@ -476,6 +476,7 @@ modules = [
 	{org = "djaya", packageName = "backend", moduleName = "backend.reviews"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.sms_service"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.stats"},
+	{org = "djaya", packageName = "backend", moduleName = "backend.supermarketStats"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.supermarket_items"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.supermarkets"},
 	{org = "djaya", packageName = "backend", moduleName = "backend.user"},

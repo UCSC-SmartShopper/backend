@@ -27,6 +27,7 @@ import backend.utils;
 import ballerina/http;
 import ballerina/io;
 import ballerina/persist;
+import backend.supermarketStats;
 
 type productQuery record {|
     int category;
@@ -152,6 +153,11 @@ service / on new http:Listener(9090) {
         return addresses:get_all_addresses(user);
     }
 
+    resource function get addresses/[int id](http:Request req) returns db:Address|error {
+        auth:User user = check auth:getUser(req);
+        return addresses:get_address_by_id(user, id);
+    }
+
     resource function post addresses(http:Request req, @http:Payload db:AddressInsert consumerAddress) returns string|error {
         auth:User user = check auth:getUser(req);
         return addresses:create_consumer_address(user, consumerAddress);
@@ -160,6 +166,16 @@ service / on new http:Listener(9090) {
     resource function patch addresses/default/[int id](http:Request req) returns string|error {
         auth:User user = check auth:getUser(req);
         return addresses:update_consumer_default_address(user, id);
+    }
+
+    resource function patch addresses/[int id](http:Request req, @http:Payload db:AddressUpdate consumerAddress) returns string|error {
+        auth:User user = check auth:getUser(req);
+        return addresses:update_consumer_address(user, id,consumerAddress);
+    }
+
+    resource function delete addresses/[int id](http:Request req) returns string|error {
+        auth:User user = check auth:getUser(req);
+        return addresses:delete_consumer_address(user, id);
     }
 
     // ---------------------------------------------- Consumer Activity Resource Functions --------------------------------------- 
@@ -309,6 +325,10 @@ service / on new http:Listener(9090) {
         return orders:supermarket_order_ready(user, orderReadyRequest);
     }
 
+    resource function get allOrders(http:Request req) returns orders:OrderResponse|error {
+        return orders:getAllOrders();
+    }
+
     //---------------------------------Advertisement Resource Functions---------------------------------------------------------
 
     resource function get advertisements() returns db:Advertisement[]|error? {
@@ -427,5 +447,20 @@ service / on new http:Listener(9090) {
     resource function get distanceCalculation(int[] id, string currentLocation) returns map<float>|error? {
         return distanceCalculation:distanceCalculation(id, currentLocation);
     };
+
+    // ---------------------------------------------- Supermarket Stats Files  -----------------------------------------------------------
+    resource function get supermarket_earnings_stats(int supermarketId, int month) returns json|error {
+        return supermarketStats:get_supermarket_earnings_by_month(supermarketId, month);
+    };
+
+    resource function get supermarket_order_stats(int supermarketId, int month) returns json|error {
+        return supermarketStats:get_supermarket_Order_stat(supermarketId, month);
+    };
+
+     resource function get get_supermarket_monthly_earnings(int supermarketId) returns json|error {
+        return supermarketStats:get_supermarket_monthly_earnings(supermarketId);
+    };
+
+    
 
 }

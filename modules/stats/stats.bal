@@ -174,4 +174,20 @@ public function get_all_supermarket_sales() returns SalesResponse|error {
     }
 }
 
+public function get_all_order_items() returns db:OrderItems[]|error {
+    do {
+        db:Client connection = connection:getConnection();
+
+        stream<db:OrderItems, persist:Error?> orderItemsStream = connection->/orderitems.get();
+        db:OrderItems[] orderItems = check from db:OrderItems orderItem in orderItemsStream
+            select orderItem;
+
+        return orderItems;
+
+    } on fail {
+        return error("Failed to get order items");
+    }
+     
+}
+
 
