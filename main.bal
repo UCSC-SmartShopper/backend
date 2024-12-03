@@ -443,6 +443,10 @@ service / on new http:Listener(9090) {
         return supermarketStats:get_supermarket_Order_stat(supermarketId, month);
     };
 
+     resource function get get_supermarket_monthly_earnings(int supermarketId) returns json|error {
+        return supermarketStats:get_supermarket_monthly_earnings(supermarketId);
+    };
+
     
 
 }
