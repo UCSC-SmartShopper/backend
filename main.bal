@@ -27,6 +27,7 @@ import backend.utils;
 import ballerina/http;
 import ballerina/io;
 import ballerina/persist;
+import backend.supermarketStats;
 
 type productQuery record {|
     int category;
@@ -446,5 +447,20 @@ service / on new http:Listener(9090) {
     resource function get distanceCalculation(int[] id, string currentLocation) returns map<float>|error? {
         return distanceCalculation:distanceCalculation(id, currentLocation);
     };
+
+    // ---------------------------------------------- Supermarket Stats Files  -----------------------------------------------------------
+    resource function get supermarket_earnings_stats(int supermarketId, int month) returns json|error {
+        return supermarketStats:get_supermarket_earnings_by_month(supermarketId, month);
+    };
+
+    resource function get supermarket_order_stats(int supermarketId, int month) returns json|error {
+        return supermarketStats:get_supermarket_Order_stat(supermarketId, month);
+    };
+
+     resource function get get_supermarket_monthly_earnings(int supermarketId) returns json|error {
+        return supermarketStats:get_supermarket_monthly_earnings(supermarketId);
+    };
+
+    
 
 }
