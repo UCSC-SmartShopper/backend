@@ -132,7 +132,7 @@ CREATE TABLE "Order" (
 	"deliveryFee" FLOAT NOT NULL,
 	"totalCost" FLOAT NOT NULL,
 	"orderPlacedOn" TIMESTAMP NOT NULL,
-	"status" VARCHAR(10) CHECK ("status" IN ('ToPay', 'Processing', 'Prepared', 'Completed', 'Cancelled')) NOT NULL,
+	"status" VARCHAR(10) CHECK ("status" IN ('ToPay', 'Processing', 'Prepared', 'Picked', 'Completed', 'Cancelled')) NOT NULL,
 	PRIMARY KEY("id")
 );
 
