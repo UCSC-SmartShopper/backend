@@ -2,6 +2,7 @@ import backend.stats;
 import backend.db;
 import ballerina/persist;
 import backend.connection;
+import ballerina/io;
 
 public type supermarketEarningsDashboard record {
     float|error totEarnings;
@@ -73,8 +74,8 @@ public function get_supermarket_monthly_earnings(int supermarketId) returns json
     float|error totEarnings = stats:get_supermarket_earnings(supermarketId);
     
 
-    float[] monthly_earnings = [];
-    int[] months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+    float[12] monthly_earnings = [];
+    int[] monthsArr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
     do {
         db:Client connection = connection:getConnection();
@@ -87,7 +88,7 @@ public function get_supermarket_monthly_earnings(int supermarketId) returns json
         foreach db:OrderWithRelations _order in orders {
             db:OrderItemsOptionalized[] _orderItems = _order.orderItems ?: [];
             
-            foreach var month in months {
+            foreach var month in monthsArr {
                 float totMonthEarningstoPay = 0;
                 if (_order.orderPlacedOn?.month == month) {
                 foreach db:OrderItemsOptionalized _orderItem in _orderItems {
@@ -97,9 +98,14 @@ public function get_supermarket_monthly_earnings(int supermarketId) returns json
                         int quantity = _orderItem.quantity ?: 0;
                         totMonthEarningstoPay += price * quantity;
                     }
+
+                    io:println("Month: ", month);
+                    io:println("totMonthEarningstoPay: ", totMonthEarningstoPay);
+
                 }
 
-                monthly_earnings.push(totMonthEarningstoPay);
+                monthly_earnings[month - 1] = totMonthEarningstoPay;
+                io:println("monthly_earnings[month - 1]: ", monthly_earnings[month - 1]);
             }
             }
 
