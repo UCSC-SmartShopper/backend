@@ -2,6 +2,8 @@ import backend.auth;
 import backend.connection;
 import backend.db;
 import backend.errors;
+import backend.file_service;
+import backend.utils;
 
 // import ballerina/persist;
 import ballerina/http;
@@ -10,8 +12,6 @@ import ballerina/persist;
 import ballerina/random;
 import ballerina/time;
 import ballerinax/twilio;
-import backend.utils;
-import backend.file_service;
 
 public type NonVerifyUser record {|
     readonly int id;
@@ -423,7 +423,39 @@ public function get_all_driver_requests(auth:User user) returns DriverRequestsRe
     return {count: driverRequestList.length(), next: "null", results: driverRequestList};
 }
 
-public function update_driver_profile_picture( http:Request req, int id) returns string|error {
+public function get_driver_request( int id) returns db:NonVerifiedDriver|http:Unauthorized|error {
+ 
+    db:Client connection = connection:getConnection();
+    db:NonVerifiedDriver|persist:Error result = connection->/nonverifieddrivers/[id]();
+
+    if result is persist:Error {
+        return error("User not found");
+    }
+
+    db:NonVerifiedDriver sanitizedDriver = {
+        id: result.id,
+        name: result.name,
+        nic: result.nic,
+        email: result.email,
+        contactNo: result.contactNo,
+        profilePic: result.profilePic,
+        courierCompany: result.courierCompany,
+        vehicleType: result.vehicleType,
+        vehicleColor: result.vehicleColor,
+        vehicleName: result.vehicleName,
+        vehicleNumber: result.vehicleNumber,
+
+        OTP: "", 
+        password: "",
+        status: result.status,
+        createdAt: result.createdAt
+    };
+
+    return sanitizedDriver;
+
+}
+
+public function update_driver_profile_picture(http:Request req, int id) returns string|error {
 
     // Admin can update any user's profile picture
     // Other users can only update their own profile picture
