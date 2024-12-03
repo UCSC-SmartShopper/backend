@@ -270,7 +270,7 @@ function update_order_status_to_prepared(int orderId) returns error? {
                 // Create an opportunity
                 db:OpportunityInsert opportunityInsert = {
                     totalDistance: optimizedRoute.totalDistance,
-                    tripCost: optimizedRoute.deliveryCost - 100,
+                    tripCost: optimizedRoute.deliveryCost,
                     consumerId: _order.consumerId ?: -1,
                     deliveryCost: optimizedRoute.deliveryCost,
 
