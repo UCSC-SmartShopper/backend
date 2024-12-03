@@ -324,6 +324,10 @@ service / on new http:Listener(9090) {
         return orders:supermarket_order_ready(user, orderReadyRequest);
     }
 
+    resource function get allOrders(http:Request req) returns orders:OrderResponse|error {
+        return orders:getAllOrders();
+    }
+
     //---------------------------------Advertisement Resource Functions---------------------------------------------------------
 
     resource function get advertisements() returns db:Advertisement[]|error? {
