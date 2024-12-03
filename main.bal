@@ -162,6 +162,11 @@ service / on new http:Listener(9090) {
         return addresses:update_consumer_default_address(user, id);
     }
 
+    resource function delete addresses/[int id](http:Request req) returns string|error {
+        auth:User user = check auth:getUser(req);
+        return addresses:delete_consumer_address(user, id);
+    }
+
     // ---------------------------------------------- Consumer Activity Resource Functions --------------------------------------- 
     resource function get activities(http:Request req) returns activity:ActivityResponse|error? {
         do {
