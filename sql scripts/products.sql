@@ -33,4 +33,3 @@ VALUES
 ('Cheese Snacks 50g', 'KEELLS CHEESE SNACKS 50G', 179, 'https://essstr.blob.core.windows.net/essimg/350x/Small/Pic118832.jpg'),
 ('Chicken Curry Mix 50g', 'KEELLS CHICKEN CURRY MIX 50G', 234, 'https://essstr.blob.core.windows.net/essimg/350x/Small/Pic120296.jpg'),
 ('Chicken Flv Soup 60g', 'KEELLS CHICKEN FLV SOUP 60G', 226, 'https://essstr.blob.core.windows.net/essimg/350x/Small/Pic120056.jpg');
-

@@ -1,5 +1,6 @@
 import backend.connection;
 import backend.db;
+import backend.utils;
 
 // import backend.user;
 
@@ -7,7 +8,6 @@ import ballerina/http;
 import ballerina/io;
 import ballerina/jwt;
 import ballerina/persist;
-import backend.utils;
 
 public type Credentials record {|
     string email_or_number;
@@ -34,21 +34,24 @@ public type UserwithToken record {|
     string jwtToken;
 |};
 
-public function getUser(http:Request req) returns User|error {
-    // get barrier token from the request
-    string|error authHeader = req.getHeader("jwt-key");
-    if (authHeader is error) {
-        return error("Authorization header not found");
-    }
+public isolated function getUser(http:Request req) returns User|error {
+    lock {
+        // get barrier token from the request
+        string|error authHeader = req.getHeader("jwt-key");
+        if (authHeader is error) {
+            return error("Authorization header not found");
+        }
 
-    if (authHeader.length() > 7 && authHeader.substring(0, 7) == "Bearer ") {
-        string jwtToken = authHeader.substring(7);
-        jwt:Payload jwtPayload = check jwt:validate(jwtToken, validatorConfig);
-        json userJson = <json>jwtPayload["user"];
-        User user = check userJson.cloneWithType(User);
-        return user;
-    } else {
-        return error("Token not found");
+        if (authHeader.length() > 7 && authHeader.substring(0, 7) == "Bearer ") {
+            string jwtToken = authHeader.substring(7);
+
+            jwt:Payload jwtPayload = check jwt:validate(jwtToken, validatorConfig);
+            json userJson = <json>jwtPayload["user"];
+            User user = check userJson.cloneWithType(User);
+            return user.cloneReadOnly();
+        } else {
+            return error("Token not found");
+        }
     }
 
 }
@@ -113,7 +116,7 @@ function getConfig(User user) returns jwt:IssuerConfig {
     };
 };
 
-jwt:ValidatorConfig validatorConfig = {
+isolated jwt:ValidatorConfig validatorConfig = {
     issuer: "ballerina",
     username: "ballerina",
     audience: ["ballerina", "ballerina.org", "ballerina.io"],

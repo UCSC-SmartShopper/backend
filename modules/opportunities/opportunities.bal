@@ -72,12 +72,12 @@ public function getOpportunities(auth:User user, string status, int _limit) retu
     return {count: opportunities.length(), next: "", results: opportunities};
 }
 
-public function getOpportunitiesById(int id) returns OpportunityNotFound|db:OpportunityWithRelations {
+public isolated function getOpportunitiesById(int id) returns error|db:OpportunityWithRelations {
     db:Client connection = connection:getConnection();
 
     db:OpportunityWithRelations|persist:Error opportunity = connection->/opportunities/[id](db:OpportunityWithRelations);
     if (opportunity is persist:Error) {
-        return createOpportunityNotFound(id);
+        return error("Opportunity not found");
     }
     return opportunity;
 }
