@@ -440,8 +440,9 @@ service / on new http:Listener(9090) {
     //     return optimizer:rateItems(items);
     // }
 
-    resource function get optimizer(@http:Query int userId, @http:Query string location) returns json|error|optimizer:ScoredItem[] {
-        return optimizer:OptimizeCart(userId, location);
+    resource function post optimizer(@http:Payload record {int consumerId; string location;} payload) returns db:CartItemWithRelations[]|error {
+        io:println(payload.location);
+        return optimizer:OptimizeCart(payload.consumerId, payload.location);
     }
 
     resource function post userpreference/add(@http:Payload user_preference:UserPreference userPreference) returns db:UserPreference|string|error {
