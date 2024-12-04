@@ -42,7 +42,7 @@ public function get_all_supermarket_items(auth:User user) returns SupermarketIte
     return {count: supermarketItem.length(), next: "null", results: supermarketItem};
 }
 
-public function get_supermarket_item_by_id(int id) returns db:SupermarketItemWithRelations|error {
+public isolated function get_supermarket_item_by_id(int id) returns db:SupermarketItemWithRelations|error {
     db:Client connection = connection:getConnection();
 
     db:SupermarketItemWithRelations|persist:Error supermarketItem = connection->/supermarketitems/[id].get();
@@ -64,4 +64,3 @@ public function editSupermarketItem(auth:User user, int id, db:SupermarketItemUp
     }
     return UpdatedSupermarketItem;
 }
-

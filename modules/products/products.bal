@@ -137,7 +137,7 @@ public function getProducts(
     return {count: count, next: hasNext, results: productList};
 }
 
-public function getProductsById(int id) returns db:ProductWithRelations|error? {
+public isolated  function getProductsById(int id) returns db:ProductWithRelations|error? {
     db:Client connection = connection:getConnection();
 
     db:ProductWithRelations|persist:Error? product = connection->/products/[id](db:ProductWithRelations);
@@ -158,4 +158,3 @@ public function getAllProducts() returns db:ProductWithRelations[]|error {
 
     return products;
 }
-

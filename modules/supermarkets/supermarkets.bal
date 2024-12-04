@@ -42,7 +42,7 @@ function createSuperMarketNotFound(int id) returns SuperMarketNotFound {
     };
 }
 
-public function get_supermarkets() returns SupermarketResponse|error {
+public isolated function get_supermarkets() returns SupermarketResponse|error {
     db:Client connection = connection:getConnection();
     stream<db:SupermarketWithRelations, persist:Error?> supermarketStream = connection->/supermarkets.get();
     db:SupermarketWithRelations[] supermarkets = check from db:SupermarketWithRelations supermarket in supermarketStream
@@ -51,11 +51,11 @@ public function get_supermarkets() returns SupermarketResponse|error {
     return {count: supermarkets.length(), next: "", results: supermarkets};
 }
 
-public function get_supermarket_by_id(int id) returns db:Supermarket|SuperMarketNotFound|error? {
+public isolated function get_supermarket_by_id(int id) returns db:Supermarket|SuperMarketNotFound|error? {
     db:Client connection = connection:getConnection();
     db:Supermarket|persist:Error? supermarket = connection->/supermarkets/[id](db:Supermarket);
     if (supermarket is ()) {
-        return createSuperMarketNotFound(id);
+        return error("Supermarket not found");
     }
     return supermarket;
 }

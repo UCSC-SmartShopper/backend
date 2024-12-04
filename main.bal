@@ -205,7 +205,7 @@ service / on new http:Listener(9090) {
         return products:getProducts(category, price, ordering, searchText, page, _limit);
     }
 
-    resource function get products/[int id]() returns db:ProductWithRelations|error? {
+    isolated resource function get products/[int id]() returns db:ProductWithRelations|error? {
         return products:getProductsById(id);
     }
 
@@ -230,11 +230,11 @@ service / on new http:Listener(9090) {
     }
 
     // ---------------------------------------------- Supermarket Resource Functions ---------------------------------------------
-    resource function get supermarkets() returns supermarkets:SupermarketResponse|error? {
+    isolated resource function get supermarkets() returns supermarkets:SupermarketResponse|error? {
         return supermarkets:get_supermarkets();
     }
 
-    resource function get supermarkets/[int id]() returns db:Supermarket|supermarkets:SuperMarketNotFound|error? {
+    isolated resource function get supermarkets/[int id]() returns db:Supermarket|supermarkets:SuperMarketNotFound|error? {
         return supermarkets:get_supermarket_by_id(id);
     }
 
@@ -256,7 +256,7 @@ service / on new http:Listener(9090) {
         return supermarket_items:get_all_supermarket_items(user);
     }
 
-    resource function get supermarket_items/[int id]() returns db:SupermarketItemWithRelations|error {
+    isolated resource function get supermarket_items/[int id]() returns db:SupermarketItemWithRelations|error {
         return supermarket_items:get_supermarket_item_by_id(id);
     }
 
@@ -296,7 +296,7 @@ service / on new http:Listener(9090) {
         return opportunities:getOpportunities(user, status, _limit);
     }
 
-    resource function get opportunities/[int id]() returns opportunities:OpportunityNotFound|db:OpportunityWithRelations {
+    isolated resource function get opportunities/[int id]() returns error|db:OpportunityWithRelations {
         return opportunities:getOpportunitiesById(id);
     }
 
@@ -317,7 +317,7 @@ service / on new http:Listener(9090) {
         return orders:getOrders(user, supermarketId);
     }
 
-    resource function get orders/[int id]() returns db:OrderWithRelations|orders:OrderNotFound|error? {
+    isolated resource function get orders/[int id]() returns db:OrderWithRelations|orders:OrderNotFound|error? {
         return orders:getOrdersById(id);
     }
 
@@ -330,7 +330,7 @@ service / on new http:Listener(9090) {
         return orders:supermarket_order_ready(user, orderReadyRequest);
     }
 
-    resource function get allOrders(http:Request req) returns orders:OrderResponse|error {
+    isolated resource function get allOrders(http:Request req) returns orders:OrderResponse|error {
         return orders:getAllOrders();
     }
 
@@ -357,11 +357,11 @@ service / on new http:Listener(9090) {
     }
 
     //------------------------------------------ Stats Resource Functions ------------------------------------------------------
-    resource function get stats/supermarket_earnings() returns stats:EarningResponse|error {
+    isolated resource function get stats/supermarket_earnings() returns stats:EarningResponse|error {
         return stats:get_all_supermarket_earnings();
     }
 
-    resource function get stats/supermarket_earnings/[int supermarketId]() returns float|error {
+    isolated resource function get stats/supermarket_earnings/[int supermarketId]() returns float|error {
         return stats:get_supermarket_earnings(supermarketId);
     }
 
@@ -369,12 +369,12 @@ service / on new http:Listener(9090) {
         return stats:get_feedbacks_by_supermarket_id(supermarketId);
     }
 
-    resource function get stats/drivers_earnings/[int driverId]() returns float|error {
+    isolated resource function get stats/drivers_earnings/[int driverId]() returns float|error {
         return stats:get_driver_earnings(driverId);
 
     }
 
-    resource function get stats/supermarket_sales() returns stats:SalesResponse|error {
+    isolated resource function get stats/supermarket_sales() returns stats:SalesResponse|error {
         return stats:get_all_supermarket_sales();
     }
 

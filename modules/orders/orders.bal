@@ -1,3 +1,4 @@
+import backend.activity;
 import backend.auth;
 import backend.cart;
 import backend.connection;
@@ -12,7 +13,6 @@ import ballerina/io;
 import ballerina/lang.runtime;
 import ballerina/persist;
 import ballerina/time;
-import backend.activity;
 
 public type CartToOrderRequest record {
     int consumerId;
@@ -81,12 +81,12 @@ public function getOrders(auth:User user, int supermarketId) returns OrderRespon
     return {count: orders.length(), next: "null", results: orders};
 }
 
-public function getOrdersById(int id) returns db:OrderWithRelations|OrderNotFound|error? {
+public isolated function getOrdersById(int id) returns db:OrderWithRelations|OrderNotFound|error? {
     db:Client connection = connection:getConnection();
     db:OrderWithRelations|persist:Error? order2 = connection->/orders/[id](db:OrderWithRelations);
 
     if order2 is persist:Error {
-        return createOrderNotFound(id);
+        return error("Order not found for id: " + id.toBalString());
     }
     return order2;
 }
@@ -162,7 +162,7 @@ public function cartToOrder(CartToOrderRequest cartToOrderRequest) returns int|p
         return orderItemResult;
     }
     //create activity
-    _  = start activity:createActivity(consumerId, "Create the order: " + orderId.toString());
+    _ = start activity:createActivity(consumerId, "Create the order: " + orderId.toString());
     // Update all the cart items of the consumer from the database whre orderId = -1
     _ = check connection->executeNativeSQL(`UPDATE "CartItem" SET "orderId" = ${orderId} WHERE "consumerId" = ${consumerId} AND "orderId" = -1`);
 
@@ -310,7 +310,7 @@ function update_order_status_to_prepared(int orderId) returns error? {
     }
 }
 
-public function getAllOrders() returns OrderResponse|error {
+public isolated function getAllOrders() returns OrderResponse|error {
     db:Client connection = connection:getConnection();
 
     stream<db:OrderWithRelations, persist:Error?> orderStream = connection->/orders.get();

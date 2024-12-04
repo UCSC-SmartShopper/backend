@@ -2,8 +2,8 @@ import backend.connection;
 import backend.db;
 import backend.reviews;
 
-import ballerina/persist;
 import ballerina/io;
+import ballerina/persist;
 
 type SupermarketsGroupedByName record {|
     string name;
@@ -27,8 +27,7 @@ public type SalesResponse record {|
     db:OrderWithRelations[] results;
 |};
 
-
-public function get_all_supermarket_earnings() returns EarningResponse|error {
+public isolated function get_all_supermarket_earnings() returns EarningResponse|error {
 
     do {
         db:Client connection = connection:getConnection();
@@ -75,7 +74,7 @@ public function get_all_supermarket_earnings() returns EarningResponse|error {
     }
 }
 
-public function get_supermarket_earnings(int supermarketId) returns float|error {
+public isolated function get_supermarket_earnings(int supermarketId) returns float|error {
 
     do {
         db:Client connection = connection:getConnection();
@@ -132,19 +131,19 @@ public function get_feedbacks_by_supermarket_id(int supermarketId) returns revie
 }
 
 //get_driver_earnings
-public function get_driver_earnings(int driverId) returns float|error {
+public isolated function get_driver_earnings(int driverId) returns float|error {
     do {
         db:Client connection = connection:getConnection();
 
         stream<db:OpportunityWithRelations, persist:Error?> opportunityStream = connection->/opportunities.get();
         db:OpportunityWithRelations[] opportunities = check from db:OpportunityWithRelations accept_opportunity in opportunityStream
-             where accept_opportunity.status == "Delivered" && accept_opportunity.driverId == driverId
+            where accept_opportunity.status == "Delivered" && accept_opportunity.driverId == driverId
             select accept_opportunity;
 
         float driverEarnings = 0.0;
 
         foreach db:OpportunityWithRelations accept_opportunity in opportunities {
-                driverEarnings += accept_opportunity.deliveryCost ?: 0.0;
+            driverEarnings += accept_opportunity.deliveryCost ?: 0.0;
 
         }
 
@@ -156,8 +155,8 @@ public function get_driver_earnings(int driverId) returns float|error {
 }
 
 //get_all_supermarket_sales
-public function get_all_supermarket_sales() returns SalesResponse|error {
-     do {
+public isolated function get_all_supermarket_sales() returns SalesResponse|error {
+    do {
         db:Client connection = connection:getConnection();
 
         stream<db:OrderWithRelations, persist:Error?> orderStream = connection->/orders.get();
@@ -165,7 +164,7 @@ public function get_all_supermarket_sales() returns SalesResponse|error {
             //order by _order.id descending
             select _order;
 
-            io:println("Orders1",orders);
+        io:println("Orders1", orders);
 
         return {count: orders.length(), next: "", results: orders};
 
@@ -187,7 +186,5 @@ public function get_all_order_items() returns db:OrderItems[]|error {
     } on fail {
         return error("Failed to get order items");
     }
-     
+
 }
-
-
